@@ -1,0 +1,11 @@
+# laranail/server-error-pages (Apache VPS)
+# Generated {{GENERATED_AT}} — do not edit by hand; re-run `php artisan
+# server-error-pages:build` to regenerate. This block is merged into your vhost
+# DocumentRoot's .htaccess automatically (existing rules are preserved). If
+# PHP-FPM is proxied, add `ProxyErrorOverride On` so these documents replace
+# backend 5xx responses.
+Options -Indexes
+
+{{SECURITY_HEADERS}}
+
+{{ERROR_DOCUMENTS}}

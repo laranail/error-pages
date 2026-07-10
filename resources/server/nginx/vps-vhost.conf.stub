@@ -1,0 +1,25 @@
+# Example Nginx vhost using laranail/server-error-pages (reference — adapt to
+# your site). The load-bearing lines are `fastcgi_intercept_errors on;` and the
+# `include` of the generated error_page snippet.
+server {
+    listen 80;
+    server_name example.com;
+    root {{DOCROOT}};
+    index index.php;
+
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    location ~ \.php$ {
+        include fastcgi_params;
+        fastcgi_pass unix:/run/php/php-fpm.sock;
+        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
+
+        # Serve the static error pages when PHP-FPM itself is down/overloaded.
+        fastcgi_intercept_errors on;
+    }
+
+    # Generated error handling (branded static pages + security headers).
+    include {{INCLUDE_PATH}};
+}

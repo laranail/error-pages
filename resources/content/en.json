@@ -1,0 +1,51 @@
+{
+    "_comment": "Edit these titles and messages, then rebuild static pages (php artisan server-error-pages:build). Deploy via git (VPS) or FTP (shared hosting). Delete a code to fall back to the built-in default.",
+    "400": {
+        "title": "Bad request",
+        "message": "The request could not be understood by the server."
+    },
+    "401": {
+        "title": "Unauthorized",
+        "message": "You need to sign in to view this page."
+    },
+    "403": {
+        "title": "Forbidden",
+        "message": "You do not have permission to view this page."
+    },
+    "404": {
+        "title": "Page not found",
+        "message": "The page you are looking for could not be found."
+    },
+    "419": {
+        "title": "Page expired",
+        "message": "Your session has expired. Please refresh and try again."
+    },
+    "429": {
+        "title": "Too many requests",
+        "message": "You have made too many requests. Please slow down and try again shortly."
+    },
+    "500": {
+        "title": "Something went wrong",
+        "message": "An unexpected error occurred on our side. We have been notified."
+    },
+    "502": {
+        "title": "Bad gateway",
+        "message": "The server received an invalid response upstream. Please try again shortly."
+    },
+    "503": {
+        "title": "Be right back",
+        "message": "We are briefly offline for maintenance. Please try again in a few minutes."
+    },
+    "504": {
+        "title": "Gateway timeout",
+        "message": "The server took too long to respond. Please try again shortly."
+    },
+    "4xx": {
+        "title": "This page is unavailable",
+        "message": "The page could not be displayed. Please check the address and try again."
+    },
+    "5xx": {
+        "title": "Something went wrong",
+        "message": "An unexpected error occurred on our side. Please try again shortly."
+    }
+}

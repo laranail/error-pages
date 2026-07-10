@@ -1,0 +1,16 @@
+{
+  "name": "@laranail/server-error-pages",
+  "private": true,
+  "description": "Dev-only asset build for laranail/server-error-pages. Consumers never run this — the committed resources/dist bundle is authoritative and inlined at render time.",
+  "type": "module",
+  "scripts": {
+    "build": "tailwindcss -i ./resources/css/error-pages.css -o ./resources/dist/error-pages.css --minify",
+    "build:js": "terser ./resources/js/static/error-pages.js -o ./resources/dist/static/error-pages.js --compress --mangle",
+    "build:all": "npm run build && npm run build:js"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.0.0",
+    "tailwindcss": "^4.0.0",
+    "terser": "^5.0.0"
+  }
+}

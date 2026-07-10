@@ -1,0 +1,18 @@
+# --- laranail/server-error-pages --------------------------------------------
+# Generated {{GENERATED_AT}} — do not edit by hand; re-run `php artisan
+# server-error-pages:build` to regenerate.
+#
+# Include this inside your `server { … }` block:
+#     include {{SELF_PATH}};
+# and make sure your PHP location has `fastcgi_intercept_errors on;` so Nginx
+# serves these static pages when PHP-FPM is down (502/503/504). See the shipped
+# vps-vhost.conf example.
+
+{{ERROR_PAGES}}
+
+location ^~ {{ERRORS_URL}}/ {
+    internal;
+}
+
+{{SECURITY_HEADERS}}
+# --- end laranail/server-error-pages ----------------------------------------
