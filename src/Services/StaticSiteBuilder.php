@@ -9,12 +9,14 @@ use Illuminate\Filesystem\Filesystem;
 use RuntimeException;
 use Simtabi\Laranail\ServerErrorPages\Concerns\InteractsWithOutputDisk;
 use Simtabi\Laranail\ServerErrorPages\Exceptions\NotSelfContainedException;
+use Simtabi\Laranail\ServerErrorPages\Support\CssVariableMap;
+use Simtabi\Laranail\ServerErrorPages\ValueObjects\ThemeSettings;
 
 /**
- * Generates the static HTML pages: render each enabled status key through the
- * shared component, assert it is fully self-contained, minify, and write it to
- * the output disk/path. This is the feature that makes error pages survive the
- * app being down.
+ * Generates the static error pages. Default mode LINKS the external CSS/JS
+ * (copied next to a servable location) — DRY and cacheable, and still resilient
+ * because the web server serves those files when PHP is down. The `--standalone`
+ * mode inlines everything into portable single files for upload to any host.
  */
 final readonly class StaticSiteBuilder
 {
@@ -24,33 +26,39 @@ final readonly class StaticSiteBuilder
         private ServerErrorPagesManager $manager,
         private Config $configRepository,
         private Filesystem $filesystem,
-        private AssetInliner $assets,
+        private HtmlInliner $inliner,
     ) {}
 
     /**
-     * Build the given keys (or all configured keys). Returns a per-key report.
+     * Build all configured keys (or a subset). In standalone mode each page is
+     * inlined and validated as self-contained; otherwise the linked bundle is
+     * copied next to the pages.
      *
      * @param  list<string>|null  $onlyKeys
      * @return array<string, array{path: string, bytes: int}>
      *
-     * @throws NotSelfContainedException
-     * @throws RuntimeException on a packaging/config error (missing CSS bundle, empty output path)
+     * @throws NotSelfContainedException|RuntimeException
      */
-    public function build(?array $onlyKeys = null): array
+    public function build(bool $standalone = false, ?array $onlyKeys = null): array
     {
         $this->guardBuildable();
 
+        $theme = $this->manager->theme();
+        $locale = $this->stringOrNull($this->configRepository->get('laranail.server-error-pages.content.default_locale'));
         $keys = $onlyKeys ?? $this->manager->keys();
         $minify = (bool) $this->configRepository->get('laranail.server-error-pages.output.minify', true);
 
         $report = [];
 
         foreach ($keys as $key) {
-            $html = $this->manager->htmlForKey($key);
+            $html = $this->manager->htmlForKey($key, $locale);
 
-            $violations = $this->externalReferences($html);
-            if ($violations !== []) {
-                throw new NotSelfContainedException($key, $violations);
+            if ($standalone) {
+                $html = $this->inliner->inline($html, $theme);
+                $violations = $this->inliner->externalReferences($html);
+                if ($violations !== []) {
+                    throw new NotSelfContainedException($key, $violations);
+                }
             }
 
             if ($minify) {
@@ -59,6 +67,10 @@ final readonly class StaticSiteBuilder
 
             $path = $this->writePage($key, $html);
             $report[$key] = ['path' => $path, 'bytes' => strlen($html)];
+        }
+
+        if (! $standalone) {
+            $this->publishLinkedAssets($theme);
         }
 
         return $report;
@@ -75,57 +87,38 @@ final readonly class StaticSiteBuilder
     }
 
     /**
-     * Detect external subresource loads that would break a page when the
-     * network/app is degraded. Escaped text content never matches (real
-     * resource attributes require unescaped quotes, and `url()` is only scanned
-     * inside <style> blocks), only genuine resource loads do. Navigation links
-     * (<a href>) are intentionally allowed, so a full-URL `url_base` on the
-     * "home" button never trips the check.
-     *
-     * @return list<string>
+     * Copy the linked bundle next to a servable location so the pages' assets
+     * are always present, and write the theme override file when configured.
      */
-    public function externalReferences(string $html): array
+    private function publishLinkedAssets(ThemeSettings $theme): void
     {
-        $external = '(?:https?:)?\/\/'; // http://, https://, or protocol-relative //
-
-        $found = [];
-
-        $markup = [
-            'external stylesheet' => '/<link\b[^>]*\bhref\s*=\s*["\']' . $external . '/i',
-            'external script' => '/<script\b[^>]*\bsrc\s*=\s*["\']' . $external . '/i',
-            'external src/srcset' => '/\bsrc(?:set)?\s*=\s*["\']?\s*' . $external . '/i',
-            'external svg use' => '/<(?:use|image)\b[^>]*\b(?:href|xlink:href)\s*=\s*["\']' . $external . '/i',
-        ];
-        foreach ($markup as $label => $pattern) {
-            if (preg_match($pattern, $html) === 1) {
-                $found[] = $label;
-            }
+        $dest = (string) $this->configRepository->get('laranail.server-error-pages.output.assets_path', '');
+        if ($dest === '') {
+            return;
         }
 
-        // CSS url()/@import — only inside <style> blocks, so escaped page text
-        // that merely contains "url(https://…)" cannot false-positive.
-        if (preg_match_all('/<style\b[^>]*>(.*?)<\/style>/is', $html, $styles) !== false) {
-            foreach ($styles[1] as $css) {
-                if (preg_match('/url\(\s*["\']?\s*' . $external . '/i', $css) === 1
-                    || preg_match('/@import\s+(?:url\(\s*)?["\']?\s*' . $external . '/i', $css) === 1) {
-                    $found[] = 'external css url()';
-                    break;
-                }
-            }
+        $src = dirname(__DIR__, 2) . '/public/assets';
+        if ($this->filesystem->isDirectory($src)) {
+            $this->filesystem->ensureDirectoryExists($dest);
+            $this->filesystem->copyDirectory($src, $dest);
         }
 
-        return $found;
+        $themeCss = CssVariableMap::themeCss($theme);
+        $themePath = $dest . '/css/theme.css';
+        if ($themeCss !== '') {
+            $this->filesystem->ensureDirectoryExists($dest . '/css');
+            $this->filesystem->put($themePath, $themeCss);
+        } elseif ($this->filesystem->exists($themePath)) {
+            $this->filesystem->delete($themePath);
+        }
     }
 
-    /**
-     * Fail fast on packaging/config errors before writing anything.
-     */
     private function guardBuildable(): void
     {
-        if ($this->assets->css() === '') {
+        $bundle = dirname(__DIR__, 2) . '/public/assets/css/error-pages.css';
+        if (! $this->filesystem->exists($bundle)) {
             throw new RuntimeException(
-                'The compiled CSS bundle is empty or missing (resources/dist/error-pages.css). ' .
-                'Reinstall the package or run `npm run build` to regenerate it.',
+                'The compiled bundle public/assets/css/error-pages.css is missing. Run `npm install && npm run build`.',
             );
         }
 
@@ -137,10 +130,8 @@ final readonly class StaticSiteBuilder
     }
 
     /**
-     * Conservative HTML minify that NEVER touches inlined <script>/<style>
-     * bodies: strip leading indentation and collapse blank lines in the markup
-     * only, so a future multi-line JS template literal or CSS string can't be
-     * corrupted.
+     * Conservative HTML minify (markup only — inlined <script>/<style> bodies
+     * are left intact so a standalone export stays valid).
      */
     private function minify(string $html): string
     {
@@ -148,7 +139,7 @@ final readonly class StaticSiteBuilder
         $html = (string) preg_replace_callback(
             '/<(script|style)\b[^>]*>.*?<\/\1>/is',
             static function (array $m) use (&$protected): string {
-                $token = "\0SEP_PROTECTED_" . count($protected) . "\0";
+                $token = "\0SEP_" . count($protected) . "\0";
                 $protected[$token] = $m[0];
 
                 return $token;
@@ -159,9 +150,12 @@ final readonly class StaticSiteBuilder
         $html = (string) preg_replace('/^[ \t]+/m', '', $html);
         $html = (string) preg_replace("/\n{2,}/", "\n", $html);
 
-        $html = strtr(trim($html), $protected);
+        return strtr(trim($html), $protected) . "\n";
+    }
 
-        return $html . "\n";
+    private function stringOrNull(mixed $value): ?string
+    {
+        return is_string($value) && $value !== '' ? $value : null;
     }
 
     protected function config(): Config

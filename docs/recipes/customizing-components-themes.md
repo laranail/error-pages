@@ -1,10 +1,10 @@
 # Customizing components and themes
 
-Re-brand the pages with a theme preset, colour overrides, and a logo — and, when you need to, override the component markup itself. There is one solid centered layout; the theme is the customization axis.
+Re-brand the pages with a theme preset, colour overrides, and a logo — and, when you need to, edit the SCSS component source itself. There is one solid centered layout; the theme is the customization axis.
 
 ## Theme preset
 
-Five colour themes ship. Pick one — it sets every `--sep-*` token for light and dark:
+Five colour presets are compiled into the one stylesheet. Pick one — it sets every `--sep-*` token for light and dark via a `sep-theme-{preset}` body class, so switching needs **no rebuild**:
 
 | Preset | Accent |
 |--------|--------|
@@ -18,9 +18,11 @@ Five colour themes ship. Pick one — it sets every `--sep-*` token for light an
 SERVER_ERROR_PAGES_THEME=midnight
 ```
 
+`auto_dark` (default `true`) adds the `sep-auto-dark` body class so the preset's dark variant follows the visitor's `prefers-color-scheme`.
+
 ## Colour overrides
 
-Colours are runtime CSS custom properties (`--sep-*`), so a re-brand needs no asset rebuild — just a config change and a static rebuild. Set only the tokens you want to change under `theme.colors`; they merge on top of the preset:
+To nudge individual tokens without touching SCSS, set them under `theme.colors`. Any override generates a small **linked `css/theme.css`** at build time (copied next to the pages), so it still needs no asset rebuild — just a static rebuild:
 
 ```php
 'theme' => [
@@ -32,42 +34,54 @@ Colours are runtime CSS custom properties (`--sep-*`), so a re-brand needs no as
 ],
 ```
 
-The tokens are `bg`, `surface`, `text`, `muted`, `accent`, and `border`. `auto_dark` (default `true`) follows the visitor's `prefers-color-scheme`.
+The tokens are `bg`, `surface`, `text`, `muted`, `accent`, `accent-2`, and `border`.
 
 ## Logo
 
-Point `brand.logo` at a local file; it is inlined as a data-URI at build time so the static pages stay self-contained:
+Point `brand.logo` at a file; it renders as an ordinary `<img src>`:
 
 ```dotenv
-SERVER_ERROR_PAGES_LOGO="resources/branding/acme-mark.svg"
+SERVER_ERROR_PAGES_LOGO="/vendor/server-error-pages/img/acme-mark.svg"
 ```
 
-> Do not use a remote `http(s)` logo URL for static pages. The build's self-containment check rejects external `src`/`url()` references and fails, because such a logo would not load when the app or network is down. A local path is inlined and always works.
+For the linked build, host the logo somewhere the web server serves it (for example under `assets_url`). For the [standalone export](standalone-export.md), use a **local file path** — it is inlined as a data-URI so the single-file page has no external request.
 
-## Overriding the component markup
+## Editing the SCSS component source
 
-The pages are built from one anonymous component, `<x-server-error-pages::layout>`, composing `status`, `message`, `actions`, and `brand` sub-components. To change the markup, publish the component views and edit them:
+The pages are built from one anonymous component, `<x-server-error-pages::layout>`, composing `brand`, `status`, `message`, and `actions` sub-components, styled by `resources/assets/scss/error-pages.scss` (Tailwind 4 + SCSS) and enhanced by `resources/assets/scripts/error-pages.js`. This source is built by Vite into the committed `public/assets/` bundle.
 
-```bash
-php artisan vendor:publish --tag=server-error-pages::content   # content JSON
-# publish the package views to resources/views/vendor/server-error-pages/ to edit components
-php artisan vendor:publish --provider="Simtabi\Laranail\ServerErrorPages\Providers\ServerErrorPagesServiceProvider"
-```
+To change the styling or markup beyond presets/overrides:
 
-Keep the CSS and JS inline — anything that fetches an external resource will fail the build's self-containment assertion. To replace a single page's markup wholesale rather than the shared component, see [Overriding an error view](overriding-error-views.md).
+1. Edit the SCSS (or the Blade component views / JS).
+2. Rebuild the bundle:
 
-## Rebuild after any change
+   ```bash
+   npm install
+   npm run build
+   ```
 
-```bash
-php artisan server-error-pages:build
-```
+   This regenerates `public/assets/css/error-pages.css` and `public/assets/js/error-pages.js`.
+3. Rebuild the static pages:
 
-Config, content, and theme changes only reach the static files on rebuild.
+   ```bash
+   php artisan server-error-pages:build
+   ```
+
+To replace a single page's markup wholesale instead of the shared component, see [Overriding an error view](overriding-error-views.md).
+
+## What needs a rebuild
+
+| Change | `npm run build`? | `server-error-pages:build`? |
+|--------|:----------------:|:---------------------------:|
+| `theme.preset` | no | yes |
+| `theme.colors` overrides | no | yes |
+| `brand.*`, content, config | no | yes |
+| SCSS / JS / component markup | yes | yes |
 
 ## Related
 
 - [Configuration](../configuration.md) — the `theme.*`, `brand.*`, and `assets.*` keys.
-- [Architecture](../architecture.md) — how the one component feeds every output.
+- [Architecture](../architecture.md) — the Vite/Tailwind/SCSS pipeline and how the one component feeds every output.
 
 ---
 [← Docs index](../../README.md#documentation)

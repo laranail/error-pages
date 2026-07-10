@@ -1,12 +1,15 @@
 /**
  * Server Error Pages — tiny, dependency-free enhancement script.
- * Inlined into every page. Everything degrades gracefully without JS:
- * links work, and retryable pages still reload via <meta http-equiv="refresh">.
+ * Built by Vite → resources/dist/error-pages.js and linked (or inlined for the
+ * standalone export). Config is read from <body> data-* attributes, so there is
+ * no inline config script. Everything degrades gracefully without JS: links
+ * work, and retryable pages still reload via <meta http-equiv="refresh">.
  */
+import "../css/app.css";
+import "../scss/error-pages.scss";
+
 (function () {
   "use strict";
-
-  var cfg = window.__sep || {};
 
   function onReady(fn) {
     if (document.readyState !== "loading") {
@@ -18,7 +21,7 @@
 
   function fallbackCopy(text, done) {
     try {
-      var ta = document.createElement("textarea");
+      const ta = document.createElement("textarea");
       ta.value = text;
       ta.setAttribute("readonly", "");
       ta.style.position = "absolute";
@@ -34,16 +37,20 @@
   }
 
   onReady(function () {
+    const data = document.body.dataset;
+    const urlBase = data.sepUrlBase || "/";
+    const retryable = data.sepRetryable === "1";
+
     document.querySelectorAll('[data-sep-action="copy"]').forEach(function (btn) {
       btn.addEventListener("click", function () {
-        var code = btn.getAttribute("data-sep-code") || "";
-        var title = btn.getAttribute("data-sep-title") || "";
-        var details =
+        const code = btn.getAttribute("data-sep-code") || "";
+        const title = btn.getAttribute("data-sep-title") || "";
+        const details =
           "Error " + code + (title ? " — " + title : "") +
           "\nURL: " + location.href +
           "\nTime: " + new Date().toISOString();
-        var original = btn.textContent;
-        var done = function () {
+        const original = btn.textContent;
+        const done = function () {
           btn.textContent = "Copied";
           btn.classList.add("is-copied");
           setTimeout(function () {
@@ -67,20 +74,20 @@
       });
     });
 
-    var counter = document.querySelector("[data-sep-countdown]");
-    if (counter && cfg.retryable) {
-      var secs = parseInt(counter.getAttribute("data-sep-countdown"), 10);
+    const counter = document.querySelector("[data-sep-countdown]");
+    if (counter && retryable) {
+      let secs = parseInt(counter.getAttribute("data-sep-countdown"), 10);
       if (secs > 0) {
         counter.hidden = false;
-        var span = counter.querySelector("[data-sep-seconds]");
-        var tick = setInterval(function () {
+        const span = counter.querySelector("[data-sep-seconds]");
+        const tick = setInterval(function () {
           secs -= 1;
           if (span) {
             span.textContent = String(Math.max(secs, 0));
           }
           if (secs <= 0) {
             clearInterval(tick);
-            window.location.assign(cfg.urlBase || "/");
+            window.location.assign(urlBase);
           }
         }, 1000);
       }

@@ -1,61 +1,80 @@
 # Architecture
 
-One component source, three coordinated outputs — and why the design is shaped that way.
+One component source, two build modes, three coordinated outputs — and why the design is shaped that way.
 
-## The one-source, three-outputs model
+## The one-source model
 
-Everything derives from a single anonymous Blade component, `<x-server-error-pages::layout>`. It composes `status`, `message`, `actions`, and `brand` sub-components into one solid centered layout. It always inlines the CSS and a small vanilla JS (no Alpine, no CDN) and emits the chosen theme preset's colours as `:root { --sep-* }` custom properties. There is one layout and no second template — the look is customised by picking a theme preset (or overriding individual colour tokens), which is more realistic for pages that are rarely seen.
+Everything derives from a single anonymous Blade component, `<x-server-error-pages::layout>`. It composes `brand`, `status`, `message`, and `actions` sub-components into one polished centered layout, and links an external stylesheet and a small vanilla JS. The theme is a colour preset selected by a `sep-theme-{preset}` class on `<body>`; there is one layout and no second template — the look is customised by picking a preset (or overriding individual colour tokens), which is realistic for pages that are rarely seen.
 
 That one component is rendered along three paths:
 
 | Output | Trigger | How | Serves when |
 |--------|---------|-----|-------------|
-| Dynamic Blade view | Laravel `renderHttpException()` | `errors::{code}` resolves to a package stub | The app is up |
+| Dynamic Blade view | Laravel `renderHttpException()` | `errors/{code}.blade.php` calls the facade | The app is up |
 | Static HTML file | `server-error-pages:build` | The same component rendered to `{code}.html` | PHP / the app is down |
 | Web-server config | `server-error-pages:build` / `:server-config` | Apache `.htaccess` / Nginx `error_page` pointing at the static files | The web server needs to pick a page |
 
-Because all three come from the same component, the live page and the static fallback are visually identical.
+Because all three come from the same component (`ServerErrorPagesManager::htmlForKey()`), the live page and the static fallback are visually identical.
+
+## External, linked assets
+
+The CSS and JS are **external files, linked** — not inlined. The page head emits `<link href="{assets_url}/css/error-pages.css">` and the body ends with `<script src="{assets_url}/js/error-pages.js" defer>`. `assets_url` defaults to `/vendor/server-error-pages`, deliberately kept **outside** the internal `/errors/` location so the web server serves it as an ordinary static asset.
+
+This is still resilient in an outage. When PHP-FPM is down, the web server (Nginx/Apache) still serves the flat `{code}.html` **and** the static CSS/JS next to it — no application code runs to deliver any of them. Linking (rather than inlining) keeps every page small, lets the browser cache one shared stylesheet across all error pages, and keeps the markup DRY.
+
+## Two build modes
+
+`server-error-pages:build` has two modes:
+
+- **Linked (default).** Renders each page with `<link>`/`<script>` tags and copies the committed bundle (`public/assets/`) to `output.assets_path` (default `public_path('vendor/server-error-pages')`) so the linked files are always present next to the pages. This is what a Laravel deploy uses.
+- **Standalone (`--standalone`, or `server-error-pages:export`).** Post-processes each rendered page through `HtmlInliner`, replacing the linked stylesheet/script with inline `<style>`/`<script>` and a local logo with a data-URI, then **asserts the page is fully self-contained** (no external stylesheet, script, or `src`) — failing the build with `NotSelfContainedException` otherwise. The result is single-file pages with zero external requests, for users who want to upload `public/errors/*.html` + `.htaccess` to any host without deploying Laravel.
 
 ## Dynamic path
 
-The provider's `packageBooted()` pushes the package's `resources/error-views` directory onto `config('view.paths')`. Laravel's `RegisterErrorViewPaths` re-reads that config on every `renderHttpException()` and maps each entry to `{path}/errors`, so `errors::{code}` resolves to the package's `errors/{code}.blade.php` stub — with no publish step. An app-published `resources/views/errors/{code}.blade.php` still wins, because the app's own view path is registered ahead of the package's.
-
-Each stub is a one-liner that calls the facade:
+The install command publishes the package's error-view stubs into the app at `resource_path('views/errors')` (`errors/{code}.blade.php`). Each stub is a one-liner that calls the facade:
 
 ```php
 {!! \Simtabi\Laranail\ServerErrorPages\Facades\ServerErrorPages::htmlFor(404) !!}
 ```
 
+These are Laravel's conventional error views, so `renderHttpException()` resolves them with no extra wiring. Because they are published into the app, editing `resources/views/errors/{code}.blade.php` (or replacing it wholesale) simply wins — it is the app's own view.
+
 ## Static path
 
-`server-error-pages:build` renders the *same* component (via the manager's `htmlForKey()`, not the `errors::` namespace, which only exists mid-exception) and writes the result to `{output.path}/{code}.html`. Before writing, it asserts each page is self-contained: the build scans for external stylesheets, scripts, `src` attributes, and CSS `url()` loads, and fails the whole build if any page would reach out to the network. Navigation links (`<a href>`) are intentionally allowed, so a full-URL "home" button never trips the check.
-
-The static build covers exactly the scenarios the dynamic path cannot: PHP-FPM crashed, a deploy is mid-flight, or the app fatals before it boots. In all of those, no Blade ever runs, so a prebuilt flat file is the only thing that can be served.
+`server-error-pages:build` renders the *same* component (via the manager's `htmlForKey()`, independent of the `errors::` namespace, which only exists mid-exception) and writes each result to `{output.path}/{code}.html`. The static build covers exactly the scenarios the dynamic path cannot: PHP-FPM crashed, a deploy is mid-flight, or the app fatals before it boots. In all of those, no Blade ever runs, so a prebuilt flat file plus its linked assets are the only things that can be served.
 
 ## Content resolution
 
-Titles and messages resolve through one chain, shared by both the dynamic and static render so their output stays byte-identical:
+Titles and messages are real Laravel translations, keyed by status code, shared by both the dynamic and static render so their output stays identical:
 
-1. Published JSON file — `resources/error-pages/{locale}.json`, keys like `"404"` or generic `"4xx"` (skipped when `content.source` is `config`).
-2. `config('laranail.server-error-pages.messages.{code}')`.
-3. Built-in `HttpStatus` enum `#[Label]` / `#[Description]` defaults.
+1. **App override** — `lang/vendor/server-error-pages/{locale}/errors.php`, keys like `'404'` or generic `'4xx'`.
+2. **Package translations** — `resources/lang/en/errors.php` (the shipped defaults).
+3. **Built-in `HttpStatus` enum default** — the last link, which is why an unconfigured install still renders complete pages.
 
-The enum default is the last link, which is why an unconfigured install still renders complete pages. A code outside the enum falls back to the generic `4xx` / `5xx` page.
+A code outside the enum falls back to the generic `4xx` / `5xx` page. `content.default_locale` is the locale baked into the static build; dynamic pages honour the request locale.
 
-## Assets and theming
+## Assets and theming pipeline
 
-The CSS and JS are hand-authored, dependency-free, and prebuilt into `resources/dist/`, which is committed to the repository. A Tailwind v4 source and a `package.json` exist for maintainers, but consumers never run a build step — the shipped bundle is inlined directly. Colours are runtime CSS variables, so a re-brand is a config change plus a rebuild, never a recompile.
+The source lives under `resources/assets/{scss,scripts}` and is built by **Vite + Tailwind 4 + SCSS** into the committed `public/assets/{css,js}/` bundle (`css/error-pages.css`, `js/error-pages.js`). The JS entry `import`s the SCSS, so one build emits both files; the config uses stable, unhashed names the pages can link. Consumers never build this — the bundle is committed and shipped — but a maintainer regenerates it with `npm run build` after changing the SCSS or JS.
+
+Theming has three tiers, cheapest first:
+
+- **Preset** — `theme.preset` swaps the `sep-theme-{preset}` body class. All five presets are compiled into the one stylesheet, so switching needs **no rebuild**.
+- **Per-token overrides** — `theme.colors.{light,dark}` generate a small linked `css/theme.css` (via `CssVariableMap`) at build time that overrides individual `--sep-*` custom properties. No SCSS rebuild.
+- **Deep custom** — edit the SCSS and run `npm run build`.
+
+`theme.auto_dark` toggles the `sep-auto-dark` body class; combined with the OS `prefers-color-scheme`, the presets' dark variants apply automatically.
 
 ## Server config generation
 
-`ServerConfigEmitter` fills the stubs under `resources/server/` with `ErrorDocument` (Apache) or `error_page` (Nginx) lines for each enabled code, plus the security headers from config. When `codes.fallbacks` is on, the Nginx output also routes the long tail of other 4xx/5xx codes to the generic pages. Outputs are written to app/FTP-writable locations by default (`public/.htaccess`, `storage/app/server-error-pages/errors.conf`) — never to `/etc` — and the command prints the include line for you to wire in.
+`ServerConfigEmitter` fills the stubs under `stubs/{apache,nginx}/` with `ErrorDocument` (Apache) or `error_page` (Nginx) lines for each enabled code, plus the security headers from config. When `codes.fallbacks` is on, the output also routes the long tail of other 4xx/5xx codes to the generic pages. The snippet is written as a **managed block** between `# BEGIN laranail/server-error-pages` / `# END` sentinels and merged into the target file, so existing content — notably Laravel's own `public/.htaccess` front-controller rules — is preserved. Outputs go to app/FTP-writable locations by default (`public/.htaccess`, `storage/app/server-error-pages/errors.conf`) — never to `/etc` — and the command prints the include line for you to wire in.
 
 ## Why this design?
 
 - **Why generate static files at all?** Every other Laravel error-page approach only renders while the app is alive. The static files exist precisely for the moments Blade cannot run, which are the moments a maintenance or outage page matters most.
-- **Why one component instead of separate templates?** A single source guarantees the live and static pages never drift apart visually, and content changes propagate to both through the same resolution chain.
-- **Why inline everything and reject external references?** A page that loads a stylesheet or font from a CDN is not self-contained; if the network or app is degraded it renders broken. The build's self-containment assertion turns that risk into a hard failure at generation time rather than a silent one during an outage.
-- **Why file-managed content, no database?** The pages must render when the database and app are unreachable. Config plus JSON files deploy by git or FTP and have no runtime dependencies.
+- **Why link assets instead of inlining them?** The web server serves the linked CSS/JS from `assets_url` just as reliably as it serves the HTML when PHP is down, so resilience is preserved — while one cached stylesheet across all pages keeps the markup small and DRY. The standalone export exists for the narrow case (arbitrary hosting, no Laravel deploy) where a truly single-file page is worth the size.
+- **Why one component instead of separate templates?** A single source guarantees the live and static pages never drift apart visually, and content changes propagate to both through the same translation chain.
+- **Why translations, no database?** The pages must render when the database and app are unreachable. Translation files deploy by git or FTP and have no runtime dependency, while giving first-class multi-locale support.
 
 ---
 [← Docs index](../README.md#documentation)

@@ -1,16 +1,16 @@
 {
   "name": "@laranail/server-error-pages",
   "private": true,
-  "description": "Dev-only asset build for laranail/server-error-pages. Consumers never run this — the committed resources/dist bundle is authoritative and inlined at render time.",
+  "description": "Dev-only asset build for laranail/server-error-pages (Vite + Tailwind 4 + SCSS). Consumers never run this — the committed resources/dist bundle is shipped.",
   "type": "module",
   "scripts": {
-    "build": "tailwindcss -i ./resources/css/error-pages.css -o ./resources/dist/error-pages.css --minify",
-    "build:js": "terser ./resources/js/static/error-pages.js -o ./resources/dist/static/error-pages.js --compress --mangle",
-    "build:all": "npm run build && npm run build:js"
+    "build": "vite build",
+    "dev": "vite build --watch"
   },
   "devDependencies": {
-    "@tailwindcss/cli": "^4.0.0",
+    "@tailwindcss/vite": "^4.0.0",
+    "sass": "^1.77.0",
     "tailwindcss": "^4.0.0",
-    "terser": "^5.0.0"
+    "vite": "^6.0.0"
   }
 }

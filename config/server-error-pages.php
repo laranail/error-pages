@@ -34,7 +34,7 @@ return [
     */
 
     'codes' => [
-        'enabled' => [400, 401, 403, 404, 419, 429, 500, 502, 503, 504],
+        'enabled' => [400, 401, 402, 403, 404, 419, 429, 500, 502, 503, 504],
         'fallbacks' => true,
     ],
 
@@ -43,22 +43,16 @@ return [
     | Content
     |--------------------------------------------------------------------------
     |
-    | Where per-code titles/messages come from. Resolution precedence is:
-    | JSON files -> config `messages` -> HttpStatus enum defaults.
-    | Set `source` to 'json' to prefer JSON files, or 'config' to ignore them.
-    | `json_path` is resolved relative to the app base path.
+    | Per-code titles/messages come from Laravel translations
+    | (`server-error-pages::errors.{code}.{title|message}`). Publish the lang
+    | files to override or add locales; a missing key falls back to the built-in
+    | HttpStatus enum default. `default_locale` is the locale baked into the
+    | static build (dynamic pages honour the request locale).
     |
     */
 
     'content' => [
-        'source' => env('SERVER_ERROR_PAGES_CONTENT', 'json'),
-        'json_path' => 'resources/error-pages',
         'default_locale' => env('SERVER_ERROR_PAGES_LOCALE', env('APP_LOCALE', 'en')),
-    ],
-
-    // Inline per-code overrides, e.g. 404 => ['title' => '…', 'message' => '…'].
-    'messages' => [
-        // 503 => ['title' => 'Back shortly', 'message' => 'We are upgrading the site.'],
     ],
 
     /*
@@ -66,18 +60,23 @@ return [
     | Output (static generation)
     |--------------------------------------------------------------------------
     |
-    | `disk` is a filesystem disk name, or null to write to `path` directly on
-    | the local disk. `path` is where `errors/{code}.html` files are written.
-    | `url_base` is the site root used for "home"/retry links on static pages.
+    | `disk` is a filesystem disk name, or null to write to `path` directly.
+    | `path` is where `errors/{code}.html` files are written. `assets_url` /
+    | `assets_path` are where the linked CSS/JS live (served by the web server,
+    | kept OUTSIDE the internal `/errors/` location). `url_base` is the site root
+    | for the "home"/retry links.
     |
     */
 
     'output' => [
         'disk' => env('SERVER_ERROR_PAGES_DISK'),
         'path' => env('SERVER_ERROR_PAGES_OUTPUT', public_path('errors')),
-        // Root-relative URL where the generated pages are served (used in the
-        // Apache/Nginx config). Set to '/myapp/errors' for a subdirectory install.
+        // Root-relative URL where the generated pages are served (Apache/Nginx
+        // config). Set to '/myapp/errors' for a subdirectory install.
         'url_path' => env('SERVER_ERROR_PAGES_URL_PATH', '/errors'),
+        // Where the linked stylesheet/script are served from + written to.
+        'assets_url' => env('SERVER_ERROR_PAGES_ASSETS_URL', '/vendor/server-error-pages'),
+        'assets_path' => env('SERVER_ERROR_PAGES_ASSETS_PATH', public_path('vendor/server-error-pages')),
         // Site root used for the "home"/retry links on the pages themselves.
         'url_base' => env('SERVER_ERROR_PAGES_URL_BASE', '/'),
         'filename' => '{code}.html',

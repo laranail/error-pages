@@ -266,7 +266,7 @@ final readonly class ServerConfigEmitter implements ServerConfigWriter
 
     private function stub(string $relative): string
     {
-        $path = dirname(__DIR__, 2) . '/resources/server/' . $relative;
+        $path = dirname(__DIR__, 2) . '/stubs/' . $relative;
 
         return $this->files->exists($path) ? $this->files->get($path) : '';
     }

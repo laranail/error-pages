@@ -7,29 +7,34 @@ namespace Simtabi\Laranail\ServerErrorPages\Support;
 use Simtabi\Laranail\ServerErrorPages\ValueObjects\ThemeSettings;
 
 /**
- * Turns a {@see ThemeSettings} colour map into the inline `:root { --sep-* }`
- * custom properties that theme every page. Because colours are variables,
- * re-branding needs no asset rebuild. Values are sanitised so nothing from
- * config can break out of the declaration.
+ * Renders the optional `theme.css` file that carries per-token colour overrides
+ * from config. It targets the chosen preset's `.sep-theme-{preset}` class so,
+ * linked AFTER the main stylesheet, it wins by source order. Values are
+ * sanitised so nothing from config can break out of the declaration. Returns
+ * an empty string when there are no overrides.
  */
 final class CssVariableMap
 {
-    /**
-     * Full inline stylesheet body: light defaults, an optional dark media
-     * query, and explicit `[data-theme]` overrides for a manual toggle.
-     */
-    public static function inline(ThemeSettings $theme): string
+    public static function themeCss(ThemeSettings $theme): string
     {
-        $light = self::block($theme->colorsLight);
-        $dark = self::block($theme->colorsDark);
-
-        $css = ':root{' . $light . '}';
-
-        if ($theme->autoDark) {
-            $css .= '@media (prefers-color-scheme:dark){:root{' . $dark . '}}';
+        if (! $theme->hasOverrides()) {
+            return '';
         }
 
-        return $css . (':root[data-theme="dark"]{' . $dark . '}:root[data-theme="light"]{' . $light . '}');
+        $class = '.sep-theme-' . $theme->preset->value;
+        $css = '';
+
+        $light = self::block($theme->overridesLight);
+        if ($light !== '') {
+            $css .= $class . '{' . $light . '}';
+        }
+
+        $dark = self::block($theme->overridesDark);
+        if ($dark !== '') {
+            $css .= '@media (prefers-color-scheme:dark){.sep-auto-dark' . $class . '{' . $dark . '}}';
+        }
+
+        return $css;
     }
 
     /**
@@ -62,15 +67,15 @@ final class CssVariableMap
     {
         $value = trim($value);
 
-        if (preg_match('/^#(?:[0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/', $value)) {
+        if (preg_match('/^#(?:[0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/', $value) === 1) {
             return $value;
         }
 
-        if (preg_match('/^(?:rgb|rgba|hsl|hsla)\([0-9.,%\s\/]+\)$/i', $value)) {
+        if (preg_match('/^(?:rgb|rgba|hsl|hsla)\([0-9.,%\s\/]+\)$/i', $value) === 1) {
             return $value;
         }
 
-        if (preg_match('/^[a-zA-Z]+$/', $value)) {
+        if (preg_match('/^[a-zA-Z]+$/', $value) === 1) {
             return $value;
         }
 

@@ -29,6 +29,9 @@ enum HttpStatus: int implements Enumerator
     #[Label('Unauthorized'), Description('You need to sign in to view this page.'), Color('warning')]
     case Unauthorized = 401;
 
+    #[Label('Payment required'), Description('This resource requires a payment to access.'), Color('warning')]
+    case PaymentRequired = 402;
+
     #[Label('Forbidden'), Description('You do not have permission to view this page.'), Color('warning')]
     case Forbidden = 403;
 

@@ -16,14 +16,14 @@ Run the build during your pipeline and treat the output as part of the release:
   run: php artisan server-error-pages:build
 
 - name: Package release
-  run: tar -czf release.tgz public/errors public/.htaccess storage/app/server-error-pages
+  run: tar -czf release.tgz public/errors public/vendor/server-error-pages public/.htaccess storage/app/server-error-pages
 ```
 
-The build fails if any page is not self-contained, so a broken release never ships.
+The linked build copies the CSS/JS bundle to `public/vendor/server-error-pages/`, so include that directory in the release artifact — the pages need it. (For a host with no Laravel deploy, `server-error-pages:export` inlines everything into single files instead; see [Standalone export](standalone-export.md).)
 
 ## Serve them through the outage window
 
-- **Nginx (VPS):** the `error_page` snippet plus `fastcgi_intercept_errors on;` means Nginx serves the flat files whenever PHP-FPM returns 502/503/504 — including while `php-fpm` is being reloaded during a deploy. Include the snippet once and it survives every release. See [VPS with git + Nginx](vps-git-nginx.md).
+- **Nginx (VPS):** the `error_page` snippet plus `fastcgi_intercept_errors on;` means Nginx serves the flat files — and their linked stylesheet/script from `public/vendor/server-error-pages/` — whenever PHP-FPM returns 502/503/504, including while `php-fpm` is being reloaded during a deploy. Include the snippet once and it survives every release. See [VPS with git + Nginx](vps-git-nginx.md).
 - **Apache (shared):** the `ErrorDocument` lines in `.htaccess` do the same for the app-down case. Add `ProxyErrorOverride On` when PHP-FPM is proxied so the static documents replace backend 5xx responses.
 
 ## Deploy an intentional maintenance page

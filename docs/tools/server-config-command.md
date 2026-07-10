@@ -37,7 +37,7 @@ These are app/FTP-writable locations by default — the command never writes to 
 ## What the config contains
 
 - An `ErrorDocument` (Apache) or `error_page` (Nginx) line for every enabled code, pointing at `{output.url_path}/{code}.html`.
-- When `codes.fallbacks` is on, the Nginx output additionally routes the long tail of other 4xx/5xx status codes to the generic `4xx.html` / `5xx.html`.
+- When `codes.fallbacks` is on, both outputs additionally route the long tail of other 4xx/5xx status codes to the generic `4xx.html` / `5xx.html`.
 - The `security.headers` from config, applied to the static pages where the app cannot set them.
 - An `internal` guard on the errors location (Nginx) so the raw files are not directly browsable.
 

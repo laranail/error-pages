@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Simtabi\Laranail\ServerErrorPages\Commands;
 
 use Override;
+use RuntimeException;
 use Simtabi\Laranail\Console\Tools\Commands\Command;
 use Simtabi\Laranail\Console\Tools\Commands\Concerns\SupportsNamespacedNames;
 use Simtabi\Laranail\ServerErrorPages\Contracts\ServerConfigWriter;
@@ -13,10 +14,11 @@ use Simtabi\Laranail\ServerErrorPages\Services\StaticSiteBuilder;
 use Symfony\Component\Console\Input\InputOption;
 
 /**
- * Generates the self-contained static error pages (and, unless disabled, the
- * matching web-server config).
+ * Generates the static error pages (linked assets by default) and, unless
+ * disabled, the matching web-server config. `--standalone` produces fully
+ * inlined, portable single-file pages (see {@see ExportCommand}).
  */
-final class BuildCommand extends Command
+class BuildCommand extends Command
 {
     use SupportsNamespacedNames;
 
@@ -29,11 +31,11 @@ final class BuildCommand extends Command
 
     public function handle(StaticSiteBuilder $builder, ServerConfigWriter $server): int
     {
-        $keys = $this->requestedKeys();
+        $standalone = $this->standalone();
 
         try {
-            $report = $builder->build($keys);
-        } catch (NotSelfContainedException $e) {
+            $report = $builder->build($standalone, $this->requestedKeys());
+        } catch (NotSelfContainedException|RuntimeException $e) {
             $this->error($e->getMessage());
 
             return self::FAILURE;
@@ -50,7 +52,11 @@ final class BuildCommand extends Command
             $rows[] = [$key, number_format($info['bytes']) . ' B', $info['path']];
         }
         $this->table(['Code', 'Size', 'File'], $rows);
-        $this->info(sprintf('Generated %d static error page(s).', count($report)));
+        $this->info(sprintf(
+            'Generated %d %s error page(s).',
+            count($report),
+            $standalone ? 'standalone (inlined)' : 'static',
+        ));
 
         if (! (bool) $this->option('no-server')) {
             foreach ($server->generate(true) as $label => $result) {
@@ -60,6 +66,14 @@ final class BuildCommand extends Command
         }
 
         return self::SUCCESS;
+    }
+
+    /**
+     * Whether to produce inlined, portable pages. Overridden by ExportCommand.
+     */
+    protected function standalone(): bool
+    {
+        return (bool) $this->option('standalone');
     }
 
     /**
@@ -87,6 +101,7 @@ final class BuildCommand extends Command
         return [
             new InputOption('codes', null, InputOption::VALUE_OPTIONAL, 'Comma-separated status keys to build (e.g. "404,503,5xx"). Default: all configured.'),
             new InputOption('no-server', null, InputOption::VALUE_NONE, 'Only build the HTML pages; skip the Apache/Nginx config.'),
+            new InputOption('standalone', null, InputOption::VALUE_NONE, 'Inline CSS/JS/logo into fully self-contained, portable pages (no separate assets).'),
         ];
     }
 }

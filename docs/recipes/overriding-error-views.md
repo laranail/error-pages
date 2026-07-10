@@ -4,11 +4,11 @@ Replace the markup of a single error page entirely, using Laravel's standard err
 
 ## How resolution works
 
-The package registers its own `resources/error-views` directory on `config('view.paths')`, so `errors::{code}` resolves to a package stub without any publish step. Because the app's own view path is registered ahead of the package's, an app-published `resources/views/errors/{code}.blade.php` always wins. That is the supported way to fully override one page.
+The install command publishes the package's error-view stubs into your app at `resources/views/errors/{code}.blade.php` — Laravel's conventional error views. Because they are the app's own views, `renderHttpException()` resolves them directly, and editing (or replacing) one simply wins. There is no view-path trickery to reason about.
 
 ## Override one page
 
-Create the view Laravel already looks for:
+Edit the published view (or create it if you skipped the publish step):
 
 ```blade
 {{-- resources/views/errors/404.blade.php --}}
@@ -22,15 +22,15 @@ Create the view Laravel already looks for:
 </html>
 ```
 
-Laravel now renders your view for a 404 and never touches the package stub. No config change is needed.
+Laravel now renders your view for a 404. No config change is needed.
 
 ## Keep the package styling, change only the content
 
-If you want the branded layout but different words, do not override the view — edit the content instead. See [Managing content in JSON](managing-content-json.md) or the config `messages` array. That keeps the dynamic and static pages identical.
+If you want the branded layout but different words, do not override the view — edit the translations instead. See [Managing content](managing-content.md). That keeps the dynamic and static pages identical.
 
 ## Reuse the package renderer inside your own view
 
-You can still call the package from a custom stub — for example to wrap it:
+The default published stub is a one-liner that calls the facade — you can keep that call while wrapping it:
 
 ```blade
 {{-- resources/views/errors/503.blade.php --}}
@@ -39,7 +39,7 @@ You can still call the package from a custom stub — for example to wrap it:
 
 The facade also exposes `htmlForKey('5xx')`, `page($code)`, `keys()`, and `theme()` if you need the underlying data.
 
-> A hand-written app override affects **only** the dynamic Blade path. The static file at `public/errors/{code}.html` is still generated from the package component by `server-error-pages:build` — it does not read your app's `resources/views/errors/`. If you need the app-down page to match a custom override, edit the shared component (see [Customizing components and themes](customizing-components-themes.md)) so both paths use it.
+> A hand-written app override affects **only** the dynamic Blade path. The static file at `public/errors/{code}.html` is still generated from the package component by `server-error-pages:build` — it does not read your app's `resources/views/errors/`. If you need the app-down page to match a custom override, edit the shared component's SCSS/Blade source (see [Customizing components and themes](customizing-components-themes.md)) so both paths use it.
 
 ## Related
 

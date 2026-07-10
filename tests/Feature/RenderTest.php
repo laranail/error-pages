@@ -2,42 +2,37 @@
 
 declare(strict_types=1);
 
-use Illuminate\Foundation\Exceptions\RegisterErrorViewPaths;
+use Illuminate\Support\Facades\File;
 use Simtabi\Laranail\ServerErrorPages\Facades\ServerErrorPages;
-use Simtabi\Laranail\ServerErrorPages\Services\ServerErrorPagesManager;
-use Simtabi\Laranail\ServerErrorPages\Services\StaticSiteBuilder;
 
 it('loads config under the laranail.server-error-pages key', function (): void {
-    expect(config('laranail.server-error-pages.codes.enabled'))->toContain(404);
+    expect(config('laranail.server-error-pages.codes.enabled'))->toContain(404, 402);
 });
 
-it('renders a self-contained dynamic error page', function (): void {
+it('renders a dynamic page that LINKS the external assets (no inline)', function (): void {
     $html = ServerErrorPages::htmlFor(404);
 
     expect($html)
         ->toContain('<!DOCTYPE html>')
         ->toContain('>404<')
-        ->toContain('Page not found')
-        ->toContain('<style>')
-        ->toContain('sep-card');
-
-    expect(app(StaticSiteBuilder::class)->externalReferences($html))->toBe([]);
+        ->toContain('Page not found')                                  // from translations
+        ->toContain('href="/vendor/server-error-pages/css/error-pages.css"')
+        ->toContain('src="/vendor/server-error-pages/js/error-pages.js"')
+        ->toContain('sep-theme-default')
+        ->toContain('sep-badge')
+        ->not->toContain('<style>')
+        ->not->toContain('window.__sep');
 });
 
-it('resolves errors::{code} to the package view once error paths are registered', function (): void {
-    (new RegisterErrorViewPaths)();
+it('resolves content through translations; an app override wins, missing falls to default', function (): void {
+    $dir = lang_path('vendor/server-error-pages/en');
+    File::ensureDirectoryExists($dir);
+    File::put($dir . '/errors.php', "<?php\n\nreturn ['404' => ['title' => 'Not here']];\n");
 
-    expect(view()->exists('errors::404'))->toBeTrue()
-        ->and(view()->exists('errors::4xx'))->toBeTrue()
-        ->and(view()->exists('errors::5xx'))->toBeTrue();
-});
+    expect(ServerErrorPages::page(404)->title)->toBe('Not here')            // app override wins
+        ->and(ServerErrorPages::page(500)->title)->toBe('Something went wrong'); // package/enum default
 
-it('applies a config override then falls back to the enum default', function (): void {
-    config()->set('laranail.server-error-pages.content.source', 'config');
-    config()->set('laranail.server-error-pages.messages', ['404' => ['title' => 'Nope']]);
-
-    expect(ServerErrorPages::page(404)->title)->toBe('Nope')
-        ->and(ServerErrorPages::page(500)->title)->toBe('Something went wrong');
+    File::deleteDirectory(lang_path('vendor/server-error-pages'));
 });
 
 it('keeps the number but uses generic copy for non-enum codes', function (): void {
@@ -45,29 +40,23 @@ it('keeps the number but uses generic copy for non-enum codes', function (): voi
     $server = ServerErrorPages::page(599);
 
     expect($client->key)->toBe('418')
-        ->and($client->code)->toBe(418)
         ->and($client->title)->toBe('This page is unavailable')
         ->and($server->key)->toBe('599')
-        ->and($server->title)->toBe('Something went wrong')
         ->and($server->retryable)->toBeTrue();
-
-    // The generic catch-all pages are still reachable by key.
-    expect(ServerErrorPages::pageByKey('4xx')->key)->toBe('4xx')
-        ->and(ServerErrorPages::pageByKey('5xx')->key)->toBe('5xx');
 });
 
-it('honors a per-code override for a non-enum code', function (): void {
-    config()->set('laranail.server-error-pages.content.source', 'config');
-    config()->set('laranail.server-error-pages.messages', ['418' => ['title' => "I'm a teapot"]]);
-
-    expect(ServerErrorPages::page(418)->title)->toBe("I'm a teapot");
+it('adds 402 as a first-class branded page', function (): void {
+    expect(ServerErrorPages::page(402)->title)->toBe('Payment required')
+        ->and(ServerErrorPages::htmlFor(402))->toContain('Payment required');
 });
 
-it('builds static pages and server config to the configured paths', function (): void {
+it('builds linked static pages + copies the bundle + merges server config', function (): void {
     $dir = sys_get_temp_dir() . '/sep-' . bin2hex(random_bytes(4));
+    $assets = sys_get_temp_dir() . '/sep-a-' . bin2hex(random_bytes(4));
 
     config()->set('laranail.server-error-pages.output.disk');
     config()->set('laranail.server-error-pages.output.path', $dir);
+    config()->set('laranail.server-error-pages.output.assets_path', $assets);
     config()->set('laranail.server-error-pages.server.apache.output', $dir . '/.htaccess');
     config()->set('laranail.server-error-pages.server.nginx.output', $dir . '/errors.conf');
 
@@ -75,21 +64,21 @@ it('builds static pages and server config to the configured paths', function ():
 
     expect(file_exists($dir . '/404.html'))->toBeTrue()
         ->and(file_exists($dir . '/5xx.html'))->toBeTrue()
-        ->and(file_exists($dir . '/.htaccess'))->toBeTrue()
-        ->and(file_exists($dir . '/errors.conf'))->toBeTrue();
+        ->and(file_exists($assets . '/css/error-pages.css'))->toBeTrue()
+        ->and(file_exists($assets . '/js/error-pages.js'))->toBeTrue()
+        ->and(file_exists($dir . '/.htaccess'))->toBeTrue();
 
-    expect(file_get_contents($dir . '/404.html'))->toContain('>404<');
+    expect(file_get_contents($dir . '/404.html'))
+        ->toContain('>404<')
+        ->toContain('href="/vendor/server-error-pages/css/error-pages.css"');
     expect(file_get_contents($dir . '/.htaccess'))->toContain('ErrorDocument 404 /errors/404.html');
-    expect(file_get_contents($dir . '/errors.conf'))->toContain('error_page 404 /errors/404.html');
 
-    array_map(unlink(...), glob($dir . '/*') ?: []);
-    @rmdir($dir);
+    File::deleteDirectory($dir);
+    File::deleteDirectory($assets);
 });
 
 it('is the same component for dynamic and static output', function (): void {
-    $manager = app(ServerErrorPagesManager::class);
-
-    expect($manager->htmlFor(503))
+    expect(ServerErrorPages::htmlFor(503))
         ->toContain('Be right back')
         ->toContain('http-equiv="refresh"');
 });

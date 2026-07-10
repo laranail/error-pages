@@ -39,11 +39,11 @@
         "illuminate/contracts": "^13.0",
         "illuminate/filesystem": "^13.0",
         "illuminate/support": "^13.0",
+        "illuminate/translation": "^13.0",
         "illuminate/view": "^13.0",
         "laranail/console": "^1.1",
         "laranail/enumerator": "^0.4",
-        "laranail/package-tools": "^4.0",
-        "laranail/toolkit": "^0.3"
+        "laranail/package-tools": "^4.0"
     },
     "require-dev": {
         "larastan/larastan": "^3.0",
