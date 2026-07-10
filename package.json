@@ -5,10 +5,15 @@
   "type": "module",
   "scripts": {
     "build": "vite build",
-    "dev": "vite build --watch"
+    "build:pretty": "vite build --mode pretty && npm run format:dist",
+    "dev": "vite build --watch",
+    "format": "prettier --write \"resources/assets/**/*.{scss,js}\"",
+    "format:dist": "prettier --write \"public/assets/**/*.{css,js}\"",
+    "format:check": "prettier --check \"resources/assets/**/*.{scss,js}\""
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.0.0",
+    "prettier": "^3.3.0",
     "sass": "^1.77.0",
     "tailwindcss": "^4.0.0",
     "vite": "^6.0.0"

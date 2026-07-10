@@ -12,9 +12,23 @@
 // The markup is intentionally semantic (`.sep-*`) and themed via `--sep-*`
 // custom properties, so we take Tailwind's PREFLIGHT (reset) + on-demand
 // UTILITIES, but NOT its full default theme (16 KB of unused design tokens).
-// Add `@import "tailwindcss/theme.css" layer(theme);` + your `@theme` tokens if
-// you start using theme-backed utilities in the Blade markup.
-@layer base, components, utilities;
+@layer theme, base, components, utilities;
+
+// Preflight resolves six `--default-*` font tokens through Tailwind's STRICT
+// `--theme()` function (it errors — ignoring the CSS fallback — when a token is
+// unregistered). Those tokens live in the theme.css we deliberately dropped, so
+// register just the few preflight needs here. This MUST precede the preflight
+// import so the tokens exist when it references them (build + IntelliSense both
+// resolve in source order). Values match our design font.
+@theme {
+  --default-font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --default-font-feature-settings: normal;
+  --default-font-variation-settings: normal;
+  --default-mono-font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  --default-mono-font-feature-settings: normal;
+  --default-mono-font-variation-settings: normal;
+}
+
 @import "tailwindcss/preflight.css" layer(base);
 @import "tailwindcss/utilities.css" layer(utilities);
 
@@ -83,6 +97,9 @@ $presets: (
     justify-content: center;
     padding: 24px;
     color: var(--sep-text, #0f172a);
+    // Solid fallback first: browsers without color-mix() drop the gradient
+    // shorthand below and keep this instead of rendering no background at all.
+    background: var(--sep-bg, #eef1f8);
     background:
       radial-gradient(1200px 600px at 50% -10%, color-mix(in srgb, var(--sep-accent, #4f46e5) 12%, transparent), transparent 60%),
       var(--sep-bg, #eef1f8);
@@ -125,13 +142,18 @@ $presets: (
     font-weight: 800;
     line-height: 1.02;
     letter-spacing: -.03em;
-    background: linear-gradient(120deg, var(--sep-accent, #4f46e5), var(--sep-accent-2, #7c3aed));
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
+    // Solid accent by default so the code is NEVER invisible; only go
+    // transparent+clip where the gradient-text is actually supported.
+    color: var(--sep-accent, #4f46e5);
+    @supports ((-webkit-background-clip: text) or (background-clip: text)) {
+      background: linear-gradient(120deg, var(--sep-accent, #4f46e5), var(--sep-accent-2, #7c3aed));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
   }
 
-  .sep-title { margin: 10px 0 8px; font-size: 1.55rem; font-weight: 700; letter-spacing: -.01em; color: var(--sep-text); }
+  .sep-title { margin: 10px 0 8px; font-size: 1.55rem; font-weight: 700; letter-spacing: -.01em; color: var(--sep-text, #0f172a); }
   .sep-message { margin: 0 auto; max-width: 30rem; color: var(--sep-muted, #64748b); font-size: 1.02rem; }
 
   .sep-actions { margin-top: 30px; display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }

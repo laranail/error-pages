@@ -1,0 +1,15 @@
+{
+  // This package authors its single Tailwind 4 entry in SCSS
+  // (resources/assets/scss/error-pages.scss): Dart Sass passes the
+  // `.css`-suffixed @imports through and @tailwindcss/vite compiles them.
+  // By default Tailwind IntelliSense only runs its v4 resolver on `.css`, so in
+  // `.scss` it never sees our `@theme` block and wrongly flags preflight's valid
+  // `--theme(--default-font-*)` lookups as "does not exist in your theme config".
+  // Running its language features on SCSS makes it resolve the @theme tokens.
+  "tailwindCSS.includeLanguages": {
+    "scss": "css"
+  },
+  // Belt-and-braces: silence the theme-config lint (the tokens ARE registered in
+  // @theme and the Vite build + tests are clean — this is an editor false positive).
+  "tailwindCSS.lint.invalidConfigPath": "ignore"
+}

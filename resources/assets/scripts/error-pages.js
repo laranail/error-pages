@@ -41,6 +41,9 @@ import "../scss/error-pages.scss";
     const retryable = data.sepRetryable === "1";
 
     document.querySelectorAll('[data-sep-action="copy"]').forEach(function (btn) {
+      // Capture the label once at bind time so a rapid re-click while the
+      // "Copied" state is showing can't freeze the button on "Copied".
+      const original = btn.textContent;
       btn.addEventListener("click", function () {
         const code = btn.getAttribute("data-sep-code") || "";
         const title = btn.getAttribute("data-sep-title") || "";
@@ -48,7 +51,6 @@ import "../scss/error-pages.scss";
           "Error " + code + (title ? " — " + title : "") +
           "\nURL: " + location.href +
           "\nTime: " + new Date().toISOString();
-        const original = btn.textContent;
         const done = function () {
           btn.textContent = "Copied";
           btn.classList.add("is-copied");

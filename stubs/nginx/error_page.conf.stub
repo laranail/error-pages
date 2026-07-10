@@ -1,4 +1,3 @@
-# --- laranail/server-error-pages --------------------------------------------
 # Generated {{GENERATED_AT}} — do not edit by hand; re-run `php artisan
 # server-error-pages:build` to regenerate.
 #
@@ -15,4 +14,3 @@ location ^~ {{ERRORS_URL}}/ {
 }
 
 {{SECURITY_HEADERS}}
-# --- end laranail/server-error-pages ----------------------------------------
