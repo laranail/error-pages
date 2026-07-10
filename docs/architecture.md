@@ -57,6 +57,8 @@ A code outside the enum falls back to the generic `4xx` / `5xx` page. `content.d
 
 The source lives under `resources/assets/{scss,scripts}` and is built by **Vite + Tailwind 4 + SCSS** into the committed `public/assets/{css,js}/` bundle (`css/error-pages.css`, `js/error-pages.js`). The JS entry `import`s the SCSS, so one build emits both files; the config uses stable, unhashed names the pages can link. Consumers never build this — the bundle is committed and shipped — but a maintainer regenerates it with `npm run build` after changing the SCSS or JS.
 
+The single SCSS entry takes only Tailwind's **preflight + utilities** (not its full 16 KB default theme) and registers, in an `@theme` block, just the handful of `--default-*` font tokens preflight resolves through Tailwind's strict `--theme()` — keeping the bundle lean (~9 KB) while staying complete. The build ships minified; `npm run build:pretty` emits an un-minified, Prettier-formatted bundle for inspection, and `npm run format` formats the source (see [Customizing components and themes](recipes/customizing-components-themes.md#build-scripts)). Consistent with the "survive total app failure" goal, the stylesheet is authored to **degrade gracefully**: a solid background sits ahead of the `color-mix()` gradient, and the gradient-clipped status number falls back to a solid accent colour via an `@supports` guard, so the code is never invisible where `background-clip: text` is unsupported.
+
 Theming has three tiers, cheapest first:
 
 - **Preset** — `theme.preset` swaps the `sep-theme-{preset}` body class. All five presets are compiled into the one stylesheet, so switching needs **no rebuild**.

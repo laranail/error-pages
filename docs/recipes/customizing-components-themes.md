@@ -67,6 +67,18 @@ To change the styling or markup beyond presets/overrides:
    php artisan server-error-pages:build
    ```
 
+### Build scripts
+
+The bundle is built by Vite; the committed output is always **minified**. The scripts:
+
+| Script | What it does |
+|--------|--------------|
+| `npm run build` | Minified production bundle → `public/assets/`. **This is the shipped bundle** — run it before committing. |
+| `npm run build:pretty` | Un-minified, Prettier-formatted bundle for inspecting the compiled CSS/JS. Overwrites `public/assets/`, so re-run `npm run build` before committing. |
+| `npm run dev` | `vite build --watch` — rebuilds the minified bundle on every source change. |
+| `npm run format` | Prettier-format the SCSS/JS **source** under `resources/assets/`. |
+| `npm run format:check` | Check source formatting without writing (CI-friendly). |
+
 To replace a single page's markup wholesale instead of the shared component, see [Overriding an error view](overriding-error-views.md).
 
 ## What needs a rebuild
