@@ -7,7 +7,7 @@ namespace Simtabi\Laranail\ServerErrorPages\Support;
 use Simtabi\Laranail\ServerErrorPages\ValueObjects\ThemeSettings;
 
 /**
- * Renders the optional `theme.css` file that carries per-token colour overrides
+ * Renders the optional `error-pages-theme.css` file that carries per-token colour overrides
  * from config. It targets the chosen preset's `.sep-theme-{preset}` class so,
  * linked AFTER the main stylesheet, it wins by source order. Values are
  * sanitised so nothing from config can break out of the declaration. Returns

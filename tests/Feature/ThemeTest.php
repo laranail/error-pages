@@ -24,7 +24,7 @@ it('falls back to the default preset for an unknown value', function (): void {
     expect(ServerErrorPages::theme()->preset)->toBe(ThemePreset::Default);
 });
 
-it('generates a linked theme.css only when per-token overrides are set', function (): void {
+it('generates a linked error-pages-theme.css only when per-token overrides are set', function (): void {
     config()->set('laranail.server-error-pages.theme.preset', 'slate');
     config()->set('laranail.server-error-pages.theme.colors.light', ['accent' => '#ff0000']);
 
@@ -34,11 +34,11 @@ it('generates a linked theme.css only when per-token overrides are set', functio
     $css = CssVariableMap::themeCss($theme);
     expect($css)->toContain('.sep-theme-slate{')->toContain('--sep-accent:#ff0000');
 
-    // the page links theme.css when overrides exist
-    expect(ServerErrorPages::htmlFor(404))->toContain('href="/vendor/server-error-pages/css/theme.css"');
+    // the page links error-pages-theme.css when overrides exist
+    expect(ServerErrorPages::htmlFor(404))->toContain('href="/vendor/server-error-pages/css/error-pages-theme.css"');
 });
 
-it('writes theme.css to assets_path during a linked build', function (): void {
+it('writes error-pages-theme.css to assets_path during a linked build', function (): void {
     $dir = sys_get_temp_dir() . '/sep-t-' . bin2hex(random_bytes(4));
     $assets = sys_get_temp_dir() . '/sep-ta-' . bin2hex(random_bytes(4));
     config()->set('laranail.server-error-pages.output.disk');
@@ -50,8 +50,8 @@ it('writes theme.css to assets_path during a linked build', function (): void {
 
     app(StaticSiteBuilder::class)->build(false, ['404']);
 
-    expect(file_exists($assets . '/css/theme.css'))->toBeTrue();
-    expect(file_get_contents($assets . '/css/theme.css'))->toContain('--sep-accent:#00ff00');
+    expect(file_exists($assets . '/css/error-pages-theme.css'))->toBeTrue();
+    expect(file_get_contents($assets . '/css/error-pages-theme.css'))->toContain('--sep-accent:#00ff00');
 
     File::deleteDirectory($dir);
     File::deleteDirectory($assets);

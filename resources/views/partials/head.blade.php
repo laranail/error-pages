@@ -9,5 +9,5 @@
 <title>{{ $page->key }} · {{ $page->title }}</title>
 <link rel="stylesheet" href="{{ $assets }}/css/error-pages.css">
 @if ($theme->hasOverrides())
-<link rel="stylesheet" href="{{ $assets }}/css/theme.css">
+<link rel="stylesheet" href="{{ $assets }}/css/error-pages-theme.css">
 @endif

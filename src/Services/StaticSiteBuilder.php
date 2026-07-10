@@ -104,7 +104,7 @@ final readonly class StaticSiteBuilder
         }
 
         $themeCss = CssVariableMap::themeCss($theme);
-        $themePath = $dest . '/css/theme.css';
+        $themePath = $dest . '/css/error-pages-theme.css';
         if ($themeCss !== '') {
             $this->filesystem->ensureDirectoryExists($dest . '/css');
             $this->filesystem->put($themePath, $themeCss);

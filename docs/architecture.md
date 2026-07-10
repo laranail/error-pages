@@ -60,7 +60,7 @@ The source lives under `resources/assets/{scss,scripts}` and is built by **Vite 
 Theming has three tiers, cheapest first:
 
 - **Preset** — `theme.preset` swaps the `sep-theme-{preset}` body class. All five presets are compiled into the one stylesheet, so switching needs **no rebuild**.
-- **Per-token overrides** — `theme.colors.{light,dark}` generate a small linked `css/theme.css` (via `CssVariableMap`) at build time that overrides individual `--sep-*` custom properties. No SCSS rebuild.
+- **Per-token overrides** — `theme.colors.{light,dark}` generate a small linked `css/error-pages-theme.css` (via `CssVariableMap`) at build time that overrides individual `--sep-*` custom properties. No SCSS rebuild.
 - **Deep custom** — edit the SCSS and run `npm run build`.
 
 `theme.auto_dark` toggles the `sep-auto-dark` body class; combined with the OS `prefers-color-scheme`, the presets' dark variants apply automatically.

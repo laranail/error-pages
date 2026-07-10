@@ -65,7 +65,7 @@ final readonly class ServerErrorPagesManager
 
     /**
      * Presentation settings from config. The preset's colours live in the
-     * compiled CSS; only per-token overrides are carried here (→ theme.css). The
+     * compiled CSS; only per-token overrides are carried here (→ error-pages-theme.css). The
      * logo is used as-is in an <img src> (inlined only by the standalone export).
      */
     public function theme(): ThemeSettings

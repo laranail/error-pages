@@ -34,7 +34,7 @@ SERVER_ERROR_PAGES_THEME=midnight     # default | slate | midnight | emerald | c
 SERVER_ERROR_PAGES_AUTO_DARK=true
 ```
 
-The preset is applied as a `sep-theme-{preset}` body class — every preset is compiled into the one stylesheet, so switching needs no asset rebuild. For per-token tweaks, set `theme.colors.light` / `theme.colors.dark` (they generate a linked `css/theme.css` at build time). See [Customizing components and themes](recipes/customizing-components-themes.md).
+The preset is applied as a `sep-theme-{preset}` body class — every preset is compiled into the one stylesheet, so switching needs no asset rebuild. For per-token tweaks, set `theme.colors.light` / `theme.colors.dark` (they generate a linked `css/error-pages-theme.css` at build time). See [Customizing components and themes](recipes/customizing-components-themes.md).
 
 ## 4. Edit the words
 

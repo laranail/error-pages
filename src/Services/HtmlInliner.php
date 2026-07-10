@@ -29,7 +29,7 @@ final readonly class HtmlInliner
         }
 
         if ($theme->hasOverrides()) {
-            $html = $this->replaceLink($html, 'theme.css', '<style>' . CssVariableMap::themeCss($theme) . '</style>');
+            $html = $this->replaceLink($html, 'error-pages-theme.css', '<style>' . CssVariableMap::themeCss($theme) . '</style>');
         }
 
         $js = $this->readAsset('static_js', 'js/error-pages.js');

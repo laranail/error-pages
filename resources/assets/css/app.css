@@ -1,6 +1,0 @@
-/* Tailwind 4 entry (processed by @tailwindcss/vite). Provides preflight and any
- * utilities used in the Blade markup; the themed .sep-* components live in the
- * sibling SCSS. Bundled together by Vite into resources/dist/error-pages.css. */
-@import "tailwindcss";
-
-@source "../../views/**/*.blade.php";

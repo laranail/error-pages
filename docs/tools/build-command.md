@@ -27,7 +27,7 @@ The fully namespaced name is `laranail::server-error-pages.build`; the alias `se
 3. Renders each key through the shared component (the same one the dynamic views use), linking the external stylesheet/script.
 4. In `--standalone` mode, inlines the assets and asserts each page is self-contained, failing with `NotSelfContainedException` if any external reference survives.
 5. Minifies (when `output.minify` is on) and writes `{output.path}/{code}.html`.
-6. In the default (linked) mode, copies the committed bundle to `output.assets_path` and writes a `css/theme.css` there when `theme.colors` overrides are set.
+6. In the default (linked) mode, copies the committed bundle to `output.assets_path` and writes a `css/error-pages-theme.css` there when `theme.colors` overrides are set.
 7. Unless `--no-server` is passed, writes the Apache/Nginx config to its configured output paths and prints the include line to wire in.
 
 ## Output

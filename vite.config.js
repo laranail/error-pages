@@ -3,17 +3,19 @@ import tailwindcss from "@tailwindcss/vite";
 
 // Dev-only. Builds the shipped, committed bundle into public/assets with a
 // by-type folder structure (css/, js/, img/) and stable, unhashed names that the
-// package links (or inlines for the standalone export). NOT laravel-vite-plugin
-// (that is for @vite-linked app assets — the opposite of what this package does).
+// package links (or inlines for the standalone export). One strictly-SCSS entry:
+// the JS `import`s the SCSS, which pulls in Tailwind 4 (preflight + utilities).
+// NOT laravel-vite-plugin (that is for @vite-linked app assets — the opposite of
+// what this package does), and publicDir is disabled since we write INTO public/.
 export default defineConfig({
   plugins: [tailwindcss()],
+  publicDir: false,
   build: {
     outDir: "public/assets",
     emptyOutDir: true,
     cssCodeSplit: false,
     minify: "esbuild",
     rollupOptions: {
-      // The JS entry `import`s the SCSS, so one build emits both files.
       input: "resources/assets/scripts/error-pages.js",
       output: {
         entryFileNames: "js/error-pages.js",

@@ -10,7 +10,7 @@ use Simtabi\Laranail\ServerErrorPages\Enums\ThemePreset;
  * Presentation settings shared by every error page: brand identity, the chosen
  * theme preset, dark-mode behaviour, and any per-token colour OVERRIDES from
  * config. The preset's full colour set lives in the compiled CSS; overrides (if
- * any) are emitted to a linked `theme.css` at build time. Immutable.
+ * any) are emitted to a linked `error-pages-theme.css` at build time. Immutable.
  */
 final readonly class ThemeSettings
 {
@@ -30,7 +30,7 @@ final readonly class ThemeSettings
 
     /**
      * True when config sets at least one per-token colour override (→ a
-     * `theme.css` is generated and linked).
+     * `error-pages-theme.css` is generated and linked).
      */
     public function hasOverrides(): bool
     {

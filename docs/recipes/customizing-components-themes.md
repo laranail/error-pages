@@ -22,7 +22,7 @@ SERVER_ERROR_PAGES_THEME=midnight
 
 ## Colour overrides
 
-To nudge individual tokens without touching SCSS, set them under `theme.colors`. Any override generates a small **linked `css/theme.css`** at build time (copied next to the pages), so it still needs no asset rebuild — just a static rebuild:
+To nudge individual tokens without touching SCSS, set them under `theme.colors`. Any override generates a small **linked `css/error-pages-theme.css`** at build time (copied next to the pages), so it still needs no asset rebuild — just a static rebuild:
 
 ```php
 'theme' => [

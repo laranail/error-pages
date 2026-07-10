@@ -1,11 +1,10 @@
 /**
  * Server Error Pages — tiny, dependency-free enhancement script.
- * Built by Vite → resources/dist/error-pages.js and linked (or inlined for the
+ * Built by Vite → public/assets/js/error-pages.js and linked (or inlined for the
  * standalone export). Config is read from <body> data-* attributes, so there is
  * no inline config script. Everything degrades gracefully without JS: links
  * work, and retryable pages still reload via <meta http-equiv="refresh">.
  */
-import "../css/app.css";
 import "../scss/error-pages.scss";
 
 (function () {

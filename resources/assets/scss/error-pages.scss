@@ -1,13 +1,25 @@
-// Server Error Pages — Tailwind 4 + SCSS source (built by Vite → resources/dist).
-// Consumers never build this; the committed resources/dist bundle is shipped and
+// Server Error Pages — Tailwind 4 + SCSS source (built by Vite → public/assets).
+// Consumers never build this; the committed public/assets bundle is shipped and
 // linked (or inlined for the standalone export). Themes are colour presets applied
 // as `.sep-theme-*` classes on <body>; deep custom branding = edit here + `npm run build`.
 
 @use "sass:map";
 
-// Tailwind 4 (preflight + any utilities used in the Blade markup) is imported
-// from the sibling `css/app.css` entry — Sass can't process `@import
-// "tailwindcss"`, so the two are kept separate and bundled by Vite.
+// Tailwind 4, imported the split, .css-suffixed way so Dart Sass passes these
+// through as plain CSS @imports (bare `@import "tailwindcss"` would choke Sass)
+// and @tailwindcss/vite resolves them — keeping ONE strictly-SCSS entry.
+//
+// The markup is intentionally semantic (`.sep-*`) and themed via `--sep-*`
+// custom properties, so we take Tailwind's PREFLIGHT (reset) + on-demand
+// UTILITIES, but NOT its full default theme (16 KB of unused design tokens).
+// Add `@import "tailwindcss/theme.css" layer(theme);` + your `@theme` tokens if
+// you start using theme-backed utilities in the Blade markup.
+@layer base, components, utilities;
+@import "tailwindcss/preflight.css" layer(base);
+@import "tailwindcss/utilities.css" layer(utilities);
+
+// Scan the Blade views so any Tailwind utilities used in markup are generated.
+@source "../../views/**/*.blade.php";
 
 /* -------------------------------------------------------------------------
  | Theme presets — each sets the --sep-* custom properties for light + dark.
@@ -58,7 +70,7 @@ $presets: (
 
 /* -------------------------------------------------------------------------
  | Layout — one polished, centered page. Colours come from --sep-* so a
- | different preset (or a linked theme.css override) restyles with no markup
+ | different preset (or a linked error-pages-theme.css override) restyles with no markup
  | change. All values fall back to the default preset if a var is missing.
  * ---------------------------------------------------------------------- */
 

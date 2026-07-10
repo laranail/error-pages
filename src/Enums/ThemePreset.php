@@ -9,7 +9,7 @@ namespace Simtabi\Laranail\ServerErrorPages\Enums;
  * `.sep-theme-{value}` class on <body>. The actual colour tokens live in the
  * SCSS (`resources/assets/scss/error-pages.scss`) and are compiled into the
  * shipped stylesheet — switching presets needs no rebuild. `config('theme.colors')`
- * can override individual tokens at build time via the generated `theme.css`.
+ * can override individual tokens at build time via the generated `error-pages-theme.css`.
  */
 enum ThemePreset: string
 {

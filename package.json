@@ -1,7 +1,7 @@
 {
   "name": "@laranail/server-error-pages",
   "private": true,
-  "description": "Dev-only asset build for laranail/server-error-pages (Vite + Tailwind 4 + SCSS). Consumers never run this — the committed resources/dist bundle is shipped.",
+  "description": "Dev-only asset build for laranail/server-error-pages (Vite + Tailwind 4 + SCSS). Consumers never run this — the committed public/assets bundle is shipped.",
   "type": "module",
   "scripts": {
     "build": "vite build",

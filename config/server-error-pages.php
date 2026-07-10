@@ -12,8 +12,9 @@ return [
     |--------------------------------------------------------------------------
     |
     | Identity shown on every error page. `logo` may be a URL, an absolute
-    | filesystem path, or a path relative to the app base — a local file is
-    | inlined as a data-URI at build time so static pages stay self-contained.
+    | filesystem path, or a path relative to the app base — used as-is in an
+    | <img src>; a local file is inlined as a data-URI only by the standalone
+    | export so those single-file pages stay self-contained.
     |
     */
 
@@ -114,8 +115,10 @@ return [
     | Assets
     |--------------------------------------------------------------------------
     |
-    | Override paths to the compiled CSS / vanilla JS that get inlined into
-    | every page. Null uses the package's committed `resources/dist` bundle.
+    | Override paths to the compiled CSS / JS the STANDALONE export inlines.
+    | Null uses the package's committed `public/assets` bundle. (The default
+    | linked build always serves the committed bundle — these only affect the
+    | `--standalone` / `:export` output.)
     |
     */
 
