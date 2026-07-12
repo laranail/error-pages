@@ -1,0 +1,44 @@
+name: Bug report
+description: Report a problem with laranail/server-error-pages
+labels: [bug]
+body:
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: A clear description of the bug and what you expected instead.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      description: Minimal steps, config, and the command you ran.
+    validations:
+      required: true
+  - type: input
+    id: package-version
+    attributes:
+      label: Package version
+      placeholder: v1.0.0
+    validations:
+      required: true
+  - type: input
+    id: php-laravel
+    attributes:
+      label: PHP / Laravel version
+      placeholder: PHP 8.4, Laravel 12
+    validations:
+      required: true
+  - type: dropdown
+    id: layer
+    attributes:
+      label: Which layer?
+      options:
+        - Dynamic Blade page (app up)
+        - Static page (app down)
+        - Generated Apache/Nginx config
+        - Content resolution (JSON/config)
+        - Other
+    validations:
+      required: true
