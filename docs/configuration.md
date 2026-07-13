@@ -16,7 +16,11 @@ Every knob in `config/error-pages.php`, published with
 | `content.default_locale` | string | `APP_LOCALE` | Locale for the copy (falls back to the ambient app locale when empty); also sets the page `<html lang>` and `dir` (RTL-aware for `ar`/`he`/`fa`/…). |
 | `request_id.header` | string | `X-Request-Id` | Request header read for the support reference / JSON `request_id`. |
 | `request_id.generate` | bool | `true` | Generate a reference when the header is absent. |
-| `problem_type_base` | string | `''` | When set, the JSON `type` becomes `{base}/{status}` (else `about:blank`). |
+| `problem_type_base` | string | `''` | When set, the JSON `type` becomes `{base}/{status}` (else `about:blank`; ignored when `problem.docs.enabled`). |
+| `problem.docs.enabled` | bool | `false` | Serve human-readable problem-type pages and point the JSON `type` at them (RFC 7807/9457). |
+| `problem.docs.route` | string | `/errors/problems` | Prefix for the problem-type pages (`{route}/{code}`). |
+| `problem.validation` | bool | `false` | Render a 422 `ValidationException` as problem+json with a field-level `errors[]` (API context; else Laravel's default 422 passes through). |
+| `content_negotiation` | bool | `false` | An `api/*` request that prefers `text/html` (a browser) renders the branded page instead of JSON. |
 | `theme.preset` | string | `default` | `default \| slate \| midnight \| emerald \| crimson`. |
 | `theme.auto_dark` | bool | `true` | Follow `prefers-color-scheme`. |
 | `theme.colors.{light,dark}` | array | `[]` | Per-token colour overrides (see [Customising](recipes/customizing-brand-theme.md)). |
@@ -39,6 +43,7 @@ Every scalar has an `ERROR_PAGES_*` env override: `ERROR_PAGES_ENABLED`,
 `ERROR_PAGES_REQUEST_ID_GENERATE`, `ERROR_PAGES_PROBLEM_TYPE_BASE`, `ERROR_PAGES_THEME`,
 `ERROR_PAGES_AUTO_DARK`, `ERROR_PAGES_ASSETS`, `ERROR_PAGES_ASSETS_VERSION`,
 `ERROR_PAGES_RENDER_DEBUG`, `ERROR_PAGES_REPORT_THROTTLE`, `ERROR_PAGES_LIVEWIRE_LAYOUT`,
+`ERROR_PAGES_PROBLEM_DOCS`, `ERROR_PAGES_PROBLEM_VALIDATION`, `ERROR_PAGES_CONTENT_NEGOTIATION`,
 `ERROR_PAGES_PREVIEW`, `ERROR_PAGES_FILAMENT`, `ERROR_PAGES_NOVA`.
 
 A CSP nonce is DSL-only (`ErrorPages::nonce(...)`) since it is per-request — never a config key.

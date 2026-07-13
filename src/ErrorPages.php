@@ -8,6 +8,7 @@ use Closure;
 use Illuminate\Contracts\Config\Repository as Config;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 use PHPUnit\Framework\Assert;
 use Simtabi\Laranail\ErrorPages\Contracts\StackRenderer;
 use Simtabi\Laranail\ErrorPages\Core\ErrorPageFactory;
@@ -560,9 +561,53 @@ final class ErrorPages
     {
         $payload = (new JsonRenderer)->render($this->errorPageFor($e, $request), $this->themeSettings());
 
-        $base = (string) $this->config->get('error-pages.problem_type_base', '');
-        if ($base !== '') {
-            $payload['type'] = rtrim($base, '/') . '/' . $payload['status'];
+        return $this->decorateProblem($payload, $request);
+    }
+
+    /**
+     * The RFC 9457 problem+json for a validation failure: the standard members
+     * plus a field-level `errors[]` array (`pointer`/`field`/`detail`). Used by
+     * the handler when `problem.validation` is on for the API context.
+     *
+     * @return array<string, mixed>
+     */
+    public function validationJsonFor(ValidationException $e, ?Request $request = null): array
+    {
+        $errors = [];
+        foreach ($e->errors() as $field => $messages) {
+            foreach ($messages as $message) {
+                $errors[] = ['pointer' => '/' . $field, 'field' => (string) $field, 'detail' => (string) $message];
+            }
+        }
+
+        $payload = [
+            'type' => 'about:blank',
+            'title' => 'Validation failed',
+            'status' => $e->status,
+            'detail' => 'The given data failed validation.',
+            'errors' => $errors,
+        ];
+
+        $requestId = $this->requestIdFor($request);
+        if ($requestId !== null) {
+            $payload['request_id'] = $requestId;
+        }
+
+        return $this->decorateProblem($payload, $request);
+    }
+
+    /**
+     * Add the resolved `type` URI (problem-docs route, else `problem_type_base`)
+     * and the recommended `instance` (request URI) to a problem payload.
+     *
+     * @param  array<string, mixed>  $payload
+     * @return array<string, mixed>
+     */
+    private function decorateProblem(array $payload, ?Request $request): array
+    {
+        $type = $this->problemTypeUri((int) $payload['status']);
+        if ($type !== null) {
+            $payload['type'] = $type;
         }
 
         if ($request instanceof Request) {
@@ -570,6 +615,24 @@ final class ErrorPages
         }
 
         return $payload;
+    }
+
+    /**
+     * The RFC 7807/9457 `type` URI for a status: the served problem-docs page when
+     * enabled, else `{problem_type_base}/{status}`, else null (`about:blank` stays).
+     */
+    private function problemTypeUri(int $status): ?string
+    {
+        if ((bool) $this->config->get('error-pages.problem.docs.enabled', false)) {
+            $root = rtrim((string) $this->config->get('app.url', ''), '/');
+            $route = trim((string) $this->config->get('error-pages.problem.docs.route', '/errors/problems'), '/');
+
+            return $root . '/' . $route . '/' . $status;
+        }
+
+        $base = (string) $this->config->get('error-pages.problem_type_base', '');
+
+        return $base !== '' ? rtrim($base, '/') . '/' . $status : null;
     }
 
     /**

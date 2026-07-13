@@ -93,8 +93,8 @@ final class ErrorPageHandler
             return null;
         }
 
-        // Preserve framework UX: validation feedback + auth challenge/redirect.
-        if ($e instanceof ValidationException || $e instanceof AuthenticationException) {
+        // Auth always preserves the framework challenge/redirect.
+        if ($e instanceof AuthenticationException) {
             return null;
         }
 
@@ -105,6 +105,17 @@ final class ErrorPageHandler
         $contexts = $this->app->make(ContextResolver::class);
         $contexts->using($errorPages->contextResolverOverride());
         $render = RenderContext::make($e, $request, $contexts->resolve($request), $stack);
+
+        // Validation preserves Laravel's default 422 UX, unless opted in to render
+        // RFC 9457 problem+json (with a field-level errors[]) for the API context.
+        if ($e instanceof ValidationException) {
+            if ($render->context === 'api' && (bool) $this->config->get('error-pages.problem.validation', false)) {
+                return $this->app->make(ErrorResponseFactory::class)
+                    ->json($errorPages->validationJsonFor($e, $request), $e->status, $e);
+            }
+
+            return null;
+        }
 
         // Path 1 (native errors:: views) owns the web context for the server-HTML
         // `blade` stack only. A web request under a livewire/Inertia/Vue/React

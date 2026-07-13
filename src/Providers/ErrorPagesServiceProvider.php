@@ -20,6 +20,7 @@ use Simtabi\Laranail\ErrorPages\ErrorPages;
 use Simtabi\Laranail\ErrorPages\Http\AssetController;
 use Simtabi\Laranail\ErrorPages\Http\ErrorPageHandler;
 use Simtabi\Laranail\ErrorPages\Http\PreviewController;
+use Simtabi\Laranail\ErrorPages\Http\ProblemController;
 use Simtabi\Laranail\ErrorPages\Livewire\ErrorPage as LivewireErrorPage;
 use Simtabi\Laranail\ErrorPages\Rendering\StackManager;
 use Simtabi\Laranail\Package\Tools\Package;
@@ -81,8 +82,25 @@ final class ErrorPagesServiceProvider extends PackageServiceProvider
         $this->app->make(ErrorPageHandler::class)->register();
 
         $this->registerAssetRoute();
+        $this->registerProblemRoute();
         $this->registerPreviewRoute();
         $this->registerOctaneReset();
+    }
+
+    private function registerProblemRoute(): void
+    {
+        /** @var Config $config */
+        $config = $this->app->make(Config::class);
+
+        if (! (bool) $config->get('error-pages.problem.docs.enabled', false)) {
+            return;
+        }
+
+        $base = rtrim((string) $config->get('error-pages.problem.docs.route', '/errors/problems'), '/');
+
+        Route::get($base . '/{code}', [ProblemController::class, 'show'])
+            ->where('code', '[0-9]+|4xx|5xx')
+            ->name('error-pages.problem');
     }
 
     /**

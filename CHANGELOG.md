@@ -30,6 +30,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Progressive-enhancement asset route (`assets.mode` = `route`/`link`/`inline`/`off`) serving
   an immutably-cached, ETag-validated `error-pages.js` + shared CSS from `presets/shared`.
 - RFC 7807 `instance` (request URI) and an optional per-status `type` via `problem_type_base`.
+- **Problem-type documentation pages** (`problem.docs.enabled`): a public `noindex`
+  `GET /errors/problems/{code}` page the JSON `type` URI dereferences to (RFC 7807/9457).
+- **RFC 9457 validation problem+json** (`problem.validation`): a 422 `ValidationException` can
+  render as problem+json with a field-level `errors[]` (`pointer`/`field`/`detail`) for the API
+  context, instead of passing through to Laravel's default 422.
+- **Content negotiation** (`content_negotiation`): an `api/*` request that prefers `text/html`
+  (a browser) renders the branded page instead of JSON; explicit JSON clients still get
+  problem+json.
 - Configurable correlation id: `request_id.header` (default `X-Request-Id`) with an optional
   generated fallback (`request_id.generate`).
 - `content.default_locale` is now threaded into content resolution.

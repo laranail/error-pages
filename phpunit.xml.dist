@@ -6,7 +6,7 @@
          failOnWarning="true"
          failOnRisky="true">
     <testsuites>
-        <testsuite name="server-error-pages">
+        <testsuite name="error-pages">
             <directory>tests</directory>
         </testsuite>
     </testsuites>

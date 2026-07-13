@@ -27,5 +27,49 @@ never leaked (5xx uses generic copy).
 Customise detection with the [DSL](../tools/dsl.md) `context()`, or replace the JSON
 entirely with `ErrorPages::extend('json', ...)`.
 
+## Problem-type documentation pages
+
+RFC 7807/9457's `type` is meant to link to a human-readable page describing the problem. Turn
+it on to serve those pages and point `type` at them:
+
+```dotenv
+ERROR_PAGES_PROBLEM_DOCS=true
+```
+
+Now `GET /errors/problems/{code}` (prefix configurable via `problem.docs.route`) returns a
+branded, `noindex` page for that status, and the JSON `type` becomes
+`{app.url}/errors/problems/{status}` — so an API consumer can open the `type` link and read
+what the error means.
+
+## Field-level validation errors (RFC 9457)
+
+By default a `ValidationException` passes through to Laravel's own 422 (`{message, errors}`),
+preserving form UX. Opt in to a problem+json with an `errors[]` array for API clients:
+
+```dotenv
+ERROR_PAGES_PROBLEM_VALIDATION=true
+```
+
+```json
+{
+  "type": "...", "title": "Validation failed", "status": 422,
+  "detail": "The given data failed validation.",
+  "errors": [
+    { "pointer": "/email", "field": "email", "detail": "The email field is required." },
+    { "pointer": "/age",   "field": "age",   "detail": "The age must be an integer." }
+  ]
+}
+```
+
+## Content negotiation
+
+By default an `api/*` path always returns JSON. Enable content negotiation so a browser
+(`Accept: text/html`) opening an API URL gets the branded **page** instead of raw JSON, while
+explicit JSON clients (`Accept: application/json`) still get problem+json:
+
+```dotenv
+ERROR_PAGES_CONTENT_NEGOTIATION=true
+```
+
 ---
 [← Docs index](../../README.md#documentation)

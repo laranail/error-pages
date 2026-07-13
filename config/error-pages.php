@@ -90,10 +90,46 @@ return [
     | Optional base URI for the JSON `type` member. When set, the payload's
     | `type` becomes `{base}/{status}` (e.g. https://example.com/problems/404)
     | instead of the default `about:blank`. Leave empty to keep `about:blank`.
+    | Ignored when `problem.docs.enabled` is on (that serves + links its own pages).
     |
     */
 
     'problem_type_base' => env('ERROR_PAGES_PROBLEM_TYPE_BASE', ''),
+
+    /*
+    |--------------------------------------------------------------------------
+    | API problem details (RFC 9457)
+    |--------------------------------------------------------------------------
+    |
+    | `docs` serves human-readable problem-type pages (the target of the JSON
+    | `type` URI, per RFC 7807/9457) at `route/{code}` and points `type` at them.
+    | `validation` renders a 422 ValidationException as problem+json with a
+    | field-level `errors[]` array for the API context (off = Laravel's default
+    | 422 passes through, preserving form/validation UX).
+    |
+    */
+
+    'problem' => [
+        'docs' => [
+            'enabled' => env('ERROR_PAGES_PROBLEM_DOCS', false),
+            'route' => '/errors/problems',
+        ],
+        'validation' => env('ERROR_PAGES_PROBLEM_VALIDATION', false),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Content negotiation
+    |--------------------------------------------------------------------------
+    |
+    | When true, a request to an `api/*` path that prefers HTML (a browser's
+    | `Accept: text/html`) renders the branded error PAGE instead of JSON — so
+    | opening an API URL in a browser shows a page, not raw JSON. Explicit
+    | JSON clients (`Accept: application/json`) always get problem+json.
+    |
+    */
+
+    'content_negotiation' => env('ERROR_PAGES_CONTENT_NEGOTIATION', false),
 
     /*
     |--------------------------------------------------------------------------
