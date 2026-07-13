@@ -57,7 +57,9 @@ final class ErrorPageHandler
 
     private function registerViewPath(): void
     {
-        $dir = dirname(__DIR__, 2) . '/resources/error-pages';
+        // The package's views live in resources/views (its errors/{code}.blade.php
+        // are picked up as `errors::{code}` fallbacks once this dir is a view path).
+        $dir = dirname(__DIR__, 2) . '/resources/views';
 
         /** @var list<string> $paths */
         $paths = (array) $this->config->get('view.paths', []);
