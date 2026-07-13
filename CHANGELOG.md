@@ -33,6 +33,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Configurable correlation id: `request_id.header` (default `X-Request-Id`) with an optional
   generated fallback (`request_id.generate`).
 - `content.default_locale` is now threaded into content resolution.
+- Component-embed support: `payloadForCode(int)` / `payloadForKey(string)` accessors and an
+  `error-pages.livewire.layout` option so the `laranail-error-page` component can be embedded in
+  your own view/layout (for apps that don't use full-page Livewire), not only rendered standalone.
 - `RenderContext` value object centralises context/stack/status and renderer selection.
 - The bridge `Stack` enum adopts the org-standard `laranail/enumerator` (attribute-driven
   `label()`/`description()`, surfaced in the `about` section). The `Core\` enums stay plain

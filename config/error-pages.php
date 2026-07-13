@@ -168,6 +168,23 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Livewire stack
+    |--------------------------------------------------------------------------
+    |
+    | `layout` renders the livewire stack inside YOUR own component layout — a
+    | view with `{{ $slot }}` that loads `@livewireStyles`/`@livewireScripts` — so
+    | the error sits in your app's chrome rather than the package's self-contained
+    | page. null (default) uses the standalone full-page wrapper. To embed the
+    | `laranail-error-page` component manually in any view, see the Livewire recipe.
+    |
+    */
+
+    'livewire' => [
+        'layout' => env('ERROR_PAGES_LIVEWIRE_LAYOUT'),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Coexistence with Ignition
     |--------------------------------------------------------------------------
     |

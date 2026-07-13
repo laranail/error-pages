@@ -28,6 +28,19 @@ it('renders a full-page Livewire error for the livewire stack', function (): voi
         ->toContain('wire:'); // Livewire rendered the component (wire: attributes present)
 });
 
+it('renders the livewire stack inside a configured app layout', function (): void {
+    config()->set('error-pages.stack', 'livewire');
+    config()->set('error-pages.livewire.layout', 'error-layout');
+
+    $response = $this->get('/livewire-layout-missing');
+
+    $response->assertStatus(404);
+    expect($response->getContent())
+        ->toContain('id="app-chrome"')   // the app layout chrome wraps it
+        ->toContain('class="ep-status"') // the embedded component
+        ->toContain('>404<');
+});
+
 it('exposes the livewire views under a publishable, overridable namespace', function (): void {
     // Registered via package-tools hasViews('error-pages'); consumers publish +
     // customise them with `vendor:publish --tag=laranail::error-pages-views`.

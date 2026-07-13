@@ -22,7 +22,11 @@ use Throwable;
  * @method static string htmlFor(Throwable $e, ?Request $request = null)
  * @method static string renderForWeb(Throwable $e, ?Request $request = null)
  * @method static array<string, mixed> jsonFor(Throwable $e, ?Request $request = null)
+ * @method static array<string, mixed> payloadFor(Throwable $e, ?Request $request = null)
+ * @method static array<string, mixed> payloadForCode(int $code)
+ * @method static array<string, mixed> payloadForKey(string $key)
  * @method static string htmlForCode(int $code)
+ * @method static string htmlForKey(string $key)
  *
  * @see \Simtabi\Laranail\ErrorPages\ErrorPages
  */

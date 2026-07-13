@@ -414,7 +414,37 @@ final class ErrorPages
      */
     public function payloadFor(Throwable $e, ?Request $request = null): array
     {
-        $page = $this->errorPageFor($e, $request);
+        return $this->payloadFromPage($this->errorPageFor($e, $request));
+    }
+
+    /**
+     * The payload for a status code directly — for embedding the Inertia/Vue/React/
+     * Livewire component in your own view without a caught exception.
+     *
+     * @return array<string, mixed>
+     */
+    public function payloadForCode(int $code): array
+    {
+        return $this->payloadFromPage($this->pipeline->process($this->factory->make($code, $this->defaultLocale())));
+    }
+
+    /**
+     * The payload for a status key — a code ("404") or a generic "4xx"/"5xx".
+     *
+     * @return array<string, mixed>
+     */
+    public function payloadForKey(string $key): array
+    {
+        return $this->payloadFromPage($this->pipeline->process($this->factory->makeByKey($key, $this->defaultLocale())));
+    }
+
+    /**
+     * Shape a resolved page + current theme into the shared component payload.
+     *
+     * @return array<string, mixed>
+     */
+    private function payloadFromPage(ErrorPage $page): array
+    {
         $theme = $this->themeSettings();
 
         return [
