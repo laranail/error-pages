@@ -42,6 +42,7 @@ final class ErrorPagesServiceProvider extends PackageServiceProvider
             ->hasConfigFile('error-pages')
             ->hasTranslations('error-pages')
             ->hasViews('error-pages')
+            ->hasBladeComponentNamespace('Simtabi\\Laranail\\ErrorPages\\View\\Components', 'error-pages')
             ->hasLivewireComponent('laranail-error-page', LivewireErrorPage::class)
             ->withoutLivewireNamespacePrefix()
             ->hasCommands(PreviewCommand::class)

@@ -36,6 +36,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Component-embed support: `payloadForCode(int)` / `payloadForKey(string)` accessors and an
   `error-pages.livewire.layout` option so the `laranail-error-page` component can be embedded in
   your own view/layout (for apps that don't use full-page Livewire), not only rendered standalone.
+- An embeddable Blade component `<x-error-pages::error :code="404" />` (or `:key`/`:page`) that
+  renders the shared `ep-*` fragment inside any view — the Blade parity for the Livewire embed.
 - `RenderContext` value object centralises context/stack/status and renderer selection.
 - The bridge `Stack` enum adopts the org-standard `laranail/enumerator` (attribute-driven
   `label()`/`description()`, surfaced in the `about` section). The `Core\` enums stay plain

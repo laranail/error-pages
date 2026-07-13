@@ -23,6 +23,28 @@ The `$exception` (a Symfony `HttpException`) is available in the view. To keep t
 design but tweak copy or theme instead of replacing markup, prefer
 [content](managing-content.md) or [theme](customizing-brand-theme.md) overrides.
 
+## Embed the branded fragment in your own view
+
+To keep your own layout but drop the branded error card into it, use the Blade component — it
+renders the shared `ep-*` markup (a fragment, no `<html>`/`<head>`):
+
+```blade
+{{-- resources/views/errors/500.blade.php --}}
+<x-app-layout>
+    <x-error-pages::error :page="\Simtabi\Laranail\ErrorPages\Facades\ErrorPages::payloadFor($exception, request())" />
+</x-app-layout>
+```
+
+Outside an error view, resolve the content from a code or key:
+
+```blade
+<x-error-pages::error :code="404" />
+<x-error-pages::error key="5xx" class="my-8" />
+```
+
+Include `@laranail/error-pages-ui/style.css` (or your own CSS) for the `ep-*` classes. This is
+the Blade parity of the [Livewire embed](livewire.md#embed-the-component-in-your-own-view).
+
 For non-Blade contexts (API/Inertia/SPA), override by registering your own driver via
 `ErrorPages::extend()` — see [Stacks](../tools/stacks.md).
 
