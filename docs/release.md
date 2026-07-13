@@ -26,7 +26,7 @@ canonical design and the standalone panel packages:
   templates into `presets/blade`; they are the design source of truth for every stack.
 - [ ] **Finalize the component visual CSS** — derive the shared stylesheet and each stack's
   styling (Blade, plain-PHP, Vue, React, Livewire) from those templates so all stacks stay
-  pixel-consistent. Until then `presets/shared/critical.css` styles them and `presets/plain-php`
+  pixel-consistent. Until then `presets/shared/css/critical.css` styles them and `presets/plain-php`
   is the guaranteed server render.
 - [ ] **Standalone Filament Plugin + Nova Tool packages** — first-class panel integrations
   (auto-registration, panel-matched theming) beyond the current path-based auto-detection.

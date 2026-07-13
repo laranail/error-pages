@@ -6,8 +6,8 @@
  * (`@laranail/error-pages-ui/style.css`); the final design lands with the
  * canonical templates. Used by the Inertia and Vue-SPA stacks.
  */
-import type { ErrorPagePayload } from '../shared/payload';
-import { themeClass } from '../shared/payload';
+import type { ErrorPagePayload } from '../../shared/ts/payload';
+import { themeClass } from '../../shared/ts/payload';
 
 const props = defineProps<{ page: ErrorPagePayload }>();
 </script>

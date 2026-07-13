@@ -1,0 +1,6 @@
+// Critical CSS entry — inlined into every error page so it is never unstyled.
+// Built to ../css/critical.css by `npm run build:css` (committed; the PHP
+// renderer and consumers read the CSS, not the SCSS). The canonical CSS-first
+// Blade design refines these partials when it lands.
+@use 'tokens';
+@use 'base';

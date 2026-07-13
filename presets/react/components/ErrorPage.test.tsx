@@ -1,6 +1,6 @@
 import { render } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
-import { samplePayload } from '../shared/fixtures';
+import { samplePayload } from '../../shared/ts/fixtures';
 import { ErrorPage } from './ErrorPage';
 
 describe('React ErrorPage', () => {

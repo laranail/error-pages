@@ -69,7 +69,7 @@ final readonly class LivewireStackRenderer implements StackRenderer
      */
     private function renderStandalone(array $payload): string
     {
-        $cssPath = dirname(__DIR__, 2) . '/presets/shared/critical.css';
+        $cssPath = dirname(__DIR__, 2) . '/presets/shared/css/critical.css';
 
         return $this->views->make('error-pages::livewire.page', [
             'page' => $payload,

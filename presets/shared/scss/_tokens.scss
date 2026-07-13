@@ -1,0 +1,49 @@
+// Theme tokens — the `--ep-*` custom properties per preset, light + dark.
+// One source map generates the `.ep-theme-{preset}` classes and their dark
+// variants, so adding a preset is one map entry (not two hand-written blocks).
+@use 'sass:map';
+
+// Keys are quoted strings so interpolation never treats a preset name that is
+// also a CSS colour keyword (e.g. `crimson`) as a colour value.
+$themes: (
+  'default': (
+    'light': (bg: #eef1f8, surface: #fff, text: #0f172a, muted: #64748b, accent: #4f46e5, accent-2: #7c3aed, border: #e2e8f0),
+    'dark':  (bg: #0b1120, surface: #111827, text: #f1f5f9, muted: #94a3b8, accent: #818cf8, accent-2: #a78bfa, border: #1f2937),
+  ),
+  'slate': (
+    'light': (bg: #f1f5f9, surface: #fff, text: #0f172a, muted: #64748b, accent: #475569, accent-2: #334155, border: #e2e8f0),
+    'dark':  (bg: #0f172a, surface: #1e293b, text: #f1f5f9, muted: #94a3b8, accent: #cbd5e1, accent-2: #94a3b8, border: #334155),
+  ),
+  'midnight': (
+    'light': (bg: #e8ecfb, surface: #fff, text: #1e1b4b, muted: #6366f1, accent: #4f46e5, accent-2: #4338ca, border: #dfe3fb),
+    'dark':  (bg: #020617, surface: #0f172a, text: #e2e8f0, muted: #64748b, accent: #6366f1, accent-2: #818cf8, border: #1e293b),
+  ),
+  'emerald': (
+    'light': (bg: #ecfdf3, surface: #fff, text: #052e16, muted: #4b5563, accent: #059669, accent-2: #047857, border: #d1fae5),
+    'dark':  (bg: #071a12, surface: #0f2a1e, text: #ecfdf5, muted: #6b7280, accent: #34d399, accent-2: #10b981, border: #14532d),
+  ),
+  'crimson': (
+    'light': (bg: #fff1f2, surface: #fff, text: #450a0a, muted: #6b7280, accent: #dc2626, accent-2: #b91c1c, border: #fee2e2),
+    'dark':  (bg: #180b0b, surface: #241416, text: #fef2f2, muted: #9ca3af, accent: #f87171, accent-2: #ef4444, border: #4c1d1d),
+  ),
+);
+
+@mixin emit-vars($vars) {
+  @each $name, $value in $vars {
+    --ep-#{$name}: #{$value};
+  }
+}
+
+@each $preset, $modes in $themes {
+  .ep-theme-#{$preset} {
+    @include emit-vars(map.get($modes, 'light'));
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  @each $preset, $modes in $themes {
+    .ep-auto-dark.ep-theme-#{$preset} {
+      @include emit-vars(map.get($modes, 'dark'));
+    }
+  }
+}

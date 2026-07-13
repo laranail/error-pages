@@ -1,0 +1,8 @@
+// Livewire stack styles — the shared tokens + base for the ep-* DOM, plus any
+// Livewire-specific overrides. Livewire bundles its own Alpine; keep styles here
+// framework-agnostic (no Alpine/JS).
+@use '../../shared/scss/tokens';
+@use '../../shared/scss/base';
+
+// Example override:
+// .ep-card { box-shadow: 0 30px 80px -30px rgba(0, 0, 0, 0.4); }

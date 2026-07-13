@@ -1,9 +1,9 @@
 import { createApp, h } from 'vue';
-import ErrorPage from './ErrorPage.vue';
-import { readErrorPayload } from '../shared/payload';
+import ErrorPage from './components/ErrorPage.vue';
+import { readErrorPayload } from '../shared/ts/payload';
 
-export { default as ErrorPage } from './ErrorPage.vue';
-export * from '../shared/payload';
+export { default as ErrorPage } from './components/ErrorPage.vue';
+export * from '../shared/ts/payload';
 
 /**
  * Mount the branded error page onto `selector` from the embedded `#error-page-data`

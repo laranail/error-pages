@@ -11,7 +11,7 @@ use Simtabi\Laranail\ErrorPages\Core\ValueObjects\ThemeSettings;
 
 /**
  * The canonical, dependency-free HTML renderer: it renders the plain-PHP page
- * template (`presets/plain-php/template.php`) with the shared critical CSS
+ * template (`presets/plain-php/views/template.php`) with the shared critical CSS
  * inlined, so a page is fully self-contained and renders even when a framework's
  * view engine or asset pipeline is the thing that failed. This is the guaranteed
  * fallback at the bottom of the bridge's stack ladder, and the renderer plain-PHP
@@ -26,8 +26,8 @@ final readonly class HtmlRenderer implements Renderer
     public function __construct(?string $templatePath = null, ?string $cssPath = null)
     {
         $presets = dirname(__DIR__, 3) . '/presets';
-        $this->templatePath = $templatePath ?? $presets . '/plain-php/template.php';
-        $this->cssPath = $cssPath ?? $presets . '/shared/critical.css';
+        $this->templatePath = $templatePath ?? $presets . '/plain-php/views/template.php';
+        $this->cssPath = $cssPath ?? $presets . '/shared/css/critical.css';
     }
 
     public function render(ErrorPage $page, ThemeSettings $theme, ?string $nonce = null): string

@@ -1,9 +1,9 @@
 import { createRoot } from 'react-dom/client';
-import { ErrorPage } from './ErrorPage';
-import { readErrorPayload } from '../shared/payload';
+import { ErrorPage } from './components/ErrorPage';
+import { readErrorPayload } from '../shared/ts/payload';
 
-export { ErrorPage, default } from './ErrorPage';
-export * from '../shared/payload';
+export { ErrorPage, default } from './components/ErrorPage';
+export * from '../shared/ts/payload';
 
 /**
  * Mount the branded error page onto `selector` from the embedded `#error-page-data`

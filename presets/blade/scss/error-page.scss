@@ -1,0 +1,8 @@
+// Blade stack styles. The shared partials provide the tokens + base layout for
+// the ep-* DOM; add Blade-specific overrides below. Build with the shared
+// pipeline (or your app's) — e.g. `sass presets/blade/scss/error-page.scss out.css`.
+@use '../../shared/scss/tokens';
+@use '../../shared/scss/base';
+
+// Example override:
+// .ep-card { border-radius: 28px; }

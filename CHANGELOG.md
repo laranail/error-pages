@@ -52,7 +52,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Filament panel **auto-detection** (path-scoped, `panels.filament`-gated) — a request under a
   Filament panel renders the panel context without a manual `context()`.
 - Vue (`presets/vue`) + React (`presets/react`) `ErrorPage` components and a shared payload
-  type/mount helper (`presets/shared/payload.ts`), all rendering the one shared DOM contract,
+  type/mount helper (`presets/shared/ts/payload.ts`), all rendering the one shared DOM contract,
   wired into `@laranail/error-pages-ui` and **unit-tested with Vitest** (DOM-parity) in a new
   `assets` CI workflow.
 - The `livewire` stack now renders a real full-page **Livewire 4** `ErrorPage` component
@@ -66,6 +66,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Reorganised `presets/` by asset kind.** `shared/` now splits into `scss/` (source),
+  `css/` (built `critical.css`), `js/` (`enhance.js`), and `ts/` (`payload.ts`/`fixtures.ts`);
+  each stack folder has `views/`/`components/`/`scss/` sub-folders. The stylesheet is authored
+  in **SCSS** (one `$themes` map generating every `.ep-theme-*` class) and built to CSS via
+  `npm run build:css` (committed; the `assets` CI job builds it and checks it is up to date).
+  The `blade/` preset is populated with a starter design. (PHP asset paths updated accordingly.)
 - Renderer selection now honours the configured stack for a plain web page load: an
   `inertia-*` stack renders an Inertia response (not the generic SPA shell).
 - `render_debug_pages` documented as inertia/spa-only (the API context is always branded).

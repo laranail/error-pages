@@ -21,14 +21,15 @@
     "react"
   ],
   "exports": {
-    "./style.css": "./shared/critical.css",
-    "./payload": "./shared/payload.ts",
-    "./enhance": "./shared/enhance.js",
+    "./style.css": "./shared/css/critical.css",
+    "./payload": "./shared/ts/payload.ts",
+    "./enhance": "./shared/js/enhance.js",
     "./vue": "./vue/index.ts",
     "./react": "./react/index.tsx"
   },
   "scripts": {
-    "build": "echo \"consumers bundle the .ts/.vue/.tsx sources via their own Vite/webpack; a prebuilt dist is added when the canonical templates land\" && exit 0",
+    "build": "npm run build:css",
+    "build:css": "sass shared/scss/critical.scss shared/css/critical.css --no-source-map --style=expanded",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },
@@ -53,6 +54,7 @@
     "happy-dom": "^16.5.3",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "sass": "^1.83.0",
     "typescript": "^5.7.2",
     "vitest": "^3.0.2",
     "vue": "^3.5.13"
