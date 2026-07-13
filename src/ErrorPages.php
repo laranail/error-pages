@@ -148,7 +148,14 @@ final class ErrorPages
 
         // A developer-intended 4xx abort message is safe to show; a 5xx never
         // uses getMessage() (it may carry internals) — always the generic copy.
-        if ($status < 500 && $e instanceof HttpExceptionInterface) {
+        //
+        // Only show it when the developer set it *directly* (`abort(403, 'msg')`
+        // has no previous). Laravel rewrites internal exceptions into
+        // HttpExceptions carrying leaky messages while setting `previous` to the
+        // cause — e.g. ModelNotFoundException → NotFoundHttpException("No query
+        // results for model [App\\Models\\User] 1") and AuthorizationException →
+        // AccessDeniedHttpException(...). Those must never reach the end user.
+        if ($status < 500 && $e instanceof HttpExceptionInterface && ! $e->getPrevious() instanceof Throwable) {
             $message = trim($e->getMessage());
             if ($message !== '') {
                 $page = new ErrorPage($page->key, $page->code, $page->title, $message, $page->retryable, $page->retryAfter, $page->requestId);
@@ -185,7 +192,13 @@ final class ErrorPages
 
         $id = $request?->headers->get($header);
         if (is_string($id) && trim($id) !== '') {
-            return trim($id);
+            // The header is attacker-controllable: strip to a safe charset and
+            // clamp the length before it is reflected into the page/JSON (beyond
+            // the escaping already applied at render).
+            $clean = substr((string) preg_replace('/[^A-Za-z0-9._-]/', '', trim($id)), 0, 128);
+            if ($clean !== '') {
+                return $clean;
+            }
         }
 
         if ((bool) $this->config->get('error-pages.request_id.generate', true)) {
@@ -238,8 +251,13 @@ final class ErrorPages
     }
 
     /**
-     * Absolute URL to a package asset served by the route (with a cache-busting
-     * version derived from the file when not configured).
+     * URL to a package asset served by the route (with a cache-busting version
+     * derived from the file when not configured).
+     *
+     * Built from the trusted `app.url`, NOT the request host — an error page must
+     * never reflect a `Host`/`X-Forwarded-Host` header into a `<script src>`
+     * (cache-poisoning / script-source hijack). Falls back to a root-relative URL
+     * when `app.url` is unset.
      */
     public function assetUrl(string $file): string
     {
@@ -247,7 +265,9 @@ final class ErrorPages
         $version = $this->config->get('error-pages.assets.version');
         $version = is_string($version) && $version !== '' ? $version : $this->assetVersion();
 
-        return url($base . '/' . $file) . '?v=' . $version;
+        $root = rtrim((string) $this->config->get('app.url', ''), '/');
+
+        return $root . $base . '/' . $file . '?v=' . $version;
     }
 
     private function assetVersion(): string

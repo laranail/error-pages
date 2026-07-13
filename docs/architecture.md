@@ -52,10 +52,31 @@ it needs no view engine or asset pipeline.
 
 ## Security
 
-For 4xx `HttpException`s a developer-intended `abort(403, 'message')` is shown; for **5xx**
-the message is **never** used (it may carry internals) — always the generic copy. Every
-response also carries `X-Robots-Tag: noindex`, `Cache-Control: no-store`, and a
-propagated/derived `Retry-After` for transient codes.
+It is a render-only decorator: it never touches the report pass, so Sentry/Bugsnag/Flare/
+Telescope keep receiving every exception and there is no double-report. Coexistence with the
+debug renderers (Ignition/Whoops) is mechanical — they sit *below* `renderViaCallbacks` in
+Laravel's debug-only default path, which Path 2's `shouldDeferToDebug` gate yields to.
+
+Output safety:
+
+- **No message leakage.** A 4xx `getMessage()` is shown only when the developer set it
+  directly (`abort(403, 'message')`); framework-rewritten HttpExceptions (which set
+  `previous` and can name a model/ids — `ModelNotFoundException`, `AuthorizationException`)
+  fall back to generic copy. **5xx never** uses `getMessage()`.
+- **No untrusted-host reflection.** The enhancement asset URL is built from `app.url`, not
+  the request `Host`/`X-Forwarded-Host`. The reflected `X-Request-Id` is escaped, charset-
+  filtered, and length-clamped. The brand/logo URL scheme is validated (no `javascript:`).
+- **Headers.** Every response carries `X-Robots-Tag: noindex`, `X-Content-Type-Options:
+  nosniff`, `Cache-Control: no-store`, and a propagated/derived `Retry-After` for transient
+  codes.
+
+## Enums
+
+The bridge `Stack` enum uses the org-standard `laranail/enumerator` for attribute-driven
+metadata (`#[Label]`/`#[Description]` → `label()`/`description()`), via the native-enum
+`HasEnumeratorBehavior` trait. The `Core\` enums (`HttpStatus`, `ThemePreset`) stay plain
+PHP — enumerator depends on `illuminate/*`, so keeping it out of `Core\` preserves the
+framework-agnostic boundary the arch test enforces.
 
 ## Why not a separate composer package?
 

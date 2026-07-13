@@ -34,6 +34,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   generated fallback (`request_id.generate`).
 - `content.default_locale` is now threaded into content resolution.
 - `RenderContext` value object centralises context/stack/status and renderer selection.
+- The bridge `Stack` enum adopts the org-standard `laranail/enumerator` (attribute-driven
+  `label()`/`description()`, surfaced in the `about` section). The `Core\` enums stay plain
+  to keep the engine framework-agnostic (arch-boundary test).
 
 ### Changed
 
@@ -57,6 +60,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `server-config`/`clear` commands, and the `output.*`/`server.*`/`security.headers` config.
 - The unused `codes.fallbacks` flag (generic 4xx/5xx branding is automatic via Laravel's
   native `errors::{n}xx` resolution).
+
+### Security
+
+- Never surface a framework-rewritten 4xx message (e.g. `ModelNotFoundException` →
+  `NotFoundHttpException` naming the model + ids): a 4xx `getMessage()` is shown only when
+  the developer set it directly (the exception has no `previous`).
+- Build the enhancement asset URL from the trusted `app.url`, never the request `Host`/
+  `X-Forwarded-Host` header (removes a cache-poisoning / script-source reflection).
+- Sanitise and clamp the reflected `X-Request-Id` (safe charset, ≤128 chars).
+- Neutralise a dangerous scheme (`javascript:`/`data:`/…) on the configured brand/logo URL.
+- Add `X-Content-Type-Options: nosniff` to every error response.
 
 ## [0.1.0] - 2026-07-11
 

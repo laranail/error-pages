@@ -13,7 +13,8 @@ use Throwable;
 /**
  * Wraps rendered output into an HTTP response, propagating the exception's own
  * headers (a 503/429 `Retry-After`, a 401 `WWW-Authenticate`, …) and setting the
- * error-page defaults (`Retry-After` for transient codes, `no-store`, `noindex`).
+ * error-page defaults (`Retry-After` for transient codes, `no-store`, `noindex`,
+ * `nosniff`).
  */
 final class ErrorResponseFactory
 {
@@ -55,6 +56,7 @@ final class ErrorResponseFactory
         }
 
         $response->headers->set('X-Robots-Tag', 'noindex');
+        $response->headers->set('X-Content-Type-Options', 'nosniff');
         $response->headers->set('Cache-Control', 'no-store');
 
         return $response;

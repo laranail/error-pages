@@ -15,6 +15,7 @@ use Simtabi\Laranail\ErrorPages\Core\Contracts\ContentRepository;
 use Simtabi\Laranail\ErrorPages\Core\ErrorPageFactory;
 use Simtabi\Laranail\ErrorPages\Core\Support\Pipeline;
 use Simtabi\Laranail\ErrorPages\Doctor\Checks;
+use Simtabi\Laranail\ErrorPages\Enums\Stack;
 use Simtabi\Laranail\ErrorPages\ErrorPages;
 use Simtabi\Laranail\ErrorPages\Http\AssetController;
 use Simtabi\Laranail\ErrorPages\Http\ErrorPageHandler;
@@ -127,9 +128,11 @@ final class ErrorPagesServiceProvider extends PackageServiceProvider
         /** @var Config $config */
         $config = $this->app->make(Config::class);
 
+        $stack = Stack::fromValue((string) $config->get('error-pages.stack', 'blade'));
+
         return [
             'Enabled' => $config->get('error-pages.enabled') ? 'yes' : 'no',
-            'Default stack' => (string) $config->get('error-pages.stack', 'blade'),
+            'Default stack' => $stack->label() . ' (' . $stack->value . ')',
             'Theme preset' => (string) $config->get('error-pages.theme.preset', 'default'),
             'Intercepted codes' => implode(', ', array_map(strval(...), (array) $config->get('error-pages.codes.intercept', []))),
         ];
