@@ -39,6 +39,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - An embeddable Blade component `<x-error-pages::error :code="404" />` (or `:key`/`:page`) that
   renders the shared `ep-*` fragment inside any view — the Blade parity for the Livewire embed.
 - `RenderContext` value object centralises context/stack/status and renderer selection.
+- Octane per-request DSL isolation: the `ErrorPages` singleton snapshots its boot-time DSL
+  config on the first request and resets to that baseline each request (via Octane's
+  `RequestReceived`), so accidental per-request DSL mutations can't leak across requests.
 - The bridge `Stack` enum adopts the org-standard `laranail/enumerator` (attribute-driven
   `label()`/`description()`, surfaced in the `about` section). The `Core\` enums stay plain
   to keep the engine framework-agnostic (arch-boundary test).

@@ -30,6 +30,8 @@ use Throwable;
  * message-security policy, correlation id, and the enrichment pipeline — and
  * renders it via the core renderers. Consumers reshape it from their own
  * provider through the DSL (`stack`/`theme`/`context`/`skipWhen`/`pipe`).
+ *
+ * @phpstan-type DslState array{skip: list<callable(Throwable, ?Request): bool>, context: ?Closure, stack: ?string, theme: ?string, nonce: Closure|string|null, pipeline: list<callable(ErrorPage): ErrorPage>}
  */
 final class ErrorPages
 {
@@ -48,6 +50,13 @@ final class ErrorPages
 
     /** @var list<array{status: int, context: string, stack: string, theme: string}> */
     private array $rendered = [];
+
+    /**
+     * Boot-time DSL snapshot, captured on the first Octane request for reset.
+     *
+     * @var DslState|null
+     */
+    private ?array $baseline = null;
 
     public function __construct(
         private readonly ErrorPageFactory $factory,
@@ -159,6 +168,52 @@ final class ErrorPages
     public function shouldSkip(Throwable $e, ?Request $request): bool
     {
         return array_any($this->skipPredicates, fn (callable $predicate): bool => $predicate($e, $request) === true);
+    }
+
+    // -------------------------------------------------------------- octane
+
+    /**
+     * Keep this singleton isolated across Octane requests. The intended usage is
+     * boot-time DSL config (which must persist), but a per-request `stack()`/
+     * `skipWhen()`/`pipe()`/… would otherwise leak into the next request on a
+     * persistent worker. On the FIRST request we snapshot the boot baseline; on
+     * every request after, we restore it — so boot config survives while
+     * per-request mutations are discarded. Wired to Octane's `RequestReceived`.
+     */
+    public function isolateOctaneRequest(): void
+    {
+        if ($this->baseline === null) {
+            $this->baseline = $this->captureState();
+
+            return;
+        }
+
+        $this->applyState($this->baseline);
+    }
+
+    private function captureState(): array
+    {
+        return [
+            'skip' => $this->skipPredicates,
+            'context' => $this->contextResolver,
+            'stack' => $this->stackOverride,
+            'theme' => $this->themeOverride,
+            'nonce' => $this->nonce,
+            'pipeline' => $this->pipeline->snapshot(),
+        ];
+    }
+
+    /**
+     * @param  DslState  $state
+     */
+    private function applyState(array $state): void
+    {
+        $this->skipPredicates = $state['skip'];
+        $this->contextResolver = $state['context'];
+        $this->stackOverride = $state['stack'];
+        $this->themeOverride = $state['theme'];
+        $this->nonce = $state['nonce'];
+        $this->pipeline->restore($state['pipeline']);
     }
 
     // ------------------------------------------------------------- testing

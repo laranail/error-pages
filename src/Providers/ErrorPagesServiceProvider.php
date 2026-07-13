@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Simtabi\Laranail\ErrorPages\Providers;
 
 use Illuminate\Contracts\Config\Repository as Config;
+use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Contracts\Translation\Translator;
 use Illuminate\Support\Facades\Route;
 use Override;
@@ -81,6 +82,25 @@ final class ErrorPagesServiceProvider extends PackageServiceProvider
 
         $this->registerAssetRoute();
         $this->registerPreviewRoute();
+        $this->registerOctaneReset();
+    }
+
+    /**
+     * On Octane, reset the ErrorPages DSL to its boot baseline at the start of
+     * each request so per-request DSL mutations can't leak across requests on a
+     * persistent worker. Guarded by string so Octane is not a dependency.
+     */
+    private function registerOctaneReset(): void
+    {
+        $event = 'Laravel\\Octane\\Events\\RequestReceived';
+
+        if (! class_exists($event)) {
+            return;
+        }
+
+        $this->app->make(Dispatcher::class)->listen($event, function (): void {
+            $this->app->make(ErrorPages::class)->isolateOctaneRequest();
+        });
     }
 
     private function registerAssetRoute(): void

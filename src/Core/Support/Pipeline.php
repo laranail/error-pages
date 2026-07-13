@@ -35,4 +35,20 @@ final class Pipeline
 
         return $page;
     }
+
+    /**
+     * @return list<callable(ErrorPage): ErrorPage>
+     */
+    public function snapshot(): array
+    {
+        return $this->stages;
+    }
+
+    /**
+     * @param  list<callable(ErrorPage): ErrorPage>  $stages
+     */
+    public function restore(array $stages): void
+    {
+        $this->stages = $stages;
+    }
 }

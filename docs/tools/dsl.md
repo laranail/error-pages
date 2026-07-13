@@ -74,7 +74,10 @@ ErrorPages::assertNothingRendered();                                // when no e
 
 - The DSL is where **closures** live — never the published config file, so `config:cache`
   keeps working (`nonce`, `context`, `skipWhen`, `pipe` are all DSL-only for this reason).
-- The `ErrorPages` instance is a singleton; configure it once at boot.
+- The `ErrorPages` instance is a singleton; configure it once at boot. Under **Octane** the
+  boot config persists across requests, and the DSL is reset to that boot baseline at the
+  start of each request — so an accidental per-request `stack()`/`skipWhen()`/`pipe()` can't
+  leak into the next request.
 
 ---
 [← Docs index](../../README.md#documentation)
