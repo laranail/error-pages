@@ -1,8 +1,8 @@
 <?php
 
 declare(strict_types=1);
-use Simtabi\Laranail\ErrorPages\ValueObjects\ErrorPage;
-use Simtabi\Laranail\ErrorPages\ValueObjects\ThemeSettings;
+use Simtabi\Laranail\ErrorPages\Core\ValueObjects\ErrorPage;
+use Simtabi\Laranail\ErrorPages\Core\ValueObjects\ThemeSettings;
 
 /**
  * Canonical, framework-agnostic error page (the guaranteed fallback renderer).
