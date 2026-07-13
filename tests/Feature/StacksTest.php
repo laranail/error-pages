@@ -61,3 +61,20 @@ it('renders a panel-tagged page for the filament/nova context', function (): voi
     $response->assertStatus(404);
     expect($response->getContent())->toContain('data-panel="filament"')->toContain('class="ep-status"');
 });
+
+it('degrades to the core HTML page when a stack renderer returns null (fallback ladder)', function (): void {
+    app(ErrorPages::class)
+        ->extend('wonky', fn ($app): StackRenderer => new class implements StackRenderer
+        {
+            public function render(Throwable $e, Request $request, int $status): ?Response
+            {
+                return null; // e.g. the stack's front-end packages are not installed
+            }
+        })
+        ->context(fn ($request): string => 'wonky');
+
+    $response = $this->get('/wonky-missing');
+
+    $response->assertStatus(404);
+    expect($response->getContent())->toContain('class="ep-status"')->toContain('>404<');
+});

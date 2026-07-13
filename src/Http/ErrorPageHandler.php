@@ -123,9 +123,20 @@ final class ErrorPageHandler
         }
 
         try {
-            return $this->app->make(StackManager::class)
+            $response = $this->app->make(StackManager::class)
                 ->renderer($this->rendererKeyFor($context))
                 ->render($e, $request, $status);
+
+            // Fallback ladder: a stack that cannot render (e.g. its packages are
+            // not installed, or a custom driver opts out) degrades to the
+            // guaranteed core HTML rather than Laravel's default — except API,
+            // which stays JSON (an HTML body would be wrong for a JSON client).
+            if ($response === null && $context !== 'api') {
+                return $this->app->make(ErrorResponseFactory::class)
+                    ->html($errorPages->htmlFor($e, $request), $status, $e);
+            }
+
+            return $response;
         } catch (Throwable $rendererFailure) {
             report(new ErrorPageRenderException($rendererFailure));
 
