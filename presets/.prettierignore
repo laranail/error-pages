@@ -1,0 +1,5 @@
+# Dependencies + generated artifacts (the SCSS *source* IS formatted + committed;
+# the built CSS is owned by sass, and the lockfile by npm).
+node_modules
+shared/css
+package-lock.json

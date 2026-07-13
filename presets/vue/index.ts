@@ -11,9 +11,9 @@ export * from '../shared/ts/payload';
  * server-rendered page stays visible.
  */
 export function mountErrorPage(selector = '#app'): void {
-  const payload = readErrorPayload();
-  const el = document.querySelector(selector);
-  if (payload && el) {
-    createApp({ render: () => h(ErrorPage, { page: payload }) }).mount(el);
-  }
+    const payload = readErrorPayload();
+    const el = document.querySelector(selector);
+    if (payload && el) {
+        createApp({ render: () => h(ErrorPage, { page: payload }) }).mount(el);
+    }
 }

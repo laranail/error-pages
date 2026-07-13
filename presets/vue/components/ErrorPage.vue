@@ -13,23 +13,28 @@ const props = defineProps<{ page: ErrorPagePayload }>();
 </script>
 
 <template>
-  <div :class="themeClass(props.page)">
-    <main class="ep-shell" role="main">
-      <section class="ep-card">
-        <div class="ep-brand">
-          <img v-if="props.page.brand.logo" class="ep-logo" :src="props.page.brand.logo" :alt="props.page.brand.name">
-          <span v-else class="ep-brand-name">{{ props.page.brand.name }}</span>
-        </div>
-        <p class="ep-status" aria-hidden="true">{{ props.page.code }}</p>
-        <h1 class="ep-title">{{ props.page.title }}</h1>
-        <p class="ep-message">{{ props.page.message }}</p>
-        <div class="ep-actions">
-          <a class="ep-btn ep-btn-primary" :href="props.page.homeUrl">Back to home</a>
-        </div>
-        <p v-if="props.page.requestId" class="ep-ref">
-          Reference: <code>{{ props.page.requestId }}</code>
-        </p>
-      </section>
-    </main>
-  </div>
+    <div :class="themeClass(props.page)">
+        <main class="ep-shell" role="main">
+            <section class="ep-card">
+                <div class="ep-brand">
+                    <img
+                        v-if="props.page.brand.logo"
+                        class="ep-logo"
+                        :src="props.page.brand.logo"
+                        :alt="props.page.brand.name"
+                    />
+                    <span v-else class="ep-brand-name">{{ props.page.brand.name }}</span>
+                </div>
+                <p class="ep-status" aria-hidden="true">{{ props.page.code }}</p>
+                <h1 class="ep-title">{{ props.page.title }}</h1>
+                <p class="ep-message">{{ props.page.message }}</p>
+                <div class="ep-actions">
+                    <a class="ep-btn ep-btn-primary" :href="props.page.homeUrl">Back to home</a>
+                </div>
+                <p v-if="props.page.requestId" class="ep-ref">
+                    Reference: <code>{{ props.page.requestId }}</code>
+                </p>
+            </section>
+        </main>
+    </div>
 </template>

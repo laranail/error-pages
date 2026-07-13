@@ -36,6 +36,9 @@ jobs:
       - name: Verify the committed CSS is up to date
         run: git diff --exit-code shared/css/critical.css
 
+      - name: Check formatting
+        run: npm run format:check
+
       - name: Typecheck
         run: npm run typecheck
 

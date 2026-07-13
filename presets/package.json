@@ -31,7 +31,9 @@
     "build": "npm run build:css",
     "build:css": "sass shared/scss/critical.scss shared/css/critical.css --no-source-map --style=expanded",
     "test": "vitest run",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "format": "prettier --write \"**/*.{ts,tsx,vue,scss,json}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,vue,scss,json}\""
   },
   "peerDependencies": {
     "react": ">=18",
@@ -52,6 +54,7 @@
     "@vitejs/plugin-vue": "^5.2.1",
     "@vue/test-utils": "^2.4.6",
     "happy-dom": "^16.5.3",
+    "prettier": "^3.4.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "sass": "^1.83.0",

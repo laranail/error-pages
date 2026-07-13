@@ -72,6 +72,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   in **SCSS** (one `$themes` map generating every `.ep-theme-*` class) and built to CSS via
   `npm run build:css` (committed; the `assets` CI job builds it and checks it is up to date).
   The `blade/` preset is populated with a starter design. (PHP asset paths updated accordingly.)
+  A **Prettier** format gate (the JS/TS/Vue/SCSS analog of Pint) now runs in the `assets` CI.
 - Renderer selection now honours the configured stack for a plain web page load: an
   `inertia-*` stack renders an Inertia response (not the generic SPA shell).
 - `render_debug_pages` documented as inertia/spa-only (the API context is always branded).
