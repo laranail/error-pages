@@ -29,7 +29,9 @@ final readonly class SpaStackRenderer implements StackRenderer
         $html = $this->pages->htmlFor($e, $request);
 
         $payload = json_encode($this->pages->payloadFor($e, $request), JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP);
-        $script = '<script id="error-page-data" type="application/json">' . ($payload === false ? '{}' : $payload) . '</script>';
+        $nonce = $this->pages->nonceValue();
+        $nonceAttr = $nonce === null ? '' : ' nonce="' . htmlspecialchars($nonce, ENT_QUOTES) . '"';
+        $script = '<script id="error-page-data" type="application/json"' . $nonceAttr . '>' . ($payload === false ? '{}' : $payload) . '</script>';
 
         $html = str_contains($html, '</body>')
             ? str_replace('</body>', $script . '</body>', $html)

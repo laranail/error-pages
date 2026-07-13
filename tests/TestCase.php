@@ -37,6 +37,10 @@ abstract class TestCase extends Orchestra
         // Production-style by default: branded pages take over, no Ignition.
         $app['config']->set('app.debug', false);
 
+        // Register the dev preview routes so their tests can exercise them
+        // (production keeps them behind app.debug / preview.enabled).
+        $app['config']->set('error-pages.preview.enabled', true);
+
         // Testbench ships its own resources/views/errors/* which would shadow
         // ours at view-path index 0 (that models an app WITH custom error views).
         // Point the "app" view path at a clean dir so we exercise OUR fallback,

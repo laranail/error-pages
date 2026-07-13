@@ -6,7 +6,6 @@ namespace Simtabi\Laranail\ErrorPages\Providers;
 
 use Illuminate\Contracts\Config\Repository as Config;
 use Illuminate\Contracts\Translation\Translator;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Route;
 use Override;
 use Simtabi\Laranail\ErrorPages\Commands\PreviewCommand;
@@ -19,6 +18,7 @@ use Simtabi\Laranail\ErrorPages\Enums\Stack;
 use Simtabi\Laranail\ErrorPages\ErrorPages;
 use Simtabi\Laranail\ErrorPages\Http\AssetController;
 use Simtabi\Laranail\ErrorPages\Http\ErrorPageHandler;
+use Simtabi\Laranail\ErrorPages\Http\PreviewController;
 use Simtabi\Laranail\ErrorPages\Rendering\StackManager;
 use Simtabi\Laranail\Package\Tools\Package;
 use Simtabi\Laranail\Package\Tools\Providers\PackageServiceProvider;
@@ -108,16 +108,11 @@ final class ErrorPagesServiceProvider extends PackageServiceProvider
 
         $base = rtrim((string) $config->get('error-pages.preview.route', '/_error-pages'), '/');
 
-        Route::get($base . '/{code}', function (string $code): Response {
-            /** @var ErrorPages $pages */
-            $pages = $this->app->make(ErrorPages::class);
+        Route::get($base, [PreviewController::class, 'index'])->name('error-pages.preview.gallery');
 
-            $html = ctype_digit($code)
-                ? $pages->htmlForCode((int) $code)
-                : $pages->htmlForKey($code);
-
-            return new Response($html, 200, ['Content-Type' => 'text/html; charset=UTF-8']);
-        })->where('code', '[0-9]+|4xx|5xx')->name('error-pages.preview');
+        Route::get($base . '/{code}', [PreviewController::class, 'show'])
+            ->where('code', '[0-9]+|4xx|5xx')
+            ->name('error-pages.preview');
     }
 
     /**

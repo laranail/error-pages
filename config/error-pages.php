@@ -182,6 +182,22 @@ return [
 
     'render_debug_pages' => env('ERROR_PAGES_RENDER_DEBUG', false),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Failure reporting
+    |--------------------------------------------------------------------------
+    |
+    | If OUR renderer throws, we report a distinct ErrorPageRenderException (never
+    | the original — the framework already reported it) and fall back to Laravel's
+    | default. `throttle` (seconds) caps repeat reports of the same failure so a
+    | persistently-broken pretty-page can't flood the log; 0 reports every time.
+    |
+    */
+
+    'report' => [
+        'throttle' => env('ERROR_PAGES_REPORT_THROTTLE', 0),
+    ],
+
     'preview' => [
         // null => enabled only when app.debug is true.
         'enabled' => env('ERROR_PAGES_PREVIEW'),

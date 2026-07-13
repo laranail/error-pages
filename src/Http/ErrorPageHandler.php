@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Simtabi\Laranail\ErrorPages\Http;
 
 use Illuminate\Auth\AuthenticationException;
+use Illuminate\Contracts\Cache\Repository as CacheRepository;
 use Illuminate\Contracts\Config\Repository as Config;
 use Illuminate\Contracts\Debug\ExceptionHandler;
 use Illuminate\Contracts\Foundation\Application;
@@ -142,14 +143,50 @@ final class ErrorPageHandler
 
             if ($response !== null) {
                 event(new ErrorPageRendered($e, $render->context, $render->status));
+                $errorPages->recordRender($render->status, $render->context);
             }
 
             return $response;
         } catch (Throwable $rendererFailure) {
-            report(new ErrorPageRenderException($rendererFailure));
+            $this->reportFailure($rendererFailure);
 
             return null;
         }
+    }
+
+    /**
+     * Report OUR renderer failure (never the original exception — the framework
+     * already reported it). Optionally throttled by `report.throttle` seconds per
+     * failure signature so a persistently-broken renderer can't flood the log; the
+     * throttle fails open (a cache error still reports).
+     */
+    private function reportFailure(Throwable $rendererFailure): void
+    {
+        $throttle = (int) $this->config->get('error-pages.report.throttle', 0);
+
+        if ($throttle > 0 && $this->throttled($rendererFailure, $throttle)) {
+            return;
+        }
+
+        report(new ErrorPageRenderException($rendererFailure));
+    }
+
+    private function throttled(Throwable $failure, int $seconds): bool
+    {
+        try {
+            $cache = $this->app->make(CacheRepository::class);
+            $key = 'error-pages:report:' . sha1($failure::class . '|' . $failure->getMessage());
+
+            if ($cache->get($key) !== null) {
+                return true;
+            }
+
+            $cache->put($key, true, $seconds);
+        } catch (Throwable) {
+            // Fail open: never let the throttle bookkeeping suppress a report.
+        }
+
+        return false;
     }
 
     private function shouldDeferToDebug(RenderContext $render): bool

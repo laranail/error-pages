@@ -19,9 +19,11 @@ use Simtabi\Laranail\ErrorPages\Core\ValueObjects\ThemeSettings;
  * @var ThemeSettings $theme
  * @var string $criticalCss
  * @var string $themeOverrideCss
+ * @var ?string $nonce
  * @var Closure $e
  */
 $bodyClass = 'ep-body ep-theme-' . $e($theme->preset->value) . ($theme->autoDark ? ' ep-auto-dark' : '');
+$nonceAttr = ($nonce ?? '') !== '' ? ' nonce="' . $e($nonce) . '"' : '';
 ?><!DOCTYPE html>
 <html lang="en" dir="ltr">
 <head>
@@ -33,7 +35,7 @@ $bodyClass = 'ep-body ep-theme-' . $e($theme->preset->value) . ($theme->autoDark
 <meta http-equiv="refresh" content="<?= (int) $page->retryAfter ?>">
 <?php } ?>
 <title><?= $e($page->key) ?> &middot; <?= $e($page->title) ?></title>
-<style><?= $criticalCss ?><?= $themeOverrideCss ?></style>
+<style<?= $nonceAttr ?>><?= $criticalCss ?><?= $themeOverrideCss ?></style>
 </head>
 <body class="<?= $bodyClass ?>">
 <main class="ep-shell" role="main">

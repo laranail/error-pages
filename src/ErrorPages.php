@@ -8,6 +8,7 @@ use Closure;
 use Illuminate\Contracts\Config\Repository as Config;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Http\Request;
+use PHPUnit\Framework\Assert;
 use Simtabi\Laranail\ErrorPages\Contracts\StackRenderer;
 use Simtabi\Laranail\ErrorPages\Core\ErrorPageFactory;
 use Simtabi\Laranail\ErrorPages\Core\Rendering\HtmlRenderer;
@@ -15,6 +16,7 @@ use Simtabi\Laranail\ErrorPages\Core\Rendering\JsonRenderer;
 use Simtabi\Laranail\ErrorPages\Core\Support\Pipeline;
 use Simtabi\Laranail\ErrorPages\Core\ValueObjects\ErrorPage;
 use Simtabi\Laranail\ErrorPages\Core\ValueObjects\ThemeSettings;
+use Simtabi\Laranail\ErrorPages\Enums\Stack;
 use Simtabi\Laranail\ErrorPages\Events\ErrorPageRendered;
 use Simtabi\Laranail\ErrorPages\Events\RenderingErrorPage;
 use Simtabi\Laranail\ErrorPages\Rendering\StackManager;
@@ -39,6 +41,13 @@ final class ErrorPages
     private ?string $stackOverride = null;
 
     private ?string $themeOverride = null;
+
+    private Closure|string|null $nonce = null;
+
+    private bool $recording = false;
+
+    /** @var list<array{status: int, context: string, stack: string, theme: string}> */
+    private array $rendered = [];
 
     public function __construct(
         private readonly ErrorPageFactory $factory,
@@ -98,6 +107,19 @@ final class ErrorPages
     }
 
     /**
+     * A Content-Security-Policy nonce (a value, or a per-request resolver) applied
+     * to the inline `<style>` and the enhancement `<script>` — for strict-CSP apps.
+     *
+     * @param  (Closure(): ?string)|string  $nonce
+     */
+    public function nonce(Closure|string $nonce): static
+    {
+        $this->nonce = $nonce;
+
+        return $this;
+    }
+
+    /**
      * Veto handling for matching exceptions/requests (they pass through to Laravel).
      *
      * @param  callable(Throwable, ?Request): bool  $predicate
@@ -137,6 +159,64 @@ final class ErrorPages
     public function shouldSkip(Throwable $e, ?Request $request): bool
     {
         return array_any($this->skipPredicates, fn (callable $predicate): bool => $predicate($e, $request) === true);
+    }
+
+    // ------------------------------------------------------------- testing
+
+    /**
+     * Start recording rendered pages so consumers can assert on them in tests.
+     * Rendering still happens as normal; call the assertions below afterwards.
+     */
+    public function fake(): static
+    {
+        $this->recording = true;
+        $this->rendered = [];
+
+        return $this;
+    }
+
+    /**
+     * Record a rendered page (called by the handler and the web renderer). A no-op
+     * unless {@see fake()} enabled recording.
+     */
+    public function recordRender(int $status, string $context): void
+    {
+        if (! $this->recording) {
+            return;
+        }
+
+        $this->rendered[] = [
+            'status' => $status,
+            'context' => $context,
+            'stack' => Stack::fromValue($this->stackOverride ?? (string) $this->config->get('error-pages.stack', 'blade'))->value,
+            'theme' => $this->themeSettings()->preset->value,
+        ];
+    }
+
+    /**
+     * Assert an error page was rendered for a status code (optionally narrowed to
+     * a stack and/or theme). Requires {@see fake()}.
+     */
+    public function assertRendered(int $code, ?string $stack = null, ?string $theme = null): void
+    {
+        $match = array_any(
+            $this->rendered,
+            fn (array $r): bool => $r['status'] === $code
+                && ($stack === null || $r['stack'] === $stack)
+                && ($theme === null || $r['theme'] === $theme),
+        );
+
+        Assert::assertTrue($match, sprintf(
+            'Failed asserting that an error page was rendered for status %d%s%s.',
+            $code,
+            $stack === null ? '' : " stack=[{$stack}]",
+            $theme === null ? '' : " theme=[{$theme}]",
+        ));
+    }
+
+    public function assertNothingRendered(): void
+    {
+        Assert::assertCount(0, $this->rendered, 'Failed asserting that no error page was rendered.');
     }
 
     // -------------------------------------------------------- page building
@@ -219,7 +299,24 @@ final class ErrorPages
      */
     private function renderPage(ErrorPage $page): string
     {
-        return $this->withEnhancement((new HtmlRenderer)->render($page, $this->themeSettings()));
+        return $this->withEnhancement((new HtmlRenderer)->render($page, $this->themeSettings(), $this->nonceValue()));
+    }
+
+    /**
+     * The resolved CSP nonce for this render (from the `nonce()` DSL), or null.
+     */
+    public function nonceValue(): ?string
+    {
+        $nonce = $this->nonce instanceof Closure ? ($this->nonce)() : $this->nonce;
+
+        return is_string($nonce) && $nonce !== '' ? $nonce : null;
+    }
+
+    private function nonceAttr(): string
+    {
+        $nonce = $this->nonceValue();
+
+        return $nonce === null ? '' : ' nonce="' . htmlspecialchars($nonce, ENT_QUOTES) . '"';
     }
 
     /**
@@ -241,10 +338,11 @@ final class ErrorPages
     private function enhancementTag(): ?string
     {
         $mode = (string) $this->config->get('error-pages.assets.mode', 'route');
+        $nonce = $this->nonceAttr();
 
         return match ($mode) {
-            'route' => '<script src="' . htmlspecialchars($this->assetUrl('error-pages.js'), ENT_QUOTES) . '" defer></script>',
-            'link' => '<script src="' . htmlspecialchars(asset('vendor/error-pages/error-pages.js'), ENT_QUOTES) . '" defer></script>',
+            'route' => '<script src="' . htmlspecialchars($this->assetUrl('error-pages.js'), ENT_QUOTES) . '"' . $nonce . ' defer></script>',
+            'link' => '<script src="' . htmlspecialchars(asset('vendor/error-pages/error-pages.js'), ENT_QUOTES) . '"' . $nonce . ' defer></script>',
             'inline' => $this->inlineEnhancement(),
             default => null,
         };
@@ -287,7 +385,7 @@ final class ErrorPages
         $path = dirname(__DIR__) . '/presets/shared/enhance.js';
         $js = is_file($path) ? file_get_contents($path) : false;
 
-        return $js === false ? null : '<script>' . $js . '</script>';
+        return $js === false ? null : '<script' . $this->nonceAttr() . '>' . $js . '</script>';
     }
 
     /**
@@ -303,6 +401,7 @@ final class ErrorPages
         event(new RenderingErrorPage($e, 'web', $status));
         $html = $this->htmlFor($e, $request);
         event(new ErrorPageRendered($e, 'web', $status));
+        $this->recordRender($status, 'web');
 
         return $html;
     }

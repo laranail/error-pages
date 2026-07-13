@@ -30,7 +30,7 @@ final readonly class HtmlRenderer implements Renderer
         $this->cssPath = $cssPath ?? $presets . '/shared/critical.css';
     }
 
-    public function render(ErrorPage $page, ThemeSettings $theme): string
+    public function render(ErrorPage $page, ThemeSettings $theme, ?string $nonce = null): string
     {
         $criticalCss = is_file($this->cssPath) ? (string) file_get_contents($this->cssPath) : '';
 
@@ -39,6 +39,7 @@ final readonly class HtmlRenderer implements Renderer
             'theme' => $theme,
             'criticalCss' => $criticalCss,
             'themeOverrideCss' => CssVariableMap::themeCss($theme),
+            'nonce' => $nonce,
         ]);
     }
 
@@ -47,7 +48,7 @@ final readonly class HtmlRenderer implements Renderer
      * values through `extract()` keeps every one visibly "used" so dead-code
      * tooling can't strip the data the required template depends on.
      *
-     * @param  array<string, mixed>  $context  provides $page, $theme, $criticalCss, $themeOverrideCss
+     * @param  array<string, mixed>  $context  provides $page, $theme, $criticalCss, $themeOverrideCss, $nonce
      */
     private function capture(string $template, array $context): string
     {
