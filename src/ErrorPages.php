@@ -5,13 +5,16 @@ declare(strict_types=1);
 namespace Simtabi\Laranail\ErrorPages;
 
 use Closure;
+use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Http\Request;
+use Simtabi\Laranail\ErrorPages\Contracts\StackRenderer;
 use Simtabi\Laranail\ErrorPages\Core\ErrorPageFactory;
 use Simtabi\Laranail\ErrorPages\Core\Rendering\HtmlRenderer;
 use Simtabi\Laranail\ErrorPages\Core\Rendering\JsonRenderer;
 use Simtabi\Laranail\ErrorPages\Core\Support\Pipeline;
 use Simtabi\Laranail\ErrorPages\Core\ValueObjects\ErrorPage;
 use Simtabi\Laranail\ErrorPages\Core\ValueObjects\ThemeSettings;
+use Simtabi\Laranail\ErrorPages\Rendering\StackManager;
 use Simtabi\Laranail\ErrorPages\Support\ThemeResolver;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Throwable;
@@ -38,7 +41,25 @@ final class ErrorPages
         private readonly ErrorPageFactory $factory,
         private readonly Pipeline $pipeline,
         private readonly ThemeResolver $themes,
+        private readonly StackManager $stacks,
     ) {}
+
+    /**
+     * Register or override a stack renderer (the coexistence driver seam).
+     *
+     * @param  Closure(Application): StackRenderer  $factory
+     */
+    public function extend(string $stack, Closure $factory): static
+    {
+        $this->stacks->extend($stack, $factory);
+
+        return $this;
+    }
+
+    public function stacks(): StackManager
+    {
+        return $this->stacks;
+    }
 
     // ---------------------------------------------------------------- DSL
 
@@ -132,6 +153,38 @@ final class ErrorPages
     public function htmlFor(Throwable $e, ?Request $request = null): string
     {
         return (new HtmlRenderer)->render($this->errorPageFor($e, $request), $this->themeSettings());
+    }
+
+    /**
+     * The full error payload for the Inertia/SPA components (richer than the
+     * RFC 7807 JSON): copy + brand + theme + retry hints + correlation id.
+     *
+     * @return array<string, mixed>
+     */
+    public function payloadFor(Throwable $e, ?Request $request = null): array
+    {
+        $page = $this->errorPageFor($e, $request);
+        $theme = $this->themeSettings();
+
+        return [
+            'status' => $page->code,
+            'code' => $page->key,
+            'title' => $page->title,
+            'message' => $page->message,
+            'retryable' => $page->retryable,
+            'retryAfter' => $page->retryAfter,
+            'requestId' => $page->requestId,
+            'homeUrl' => $theme->brandUrl,
+            'brand' => [
+                'name' => $theme->brandName,
+                'url' => $theme->brandUrl,
+                'logo' => $theme->logo,
+            ],
+            'theme' => [
+                'preset' => $theme->preset->value,
+                'autoDark' => $theme->autoDark,
+            ],
+        ];
     }
 
     /**

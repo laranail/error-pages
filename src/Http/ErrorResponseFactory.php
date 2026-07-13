@@ -25,21 +25,24 @@ final class ErrorResponseFactory
         $response = new JsonResponse($payload, $status);
         $response->headers->set('Content-Type', 'application/problem+json');
 
-        return $this->decorate($response, $status, $e);
+        return $this->harden($response, $status, $e);
     }
 
     public function html(string $html, int $status, Throwable $e): Response
     {
-        return $this->decorate(new Response($html, $status, ['Content-Type' => 'text/html; charset=UTF-8']), $status, $e);
+        return $this->harden(new Response($html, $status, ['Content-Type' => 'text/html; charset=UTF-8']), $status, $e);
     }
 
     /**
+     * Apply the error-response headers to any already-built response (used by the
+     * Inertia/SPA stack renderers, which construct their own response first).
+     *
      * @template T of SymfonyResponse
      *
      * @param  T  $response
      * @return T
      */
-    private function decorate(SymfonyResponse $response, int $status, Throwable $e): SymfonyResponse
+    public function harden(SymfonyResponse $response, int $status, Throwable $e): SymfonyResponse
     {
         if ($e instanceof HttpExceptionInterface) {
             foreach ($e->getHeaders() as $name => $value) {

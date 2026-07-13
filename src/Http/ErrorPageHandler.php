@@ -10,8 +10,10 @@ use Illuminate\Contracts\Debug\ExceptionHandler;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
+use Simtabi\Laranail\ErrorPages\Enums\Stack;
 use Simtabi\Laranail\ErrorPages\ErrorPages;
 use Simtabi\Laranail\ErrorPages\Exceptions\ErrorPageRenderException;
+use Simtabi\Laranail\ErrorPages\Rendering\StackManager;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Throwable;
@@ -94,12 +96,16 @@ final class ErrorPageHandler
 
         $errorPages = $this->app->make(ErrorPages::class);
 
+        $stack = Stack::fromValue($errorPages->stackName() ?? (string) $this->config->get('error-pages.stack', 'blade'));
+
         $contexts = $this->app->make(ContextResolver::class);
         $contexts->using($errorPages->contextResolverOverride());
         $context = $contexts->resolve($request);
 
-        // Path 1 owns the web/livewire context (native errors:: views).
-        if ($context === 'web') {
+        // Path 1 (native errors:: views) owns the web context for server-HTML
+        // stacks (blade/livewire). A web request under a Vue/React SPA stack is
+        // Path 2 (renders the shell + payload).
+        if ($context === 'web' && $stack->isServerHtml()) {
             return null;
         }
 
@@ -109,8 +115,17 @@ final class ErrorPageHandler
             return null;
         }
 
+        // Complement Ignition: for a genuine (non-HttpException) 500 in dev, defer
+        // the HTML-ish contexts to the debug page; JSON is safe (Ignition is
+        // HTML-only). render_debug_pages forces branded output in dev.
+        if ($this->shouldDeferToDebug($e, $context)) {
+            return null;
+        }
+
         try {
-            return $this->renderContext($context, $e, $request, $status, $errorPages);
+            return $this->app->make(StackManager::class)
+                ->renderer($this->rendererKeyFor($context))
+                ->render($e, $request, $status);
         } catch (Throwable $rendererFailure) {
             report(new ErrorPageRenderException($rendererFailure));
 
@@ -118,16 +133,30 @@ final class ErrorPageHandler
         }
     }
 
-    private function renderContext(string $context, Throwable $e, Request $request, int $status, ErrorPages $errorPages): ?SymfonyResponse
+    /**
+     * Map a resolved (context, stack) to a stack-renderer key. API is always
+     * JSON; Inertia is the Inertia renderer; a web SPA stack renders the shell;
+     * any custom context maps to a same-named consumer-registered driver.
+     */
+    private function rendererKeyFor(string $context): string
     {
-        $responses = $this->app->make(ErrorResponseFactory::class);
+        return match ($context) {
+            'api' => 'json',
+            'inertia' => 'inertia',
+            'web' => 'spa',
+            default => $context,
+        };
+    }
 
-        // Phase A ships the API/JSON context; Inertia + SPA arrive in Phase B.
+    private function shouldDeferToDebug(Throwable $e, string $context): bool
+    {
         if ($context === 'api') {
-            return $responses->json($errorPages->jsonFor($e, $request), $status, $e);
+            return false;
         }
 
-        return null;
+        return ! ($e instanceof HttpExceptionInterface)
+            && (bool) $this->config->get('app.debug', false)
+            && ! (bool) $this->config->get('error-pages.render_debug_pages', false);
     }
 
     private function handles(int $status): bool

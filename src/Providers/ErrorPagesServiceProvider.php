@@ -17,6 +17,7 @@ use Simtabi\Laranail\ErrorPages\Core\Support\Pipeline;
 use Simtabi\Laranail\ErrorPages\Doctor\Checks;
 use Simtabi\Laranail\ErrorPages\ErrorPages;
 use Simtabi\Laranail\ErrorPages\Http\ErrorPageHandler;
+use Simtabi\Laranail\ErrorPages\Rendering\StackManager;
 use Simtabi\Laranail\Package\Tools\Package;
 use Simtabi\Laranail\Package\Tools\Providers\PackageServiceProvider;
 use Simtabi\Laranail\Package\Tools\Support\Definitions\AboutSectionDefinition;
@@ -58,6 +59,7 @@ final class ErrorPagesServiceProvider extends PackageServiceProvider
         );
 
         $this->app->singleton(Pipeline::class);
+        $this->app->singleton(StackManager::class);
 
         $this->app->singleton(ErrorPages::class);
         $this->app->alias(ErrorPages::class, 'laranail.error-pages');

@@ -1,6 +1,6 @@
 {
     "name": "laranail/error-pages",
-    "description": "Beautiful, branded production error and exception pages for Laravel that complement Ignition — Blade, API/JSON, Inertia, Filament and Nova, all Alpine-enhanced and fully configurable.",
+    "description": "Beautiful, branded production error and exception pages for Laravel that complement Ignition \u2014 Blade, API/JSON, Inertia, Filament and Nova, all Alpine-enhanced and fully configurable.",
     "keywords": [
         "laravel",
         "error-pages",
@@ -43,6 +43,7 @@
         "laranail/package-tools": "^0.1"
     },
     "require-dev": {
+        "inertiajs/inertia-laravel": "^2.0",
         "larastan/larastan": "^3.0",
         "laravel/pint": "^1.18",
         "mockery/mockery": "^1.6",
@@ -123,5 +124,8 @@
             "type": "vcs",
             "url": "https://github.com/laranail/package-tools"
         }
-    ]
+    ],
+    "suggest": {
+        "inertiajs/inertia-laravel": "Enables the inertia stack (Inertia + Vue/React error pages)."
+    }
 }

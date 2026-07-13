@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Simtabi\Laranail\ErrorPages\Tests;
 
 use Illuminate\Foundation\Application;
+use Inertia\ServiceProvider;
 use Orchestra\Testbench\TestCase as Orchestra;
 use Simtabi\Laranail\ErrorPages\Providers\ErrorPagesServiceProvider;
 
@@ -16,7 +17,16 @@ abstract class TestCase extends Orchestra
      */
     protected function getPackageProviders($app): array
     {
-        return [ErrorPagesServiceProvider::class];
+        $providers = [ErrorPagesServiceProvider::class];
+
+        // Inertia is a dev-dep (to exercise the inertia stack); its context is
+        // only active when a request carries the X-Inertia header, so loading it
+        // here is inert for the other tests.
+        if (class_exists(ServiceProvider::class)) {
+            $providers[] = ServiceProvider::class;
+        }
+
+        return $providers;
     }
 
     /**
