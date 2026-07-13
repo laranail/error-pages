@@ -23,7 +23,34 @@ php artisan vendor:publish --tag=laranail::error-pages-config
 
 ## <a name="documentation"></a>Documentation
 
-Full documentation is hosted at **<https://opensource.simtabi.com/documentation/laranail/error-pages/>**.
+Hosted at **<https://opensource.simtabi.com/documentation/laranail/error-pages/>**.
+
+### Guides
+
+- [Installation](docs/installation.md) — install, publish, verify.
+- [Getting started](docs/getting-started.md) — the mental model and first customisations.
+- [Configuration](docs/configuration.md) — every config key.
+- [Architecture](docs/architecture.md) — the two hook paths and the framework-agnostic core.
+- [Coexistence](docs/coexistence.md) — how it sits beside Ignition, Sentry, Flare, Bugsnag.
+
+### Reference
+
+- [Stacks](docs/tools/stacks.md) — the front-end stacks and custom drivers.
+- [The `ErrorPages` DSL](docs/tools/dsl.md) — the fluent runtime API.
+- [Preview](docs/tools/preview.md) — the preview route and command.
+
+### Recipes
+
+- [Customising brand and theme](docs/recipes/customizing-brand-theme.md)
+- [Managing content](docs/recipes/managing-content.md)
+- [Overriding an error view](docs/recipes/overriding-error-views.md)
+- [API error responses](docs/recipes/api-json.md)
+- [Inertia and SPA error pages](docs/recipes/inertia-spa.md)
+- [Skipping and passthrough](docs/recipes/skip-and-veto.md)
+
+### Project
+
+- [Release](docs/release.md)
 
 ## License
 

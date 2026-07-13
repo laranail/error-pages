@@ -1,48 +1,30 @@
 # Release
 
-How `laranail/server-error-pages` is versioned and published.
+How `laranail/error-pages` is versioned and released.
 
 ## Versioning
 
-The package follows semantic versioning, tag-driven from `main`. The single source of version truth is the git tag (`vX.Y.Z`); there is no version string committed in code. The `composer.json` carries a `dev-main` branch alias for pre-release development.
+Semantic versioning. The package tracks the laranail family's pre-1.0 line
+(`minimum-stability: dev`, `branch-alias dev-main → 0.x-dev`) until the API settles.
+
+## Compatibility
+
+- Laravel `^13.0`, PHP `^8.4.1 || ^8.5`.
+- Optional integrations, activated when installed: Inertia v2 (Vue/React), Livewire v3,
+  Filament v4/v5, Nova v5.
 
 ## Cutting a release
 
-1. Update `CHANGELOG.md` with a new `## [X.Y.Z]` section describing what changed.
-2. Ensure the suite is green:
+1. Update `CHANGELOG.md` (Keep a Changelog) with the version's changes.
+2. Ensure CI is green on the `8.4 / 8.5` matrix — `composer test` + `composer lint`
+   (Pint, PHPStan max, Rector).
+3. Tag `vX.Y.Z`; the release workflow builds the GitHub release from the CHANGELOG section.
 
-   ```bash
-   composer lint   # pint + phpstan + rector
-   composer test   # pest
-   ```
+## Upgrading from `laranail/server-error-pages`
 
-3. Tag and push:
-
-   ```bash
-   git tag vX.Y.Z
-   git push origin vX.Y.Z
-   ```
-
-The GitHub release body is sourced from that version's `CHANGELOG.md` section — never a bare "see changelog" stub.
-
-## Publishing to Packagist
-
-Packagist tracks the repository, so a pushed `vX.Y.Z` tag becomes an installable version automatically. Consumers pull it with:
-
-```bash
-composer require laranail/server-error-pages
-```
-
-## Quality gates
-
-| Gate | Command | Tool |
-|------|---------|------|
-| Tests | `composer test` | Pest 4 (+ arch, laravel plugins) |
-| Static analysis | `composer phpstan` | PHPStan 2 / Larastan 3 |
-| Code style | `composer pint` | Laravel Pint |
-| Refactors | `composer rector` | Rector 2 (dry-run) |
-
-`composer lint` runs Pint, PHPStan, and Rector together and must pass before a tag.
+The former static-HTML generator was replaced by this runtime renderer. See
+[`UPGRADE.md`](https://github.com/laranail/error-pages/blob/main/UPGRADE.md) for the
+old→new mapping (package name, namespace, config keys, and removed commands).
 
 ---
 [← Docs index](../README.md#documentation)

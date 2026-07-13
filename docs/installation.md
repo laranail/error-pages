@@ -1,75 +1,53 @@
 # Installation
 
-Requirements, install, and first build for `laranail/server-error-pages`.
+Install the package and publish the pieces you want to customise.
 
 ## Requirements
 
-| Requirement | Constraint |
-|-------------|-----------|
-| PHP | `^8.4.1 \|\| ^8.5` |
-| Laravel (`illuminate/*`) | `^13.0` |
-| `laranail/package-tools` | `^4.0` |
-| `laranail/enumerator` | `^0.4` |
-| `laranail/console` | `^1.1` |
-| Node.js + npm | Only to rebuild assets (`npm run build`); a committed bundle ships, so consumers rarely need it. |
+- PHP `^8.4.1 || ^8.5`
+- Laravel `^13.0`
 
-There is no database, no cache table, and no admin UI. Content is Laravel translation files you edit and redeploy (git on a VPS, FTP on shared hosting).
-
-## Install the package
+## Install
 
 ```bash
-composer require laranail/server-error-pages
+composer require laranail/error-pages
 ```
 
-The service provider (`Simtabi\Laranail\ServerErrorPages\Providers\ServerErrorPagesServiceProvider`) is auto-discovered — no manual registration.
+The service provider is auto-discovered. Out of the box the package renders branded
+pages for production-style error responses (404, 403, 500, 502, 503, 504, 429, 401);
+genuine unhandled 500s in local dev still show Ignition's debug page. Nothing else is
+required.
 
-## Run the installer
+## Publish
+
+Everything is optional — publish only what you need to customise. Tags:
+
+| Tag | Publishes | Use when |
+|-----|-----------|----------|
+| `laranail::error-pages-config` | `config/error-pages.php` | tune codes, stack, theme, brand, coexistence |
+| `laranail::error-pages-translations` | `lang/vendor/error-pages/…` | override or translate the copy |
+| `laranail::error-pages-views` | `resources/views/errors/*` | replace a page's Blade markup wholesale |
 
 ```bash
-php artisan server-error-pages:install
+php artisan vendor:publish --tag=laranail::error-pages-config
 ```
-
-The installer runs, in order:
-
-1. Publishes `config/server-error-pages.php`.
-2. Publishes the error-view stubs to `resources/views/errors/` (Laravel's conventional error views).
-3. Publishes the content translations to `lang/vendor/server-error-pages/`.
-4. Publishes the compiled asset bundle to `public/vendor/server-error-pages/`.
-5. Runs `server-error-pages:build` to generate the static HTML pages and the Apache/Nginx config.
-
-After it finishes you have branded dynamic error views working immediately, static fallback pages under `public/errors/`, the linked CSS/JS under `public/vendor/server-error-pages/`, and a generated `.htaccess` / `errors.conf` ready to wire into your web server.
-
-> The install command's alias is `server-error-pages:install`; its fully namespaced name is `laranail::server-error-pages.install`. Either form works.
-
-## What gets published
-
-| Artifact | Destination | Publish tag |
-|----------|-------------|-------------|
-| Config | `config/server-error-pages.php` | `laranail::server-error-pages-config` |
-| Error views | `resources/views/errors/{code}.blade.php` | `laranail::server-error-pages-errors` |
-| Content translations | `lang/vendor/server-error-pages/{locale}/errors.php` | `laranail::server-error-pages-translations` |
-| Compiled asset bundle | `public/vendor/server-error-pages/{css,js}/` | `laranail::server-error-pages-assets` |
-
-Publish any one individually with `vendor:publish --tag=<tag>`. The linked build also copies the bundle to `output.assets_path` on every run, so the assets are present even if you skip the `-assets` tag.
-
-## Rebuilding the assets (maintainers)
-
-The shipped `public/assets/` bundle is committed, built by Vite + Tailwind 4 + SCSS from `resources/assets/{scss,scripts}`. You only rebuild it after editing that source:
-
-```bash
-npm install
-npm run build
-```
-
-This regenerates `public/assets/css/error-pages.css` and `public/assets/js/error-pages.js`. `server-error-pages:build` refuses to run if that bundle is missing.
 
 ## Verify
 
 ```bash
-php artisan about
+# health check
+php artisan laranail::package-tools.doctor
+
+# preview any page in dev (APP_DEBUG=true)
+php artisan laranail::laravel-error-pages.preview 503 --output=storage/preview-503.html
 ```
 
-Look for the "Server Error Pages" section, which reports the output path, assets URL, active theme, enabled codes, and server profile. To confirm a dynamic page renders, visit any unknown URL in your app and you should see the branded 404.
+Or hit the preview route while `APP_DEBUG=true`: `GET /_error-pages/503`.
+
+## Optional integrations
+
+- **Inertia** (Vue/React SPA stack): `composer require inertiajs/inertia-laravel`.
+- **Filament / Nova**: the panel stacks activate when those packages are installed.
 
 ---
 [← Docs index](../README.md#documentation)
