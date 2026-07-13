@@ -28,6 +28,10 @@ final readonly class ThemeSettings
         public bool $autoDark,
         public array $overridesLight = [],
         public array $overridesDark = [],
+        /** BCP-47 language tag for the page `<html lang>` (e.g. `en`, `ar`, `pt-BR`). */
+        public string $locale = 'en',
+        /** Text direction for `<html dir>`: `ltr` or `rtl`. */
+        public string $dir = 'ltr',
     ) {}
 
     /**

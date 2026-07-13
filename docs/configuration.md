@@ -13,7 +13,7 @@ Every knob in `config/error-pages.php`, published with
 | `brand.url` | string | `APP_URL` | Brand link. |
 | `brand.logo` | ?string | `null` | Logo URL (rendered as `<img>`). |
 | `home_url` | string | `APP_URL` | Where "home"/retry links point. |
-| `content.default_locale` | string | `APP_LOCALE` | Locale for the copy (falls back to the ambient app locale when empty). |
+| `content.default_locale` | string | `APP_LOCALE` | Locale for the copy (falls back to the ambient app locale when empty); also sets the page `<html lang>` and `dir` (RTL-aware for `ar`/`he`/`fa`/…). |
 | `request_id.header` | string | `X-Request-Id` | Request header read for the support reference / JSON `request_id`. |
 | `request_id.generate` | bool | `true` | Generate a reference when the header is absent. |
 | `problem_type_base` | string | `''` | When set, the JSON `type` becomes `{base}/{status}` (else `about:blank`). |

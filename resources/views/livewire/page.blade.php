@@ -1,7 +1,7 @@
 {{-- Full-page wrapper for the Livewire error stack: inlines the critical CSS and
      loads Livewire's own styles/scripts (which bundle Alpine). --}}
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
+<html lang="{{ $page['theme']['locale'] }}" dir="{{ $page['theme']['dir'] }}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">

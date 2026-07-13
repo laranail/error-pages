@@ -9,7 +9,7 @@
     (@laranail/error-pages-ui/style.css, built from presets/shared/scss).
 --}}
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="ltr">
+<html lang="{{ $theme->locale }}" dir="{{ $theme->dir }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">

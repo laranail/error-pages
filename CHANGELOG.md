@@ -94,6 +94,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The unused `codes.fallbacks` flag (generic 4xx/5xx branding is automatic via Laravel's
   native `errors::{n}xx` resolution).
 
+### Fixed
+
+- i18n/a11y: the rendered page's `<html lang>` and `dir` now reflect the resolved locale
+  instead of a hard-coded `en`/`ltr` — right-to-left locales (`ar`, `he`, `fa`, …) render
+  `dir="rtl"`. Threaded via `ThemeSettings` (Core stays framework-agnostic; the bridge
+  resolves it).
+- `.editorconfig` now covers `ts`/`tsx`/`vue`/`scss` at 2-space (the org "2-space JS" rule);
+  they were falling under the 4-space default.
+
 ### Security
 
 - Never surface a framework-rewritten 4xx message (e.g. `ModelNotFoundException` →

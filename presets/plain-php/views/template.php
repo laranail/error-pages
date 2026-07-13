@@ -25,7 +25,7 @@ use Simtabi\Laranail\ErrorPages\Core\ValueObjects\ThemeSettings;
 $bodyClass = 'ep-body ep-theme-' . $e($theme->preset->value) . ($theme->autoDark ? ' ep-auto-dark' : '');
 $nonceAttr = ($nonce ?? '') !== '' ? ' nonce="' . $e($nonce) . '"' : '';
 ?><!DOCTYPE html>
-<html lang="en" dir="ltr">
+<html lang="<?= $e($theme->locale) ?>" dir="<?= $e($theme->dir) ?>">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">

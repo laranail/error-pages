@@ -21,8 +21,13 @@ final readonly class ThemeResolver
         private Config $config,
     ) {}
 
+    /** Base languages that read right-to-left (matched on the primary subtag). */
+    private const array RTL = ['ar', 'he', 'fa', 'ur', 'ps', 'sd', 'dv', 'ug', 'yi', 'ckb', 'arc', 'nqo', 'rhg'];
+
     public function resolve(?string $presetOverride = null): ThemeSettings
     {
+        $locale = $this->locale();
+
         return new ThemeSettings(
             brandName: (string) $this->get('brand.name', 'Our site'),
             // The brand URL is a clickable <a href>: allow only http(s)/relative.
@@ -33,7 +38,28 @@ final readonly class ThemeResolver
             autoDark: (bool) $this->get('theme.auto_dark', true),
             overridesLight: $this->colors('light'),
             overridesDark: $this->colors('dark'),
+            locale: $locale,
+            dir: $this->direction($locale),
         );
+    }
+
+    /**
+     * The render locale as a BCP-47 tag (`_` → `-`): the configured
+     * `content.default_locale` if set, else the ambient app locale.
+     */
+    private function locale(): string
+    {
+        $configured = $this->get('content.default_locale');
+        $locale = is_string($configured) && $configured !== '' ? $configured : (string) app()->getLocale();
+
+        return str_replace('_', '-', $locale !== '' ? $locale : 'en');
+    }
+
+    private function direction(string $locale): string
+    {
+        $base = strtolower((string) strtok($locale, '-'));
+
+        return in_array($base, self::RTL, true) ? 'rtl' : 'ltr';
     }
 
     /**

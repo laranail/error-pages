@@ -16,3 +16,19 @@ it('falls back to the ambient locale when no default is configured', function ()
 
     expect($this->get('/ambient-locale-missing')->getContent())->toContain('No encontrada');
 });
+
+it('sets the html lang and ltr direction from the locale', function (): void {
+    config()->set('error-pages.content.default_locale', 'fr');
+
+    expect($this->get('/lang-missing')->getContent())
+        ->toContain('lang="fr"')
+        ->toContain('dir="ltr"');
+});
+
+it('sets rtl direction for a right-to-left locale', function (): void {
+    config()->set('error-pages.content.default_locale', 'ar');
+
+    expect($this->get('/rtl-missing')->getContent())
+        ->toContain('lang="ar"')
+        ->toContain('dir="rtl"');
+});

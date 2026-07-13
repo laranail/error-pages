@@ -464,6 +464,8 @@ final class ErrorPages
             'theme' => [
                 'preset' => $theme->preset->value,
                 'autoDark' => $theme->autoDark,
+                'locale' => $theme->locale,
+                'dir' => $theme->dir,
             ],
         ];
     }
