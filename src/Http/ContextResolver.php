@@ -53,11 +53,14 @@ final class ContextResolver
         }
 
         if ($request->is('api/*')) {
-            // Content negotiation: a browser hitting an API URL (prefers text/html)
-            // gets the branded page instead of raw JSON, when enabled.
+            // Content negotiation: a browser hitting an API URL gets the branded
+            // page instead of raw JSON, when enabled. Require an EXPLICIT
+            // `text/html` in the Accept header — a JSON client is already handled
+            // by `expectsJson()` above, and a `*/*` default (curl/Guzzle) must
+            // stay JSON, so `prefers()` (which resolves `*/*` to text/html) is not
+            // safe here.
             if ((bool) $this->config->get('error-pages.content_negotiation', false)
-                && $request->hasHeader('Accept')
-                && $request->prefers(['text/html', 'application/json']) === 'text/html') {
+                && str_contains(strtolower((string) $request->header('Accept', '')), 'text/html')) {
                 return 'web';
             }
 

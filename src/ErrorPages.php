@@ -575,8 +575,12 @@ final class ErrorPages
     {
         $errors = [];
         foreach ($e->errors() as $field => $messages) {
+            $field = (string) $field;
+            // RFC 6901 JSON Pointer: escape `~`/`/`, and map Laravel's dotted
+            // path (`items.0.name`) to pointer segments (`/items/0/name`).
+            $pointer = '/' . str_replace(['~', '/', '.'], ['~0', '~1', '/'], $field);
             foreach ($messages as $message) {
-                $errors[] = ['pointer' => '/' . $field, 'field' => (string) $field, 'detail' => (string) $message];
+                $errors[] = ['pointer' => $pointer, 'field' => $field, 'detail' => (string) $message];
             }
         }
 

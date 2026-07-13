@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\ErrorPages\Support;
 
+use Illuminate\Contracts\Config\Repository as Config;
 use Illuminate\Contracts\Translation\Translator;
 
 /**
@@ -15,6 +16,7 @@ final readonly class ProblemDocs
 {
     public function __construct(
         private Translator $translator,
+        private Config $config,
     ) {}
 
     /**
@@ -35,12 +37,13 @@ final readonly class ProblemDocs
     private function line(string $key): ?array
     {
         $id = 'error-pages::problems.' . $key;
+        $locale = $this->defaultLocale();
 
-        if (! $this->translator->has($id)) {
+        if (! $this->translator->has($id, $locale)) {
             return null;
         }
 
-        $value = $this->translator->get($id);
+        $value = $this->translator->get($id, [], $locale);
 
         if (! is_array($value)) {
             return null;
@@ -51,6 +54,17 @@ final readonly class ProblemDocs
             'causes' => $this->strings($value['causes'] ?? []),
             'resolution' => $this->strings($value['resolution'] ?? []),
         ];
+    }
+
+    /**
+     * The configured `content.default_locale`, or null to follow the ambient
+     * app locale — matching how the branded card on the same page resolves.
+     */
+    private function defaultLocale(): ?string
+    {
+        $locale = $this->config->get('error-pages.content.default_locale');
+
+        return is_string($locale) && $locale !== '' ? $locale : null;
     }
 
     /**

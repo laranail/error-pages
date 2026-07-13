@@ -43,6 +43,7 @@ final readonly class ProblemController
         return new Response($html, 200, [
             'Content-Type' => 'text/html; charset=UTF-8',
             'X-Robots-Tag' => 'noindex',
+            'X-Content-Type-Options' => 'nosniff',
         ]);
     }
 }

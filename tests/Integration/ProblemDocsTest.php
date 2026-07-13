@@ -25,6 +25,17 @@ it('falls back to the class (4xx/5xx) doc content for a code without its own ent
         ->toContain('not a fault on the server'); // the 4xx-class meaning
 });
 
+it('serves validation-specific (not 4xx-generic) doc content for 422', function (): void {
+    $response = $this->get('/errors/problems/422');
+
+    $response->assertStatus(200);
+    expect($response->getContent())
+        ->toContain('>422<')
+        ->toContain('Validation failed') // the 422 title, not the 4xx-generic one
+        ->toContain('failed validation') // the 422-specific meaning
+        ->not->toContain('mistyped'); // must NOT fall back to the 4xx-class copy
+});
+
 it('serves a generic problem-type page for a class key', function (): void {
     expect($this->get('/errors/problems/5xx')->getContent())
         ->toContain('>5xx<')

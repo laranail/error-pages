@@ -16,6 +16,7 @@ return [
     '403' => ['title' => 'Forbidden', 'message' => 'You do not have permission to view this page.'],
     '404' => ['title' => 'Page not found', 'message' => 'The page you are looking for could not be found.'],
     '419' => ['title' => 'Page expired', 'message' => 'Your session has expired. Please refresh and try again.'],
+    '422' => ['title' => 'Validation failed', 'message' => 'Some of the information you submitted is invalid. Please correct the highlighted fields and try again.'],
     '429' => ['title' => 'Too many requests', 'message' => 'You have made too many requests. Please slow down and try again shortly.'],
     '500' => ['title' => 'Something went wrong', 'message' => 'An unexpected error occurred on our side. We have been notified.'],
     '502' => ['title' => 'Bad gateway', 'message' => 'The server received an invalid response upstream. Please try again shortly.'],

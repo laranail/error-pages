@@ -109,7 +109,9 @@ final class ErrorPageHandler
         // Validation preserves Laravel's default 422 UX, unless opted in to render
         // RFC 9457 problem+json (with a field-level errors[]) for the API context.
         if ($e instanceof ValidationException) {
-            if ($render->context === 'api' && (bool) $this->config->get('error-pages.problem.validation', false)) {
+            if ($render->context === 'api'
+                && (bool) $this->config->get('error-pages.problem.validation', false)
+                && ! $errorPages->shouldSkip($e, $request)) {
                 return $this->app->make(ErrorResponseFactory::class)
                     ->json($errorPages->validationJsonFor($e, $request), $e->status, $e);
             }

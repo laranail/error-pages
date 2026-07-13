@@ -62,6 +62,19 @@ return [
         ],
     ],
 
+    '422' => [
+        'meaning' => 'The request was well-formed, but the data it carried failed validation and could not be processed.',
+        'causes' => [
+            'A required field was missing or left empty.',
+            'A value was the wrong type, format, or out of range.',
+            'A field did not match a related one (for example, a password confirmation).',
+        ],
+        'resolution' => [
+            'Read the `errors` list in the response — each entry names the field and what is wrong with it.',
+            'Correct the highlighted fields and send the request again.',
+        ],
+    ],
+
     '429' => [
         'meaning' => 'You have sent too many requests in a short time and have been rate-limited.',
         'causes' => [

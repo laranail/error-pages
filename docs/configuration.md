@@ -59,7 +59,9 @@ keeps working.
 
 Independent of `codes.intercept`: `ValidationException` (422) and `AuthenticationException`
 (login redirect / 401 JSON) always pass through to the framework, so form feedback and
-auth challenges are never replaced.
+auth challenges are never replaced — **except** that, when `problem.validation` is enabled,
+a `ValidationException` in the **API** context renders RFC 9457 problem+json (`errors[]`)
+instead of passing through (a `skipWhen` veto still opts back out).
 
 ---
 [← Docs index](../README.md#documentation)
