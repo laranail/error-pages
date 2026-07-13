@@ -25,8 +25,10 @@ final readonly class ThemeResolver
     {
         return new ThemeSettings(
             brandName: (string) $this->get('brand.name', 'Our site'),
+            // The brand URL is a clickable <a href>: allow only http(s)/relative.
             brandUrl: $this->safeUrl((string) $this->get('home_url', $this->get('brand.url', '/')), '/'),
-            logo: $this->safeUrl($this->stringOrNull($this->get('brand.logo')), null),
+            // The logo is an <img src>: additionally allow inline `data:` images.
+            logo: $this->safeUrl($this->stringOrNull($this->get('brand.logo')), null, ['data']),
             preset: ThemePreset::fromValue($presetOverride ?? (string) $this->get('theme.preset', 'default')),
             autoDark: (bool) $this->get('theme.auto_dark', true),
             overridesLight: $this->colors('light'),
@@ -37,26 +39,30 @@ final readonly class ThemeResolver
     /**
      * Neutralise a dangerous URL scheme on brand/logo config. HTML-escaping already
      * prevents attribute breakout; this defends the (admin-config) case where a
-     * `javascript:`/`data:`/`vbscript:` URI would still be a clickable script link.
-     * Allows http(s), relative, anchor, and protocol-relative URLs.
+     * `javascript:`/`vbscript:` URI would still be a clickable script link. Allows
+     * relative, anchor, and protocol-relative URLs, an explicit http(s) scheme, and
+     * any additionally-permitted scheme (e.g. `data:` for the logo `<img src>`).
      *
      * @template T of string|null
      *
      * @param  T  $fallback
+     * @param  list<string>  $allowedSchemes
      * @return string|T
      */
-    private function safeUrl(?string $url, ?string $fallback): ?string
+    private function safeUrl(?string $url, ?string $fallback, array $allowedSchemes = []): ?string
     {
         if ($url === null || $url === '') {
             return $fallback;
         }
 
-        // No scheme (relative/anchor/protocol-relative), or an explicit http(s) scheme.
-        if (! preg_match('/^[a-z][a-z0-9+.-]*:/i', $url) || preg_match('#^https?://#i', $url)) {
+        // No scheme at all → relative/anchor/protocol-relative, always safe.
+        if (! preg_match('/^([a-z][a-z0-9+.-]*):/i', $url, $m)) {
             return $url;
         }
 
-        return $fallback;
+        $scheme = strtolower($m[1]);
+
+        return in_array($scheme, ['http', 'https', ...$allowedSchemes], true) ? $url : $fallback;
     }
 
     private function get(string $key, mixed $default = null): mixed

@@ -74,3 +74,29 @@ it('neutralises a dangerous brand URL scheme', function (): void {
         ->not->toContain('javascript:')
         ->toContain('href="/"');
 });
+
+it('allows an inline data: URI logo but blocks a javascript: logo', function (): void {
+    config()->set('error-pages.brand.logo', 'data:image/svg+xml;base64,PHN2Zy8+');
+    expect($this->get('/logo-data-missing')->getContent())->toContain('data:image/svg+xml;base64,PHN2Zy8+');
+
+    config()->set('error-pages.brand.logo', 'javascript:alert(1)');
+    expect($this->get('/logo-js-missing')->getContent())->not->toContain('javascript:');
+});
+
+it('preserves a legitimate UUID request id unchanged', function (): void {
+    $uuid = '550e8400-e29b-41d4-a716-446655440000';
+
+    $response = $this->getJson('/uuid-rid', ['X-Request-Id' => $uuid]);
+
+    expect($response->json('request_id'))->toBe($uuid);
+});
+
+it('builds a clean asset URL when app.url has a trailing slash', function (): void {
+    config()->set('app.url', 'https://site.example/');
+
+    $response = $this->get('/trailing-slash-missing');
+
+    expect($response->getContent())
+        ->toContain('https://site.example/_error-pages/assets/error-pages.js')
+        ->not->toContain('site.example//_error-pages');
+});

@@ -69,7 +69,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Build the enhancement asset URL from the trusted `app.url`, never the request `Host`/
   `X-Forwarded-Host` header (removes a cache-poisoning / script-source reflection).
 - Sanitise and clamp the reflected `X-Request-Id` (safe charset, ≤128 chars).
-- Neutralise a dangerous scheme (`javascript:`/`data:`/…) on the configured brand/logo URL.
+- Validate the scheme on the configured brand/logo URL: the brand `<a href>` allows only
+  http(s)/relative; the logo `<img src>` additionally allows inline `data:` images;
+  `javascript:`/`vbscript:` are neutralised.
 - Add `X-Content-Type-Options: nosniff` to every error response.
 
 ## [0.1.0] - 2026-07-11
