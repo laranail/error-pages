@@ -17,10 +17,9 @@ function theme(ThemePreset $preset = ThemePreset::Default): ThemeSettings
 
 it('exposes built-in copy and traits for each status', function (): void {
     expect(HttpStatus::NotFound->label())->toBe('Page not found')
+        ->and(HttpStatus::NotFound->description())->toContain('could not be found')
         ->and(HttpStatus::ServiceUnavailable->isRetryable())->toBeTrue()
         ->and(HttpStatus::ServiceUnavailable->retryAfter())->toBe(15)
-        ->and(HttpStatus::InternalServerError->color())->toBe('danger')
-        ->and(HttpStatus::NotFound->fallbackKey())->toBe('4xx')
         ->and(HttpStatus::fallbackKeyFor(507))->toBe('5xx');
 });
 

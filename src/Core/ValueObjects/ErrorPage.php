@@ -28,19 +28,6 @@ final readonly class ErrorPage
     ) {}
 
     /**
-     * True for the generic catch-all pages ("4xx" / "5xx").
-     */
-    public function isGeneric(): bool
-    {
-        return $this->key === '4xx' || $this->key === '5xx';
-    }
-
-    public function isServerError(): bool
-    {
-        return $this->code >= 500;
-    }
-
-    /**
      * A copy of this page with a correlation id attached.
      */
     public function withRequestId(?string $requestId): self

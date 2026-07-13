@@ -96,6 +96,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `server-config`/`clear` commands, and the `output.*`/`server.*`/`security.headers` config.
 - The unused `codes.fallbacks` flag (generic 4xx/5xx branding is automatic via Laravel's
   native `errors::{n}xx` resolution).
+- Dead code: unused predicates `HttpStatus::{color,isClientError,isServerError,fallbackKey}`
+  (the static `fallbackKeyFor` is kept), `ErrorPage::{isGeneric,isServerError}`, and
+  `Stack::isSpa` (SPA is reached via the renderer-key default branch).
 
 ### Fixed
 

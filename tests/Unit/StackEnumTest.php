@@ -18,6 +18,5 @@ it('keeps the bridge routing predicates', function (): void {
         ->and(Stack::Blade->isServerHtml())->toBeTrue()
         ->and(Stack::Livewire->isServerHtml())->toBeFalse()
         ->and(Stack::Livewire->isLivewire())->toBeTrue()
-        ->and(Stack::InertiaReact->isInertia())->toBeTrue()
-        ->and(Stack::React->isSpa())->toBeTrue();
+        ->and(Stack::InertiaReact->isInertia())->toBeTrue();
 });

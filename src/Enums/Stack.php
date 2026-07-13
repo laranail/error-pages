@@ -65,9 +65,4 @@ enum Stack: string implements Enumerator
     {
         return $this === self::InertiaVue || $this === self::InertiaReact;
     }
-
-    public function isSpa(): bool
-    {
-        return $this === self::Vue || $this === self::React;
-    }
 }

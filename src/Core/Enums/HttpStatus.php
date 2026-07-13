@@ -69,28 +69,6 @@ enum HttpStatus: int
     }
 
     /**
-     * A semantic severity token for theming (`warning` | `danger` | `info`).
-     */
-    public function color(): string
-    {
-        return match ($this) {
-            self::InternalServerError, self::BadGateway, self::GatewayTimeout => 'danger',
-            self::ServiceUnavailable => 'info',
-            default => 'warning',
-        };
-    }
-
-    public function isClientError(): bool
-    {
-        return $this->value >= 400 && $this->value < 500;
-    }
-
-    public function isServerError(): bool
-    {
-        return $this->value >= 500;
-    }
-
-    /**
      * Codes worth auto-refreshing / offering a retry — transient by nature.
      */
     public function isRetryable(): bool
@@ -108,15 +86,7 @@ enum HttpStatus: int
     }
 
     /**
-     * The generic fallback page key for this code ('4xx' or '5xx').
-     */
-    public function fallbackKey(): string
-    {
-        return $this->isServerError() ? '5xx' : '4xx';
-    }
-
-    /**
-     * The generic fallback key for an arbitrary integer code.
+     * The generic fallback key for an arbitrary integer code ('4xx' or '5xx').
      */
     public static function fallbackKeyFor(int $code): string
     {
