@@ -1,0 +1,33 @@
+/* Shared critical CSS (placeholder). Superseded by the user's CSS-first
+   templates. Tokens are --ep-*; themes are .ep-theme-{preset}; dark mode applies
+   under .ep-auto-dark + prefers-color-scheme. */
+*,*::before,*::after{box-sizing:border-box}
+.ep-theme-default{--ep-bg:#eef1f8;--ep-surface:#fff;--ep-text:#0f172a;--ep-muted:#64748b;--ep-accent:#4f46e5;--ep-accent-2:#7c3aed;--ep-border:#e2e8f0}
+.ep-theme-slate{--ep-bg:#f1f5f9;--ep-surface:#fff;--ep-text:#0f172a;--ep-muted:#64748b;--ep-accent:#475569;--ep-accent-2:#334155;--ep-border:#e2e8f0}
+.ep-theme-midnight{--ep-bg:#e8ecfb;--ep-surface:#fff;--ep-text:#1e1b4b;--ep-muted:#6366f1;--ep-accent:#4f46e5;--ep-accent-2:#4338ca;--ep-border:#dfe3fb}
+.ep-theme-emerald{--ep-bg:#ecfdf3;--ep-surface:#fff;--ep-text:#052e16;--ep-muted:#4b5563;--ep-accent:#059669;--ep-accent-2:#047857;--ep-border:#d1fae5}
+.ep-theme-crimson{--ep-bg:#fff1f2;--ep-surface:#fff;--ep-text:#450a0a;--ep-muted:#6b7280;--ep-accent:#dc2626;--ep-accent-2:#b91c1c;--ep-border:#fee2e2}
+@media (prefers-color-scheme:dark){
+.ep-auto-dark.ep-theme-default{--ep-bg:#0b1120;--ep-surface:#111827;--ep-text:#f1f5f9;--ep-muted:#94a3b8;--ep-accent:#818cf8;--ep-accent-2:#a78bfa;--ep-border:#1f2937}
+.ep-auto-dark.ep-theme-slate{--ep-bg:#0f172a;--ep-surface:#1e293b;--ep-text:#f1f5f9;--ep-muted:#94a3b8;--ep-accent:#cbd5e1;--ep-accent-2:#94a3b8;--ep-border:#334155}
+.ep-auto-dark.ep-theme-midnight{--ep-bg:#020617;--ep-surface:#0f172a;--ep-text:#e2e8f0;--ep-muted:#64748b;--ep-accent:#6366f1;--ep-accent-2:#818cf8;--ep-border:#1e293b}
+.ep-auto-dark.ep-theme-emerald{--ep-bg:#071a12;--ep-surface:#0f2a1e;--ep-text:#ecfdf5;--ep-muted:#6b7280;--ep-accent:#34d399;--ep-accent-2:#10b981;--ep-border:#14532d}
+.ep-auto-dark.ep-theme-crimson{--ep-bg:#180b0b;--ep-surface:#241416;--ep-text:#fef2f2;--ep-muted:#9ca3af;--ep-accent:#f87171;--ep-accent-2:#ef4444;--ep-border:#4c1d1d}
+}
+.ep-body{margin:0;min-height:100vh;min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:24px;color:var(--ep-text,#0f172a);background:var(--ep-bg,#eef1f8);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;line-height:1.55;-webkit-font-smoothing:antialiased}
+.ep-shell{width:100%;max-width:32rem}
+.ep-card{background:var(--ep-surface,#fff);border:1px solid var(--ep-border,#e2e8f0);border-radius:20px;padding:44px 40px 36px;text-align:center;box-shadow:0 24px 60px -24px rgba(15,23,42,.35)}
+.ep-brand{margin-bottom:18px;min-height:22px;display:flex;justify-content:center}
+.ep-brand-name{font-weight:650;letter-spacing:.01em;color:var(--ep-muted,#64748b);font-size:.95rem}
+.ep-logo{max-height:34px;max-width:180px;width:auto;height:auto}
+.ep-status{margin:0;font-size:clamp(3.2rem,12vw,5rem);font-weight:800;line-height:1.02;letter-spacing:-.03em;color:var(--ep-accent,#4f46e5)}
+.ep-title{margin:6px 0 8px;font-size:1.5rem;font-weight:700;letter-spacing:-.01em;color:var(--ep-text,#0f172a)}
+.ep-message{margin:0 auto;max-width:30rem;color:var(--ep-muted,#64748b);font-size:1.02rem}
+.ep-actions{margin-top:26px;display:flex;flex-wrap:wrap;gap:12px;justify-content:center}
+.ep-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:11px 20px;border-radius:12px;border:1px solid transparent;font:inherit;font-weight:600;font-size:.95rem;text-decoration:none;cursor:pointer}
+.ep-btn-primary{background:var(--ep-accent,#4f46e5);color:#fff}
+.ep-btn-primary:hover{filter:brightness(1.06)}
+.ep-btn:focus-visible{outline:2px solid var(--ep-accent,#4f46e5);outline-offset:2px}
+.ep-ref{margin:18px 0 0;font-size:.8rem;color:var(--ep-muted,#64748b)}
+.ep-ref code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+@media (max-width:480px){.ep-card{padding:32px 22px 26px;border-radius:16px}.ep-actions{flex-direction:column}.ep-btn{width:100%}}

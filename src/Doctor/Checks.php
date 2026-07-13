@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Simtabi\Laranail\LaravelErrorPages\Doctor;
+namespace Simtabi\Laranail\ErrorPages\Doctor;
 
 use Simtabi\Laranail\Package\Tools\Services\Doctor\Checks\ConfigPresentCheck;
 use Simtabi\Laranail\Package\Tools\Services\Doctor\DoctorCheck;

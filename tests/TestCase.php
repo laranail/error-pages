@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Simtabi\Laranail\LaravelErrorPages\Tests;
+namespace Simtabi\Laranail\ErrorPages\Tests;
 
 use Illuminate\Foundation\Application;
 use Orchestra\Testbench\TestCase as Orchestra;
-use Simtabi\Laranail\LaravelErrorPages\Providers\ErrorPagesServiceProvider;
+use Simtabi\Laranail\ErrorPages\Providers\ErrorPagesServiceProvider;
 
 abstract class TestCase extends Orchestra
 {

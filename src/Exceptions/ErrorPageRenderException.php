@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Simtabi\Laranail\LaravelErrorPages\Exceptions;
+namespace Simtabi\Laranail\ErrorPages\Exceptions;
 
 use RuntimeException;
 use Throwable;

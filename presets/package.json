@@ -1,0 +1,43 @@
+{
+  "name": "@laranail/error-pages-ui",
+  "version": "0.1.0",
+  "description": "Vue & React error-page components + shared styles for laranail/error-pages (used by the Inertia and SPA stacks).",
+  "license": "MIT",
+  "author": "Simtabi LLC <opensource@simtabi.com>",
+  "homepage": "https://opensource.simtabi.com/products/laranail/error-pages",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/laranail/error-pages.git",
+    "directory": "presets"
+  },
+  "type": "module",
+  "sideEffects": [
+    "*.css"
+  ],
+  "files": [
+    "dist",
+    "shared",
+    "vue",
+    "react"
+  ],
+  "exports": {
+    "./style.css": "./shared/critical.css",
+    "./vue": "./dist/vue.js",
+    "./react": "./dist/react.js"
+  },
+  "scripts": {
+    "build": "echo \"build wired up in Phase B (Vue/React components land with the canonical templates)\" && exit 0"
+  },
+  "peerDependencies": {
+    "react": ">=18",
+    "vue": ">=3"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    },
+    "vue": {
+      "optional": true
+    }
+  }
+}

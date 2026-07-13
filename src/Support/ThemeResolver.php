@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Simtabi\Laranail\LaravelErrorPages\Support;
+namespace Simtabi\Laranail\ErrorPages\Support;
 
 use Illuminate\Contracts\Config\Repository as Config;
-use Simtabi\Laranail\ErrorPages\Enums\ThemePreset;
-use Simtabi\Laranail\ErrorPages\ValueObjects\ThemeSettings;
+use Simtabi\Laranail\ErrorPages\Core\Enums\ThemePreset;
+use Simtabi\Laranail\ErrorPages\Core\ValueObjects\ThemeSettings;
 
 /**
  * Builds the core {@see ThemeSettings} from `config('error-pages.*')` (brand,

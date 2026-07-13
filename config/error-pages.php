@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use Simtabi\Laranail\ErrorPages\Enums\ThemePreset;
+use Simtabi\Laranail\ErrorPages\Core\Enums\ThemePreset;
 
 return [
 

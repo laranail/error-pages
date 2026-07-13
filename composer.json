@@ -1,5 +1,5 @@
 {
-    "name": "laranail/laravel-error-pages",
+    "name": "laranail/error-pages",
     "description": "Beautiful, branded production error and exception pages for Laravel that complement Ignition — Blade, API/JSON, Inertia, Filament and Nova, all Alpine-enhanced and fully configurable.",
     "keywords": [
         "laravel",
@@ -12,7 +12,7 @@
         "ignition",
         "laranail"
     ],
-    "homepage": "https://opensource.simtabi.com/products/laranail/laravel-error-pages",
+    "homepage": "https://opensource.simtabi.com/products/laranail/error-pages",
     "license": "MIT",
     "authors": [
         {
@@ -28,9 +28,9 @@
         }
     ],
     "support": {
-        "issues": "https://github.com/laranail/laravel-error-pages/issues",
-        "source": "https://github.com/laranail/laravel-error-pages",
-        "docs": "https://opensource.simtabi.com/documentation/laranail/laravel-error-pages/"
+        "issues": "https://github.com/laranail/error-pages/issues",
+        "source": "https://github.com/laranail/error-pages",
+        "docs": "https://opensource.simtabi.com/documentation/laranail/error-pages/"
     },
     "require": {
         "php": "^8.4.1 || ^8.5",
@@ -40,7 +40,6 @@
         "illuminate/translation": "^13.0",
         "illuminate/view": "^13.0",
         "laranail/console": "^0.1",
-        "laranail/error-pages": "*",
         "laranail/package-tools": "^0.1"
     },
     "require-dev": {
@@ -57,12 +56,12 @@
     },
     "autoload": {
         "psr-4": {
-            "Simtabi\\Laranail\\LaravelErrorPages\\": "src/"
+            "Simtabi\\Laranail\\ErrorPages\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Simtabi\\Laranail\\LaravelErrorPages\\Tests\\": "tests/"
+            "Simtabi\\Laranail\\ErrorPages\\Tests\\": "tests/"
         }
     },
     "scripts": {
@@ -82,10 +81,10 @@
     "extra": {
         "laravel": {
             "providers": [
-                "Simtabi\\Laranail\\LaravelErrorPages\\Providers\\ErrorPagesServiceProvider"
+                "Simtabi\\Laranail\\ErrorPages\\Providers\\ErrorPagesServiceProvider"
             ],
             "aliases": {
-                "ErrorPages": "Simtabi\\Laranail\\LaravelErrorPages\\Facades\\ErrorPages"
+                "ErrorPages": "Simtabi\\Laranail\\ErrorPages\\Facades\\ErrorPages"
             }
         },
         "branch-alias": {
@@ -102,13 +101,6 @@
     "minimum-stability": "dev",
     "prefer-stable": true,
     "repositories": [
-        {
-            "type": "path",
-            "url": "../error-pages",
-            "options": {
-                "symlink": true
-            }
-        },
         {
             "type": "path",
             "url": "../tools/console",

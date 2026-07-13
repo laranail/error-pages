@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use Simtabi\Laranail\LaravelErrorPages\ErrorPages;
+use Simtabi\Laranail\ErrorPages\ErrorPages;
 
 it('renders a branded HTML page for a web 404 (Path 1)', function (): void {
     $response = $this->get('/definitely-missing');
@@ -79,7 +79,7 @@ it('honours a consumer skipWhen veto', function (): void {
 });
 
 it('renders a page by code and by generic key (preview / design QA)', function (): void {
-    $facade = Simtabi\Laranail\LaravelErrorPages\Facades\ErrorPages::class;
+    $facade = Simtabi\Laranail\ErrorPages\Facades\ErrorPages::class;
 
     expect($facade::htmlForCode(503))->toContain('>503<')->toContain('Be right back')
         ->and($facade::htmlForKey('4xx'))->toContain('>4xx<');

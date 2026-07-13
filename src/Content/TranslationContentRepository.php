@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Simtabi\Laranail\LaravelErrorPages\Content;
+namespace Simtabi\Laranail\ErrorPages\Content;
 
 use Illuminate\Contracts\Translation\Translator;
-use Simtabi\Laranail\ErrorPages\Contracts\ContentRepository;
+use Simtabi\Laranail\ErrorPages\Core\Contracts\ContentRepository;
 
 /**
  * Content overrides backed by Laravel translations

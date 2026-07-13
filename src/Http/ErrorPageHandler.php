@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Simtabi\Laranail\LaravelErrorPages\Http;
+namespace Simtabi\Laranail\ErrorPages\Http;
 
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Contracts\Config\Repository as Config;
@@ -10,8 +10,8 @@ use Illuminate\Contracts\Debug\ExceptionHandler;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
-use Simtabi\Laranail\LaravelErrorPages\ErrorPages;
-use Simtabi\Laranail\LaravelErrorPages\Exceptions\ErrorPageRenderException;
+use Simtabi\Laranail\ErrorPages\ErrorPages;
+use Simtabi\Laranail\ErrorPages\Exceptions\ErrorPageRenderException;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Throwable;

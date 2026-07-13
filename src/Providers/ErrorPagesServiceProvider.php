@@ -2,21 +2,21 @@
 
 declare(strict_types=1);
 
-namespace Simtabi\Laranail\LaravelErrorPages\Providers;
+namespace Simtabi\Laranail\ErrorPages\Providers;
 
 use Illuminate\Contracts\Config\Repository as Config;
 use Illuminate\Contracts\Translation\Translator;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Route;
 use Override;
-use Simtabi\Laranail\ErrorPages\Contracts\ContentRepository;
-use Simtabi\Laranail\ErrorPages\ErrorPageFactory;
-use Simtabi\Laranail\ErrorPages\Support\Pipeline;
-use Simtabi\Laranail\LaravelErrorPages\Commands\PreviewCommand;
-use Simtabi\Laranail\LaravelErrorPages\Content\TranslationContentRepository;
-use Simtabi\Laranail\LaravelErrorPages\Doctor\Checks;
-use Simtabi\Laranail\LaravelErrorPages\ErrorPages;
-use Simtabi\Laranail\LaravelErrorPages\Http\ErrorPageHandler;
+use Simtabi\Laranail\ErrorPages\Commands\PreviewCommand;
+use Simtabi\Laranail\ErrorPages\Content\TranslationContentRepository;
+use Simtabi\Laranail\ErrorPages\Core\Contracts\ContentRepository;
+use Simtabi\Laranail\ErrorPages\Core\ErrorPageFactory;
+use Simtabi\Laranail\ErrorPages\Core\Support\Pipeline;
+use Simtabi\Laranail\ErrorPages\Doctor\Checks;
+use Simtabi\Laranail\ErrorPages\ErrorPages;
+use Simtabi\Laranail\ErrorPages\Http\ErrorPageHandler;
 use Simtabi\Laranail\Package\Tools\Package;
 use Simtabi\Laranail\Package\Tools\Providers\PackageServiceProvider;
 use Simtabi\Laranail\Package\Tools\Support\Definitions\AboutSectionDefinition;

@@ -1,15 +1,12 @@
 # Normalize line endings
 * text=auto eol=lf
 
-# Keep the prebuilt browser bundle checked out with LF (it ships in the package)
-public/assets/** text eol=lf
-
-# Exclude dev/test cruft and asset sources from the distributed package
+# Exclude dev/test cruft from the distributed package (presets/ ships — it is the
+# runtime design home; its node_modules/dist are ignored via .gitignore).
 /.github            export-ignore
 /.vscode            export-ignore
 /tests              export-ignore
 /docs               export-ignore
-/resources/assets   export-ignore
 /node_modules       export-ignore
 .editorconfig       export-ignore
 .gitattributes      export-ignore
@@ -18,6 +15,3 @@ phpunit.xml.dist    export-ignore
 phpstan.neon        export-ignore
 pint.json           export-ignore
 rector.php          export-ignore
-package.json        export-ignore
-vite.config.js      export-ignore
-.prettierrc         export-ignore

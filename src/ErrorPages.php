@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-namespace Simtabi\Laranail\LaravelErrorPages;
+namespace Simtabi\Laranail\ErrorPages;
 
 use Closure;
 use Illuminate\Http\Request;
-use Simtabi\Laranail\ErrorPages\ErrorPageFactory;
-use Simtabi\Laranail\ErrorPages\Rendering\HtmlRenderer;
-use Simtabi\Laranail\ErrorPages\Rendering\JsonRenderer;
-use Simtabi\Laranail\ErrorPages\Support\Pipeline;
-use Simtabi\Laranail\ErrorPages\ValueObjects\ErrorPage;
-use Simtabi\Laranail\ErrorPages\ValueObjects\ThemeSettings;
-use Simtabi\Laranail\LaravelErrorPages\Support\ThemeResolver;
+use Simtabi\Laranail\ErrorPages\Core\ErrorPageFactory;
+use Simtabi\Laranail\ErrorPages\Core\Rendering\HtmlRenderer;
+use Simtabi\Laranail\ErrorPages\Core\Rendering\JsonRenderer;
+use Simtabi\Laranail\ErrorPages\Core\Support\Pipeline;
+use Simtabi\Laranail\ErrorPages\Core\ValueObjects\ErrorPage;
+use Simtabi\Laranail\ErrorPages\Core\ValueObjects\ThemeSettings;
+use Simtabi\Laranail\ErrorPages\Support\ThemeResolver;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Throwable;
 

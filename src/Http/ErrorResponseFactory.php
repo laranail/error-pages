@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Simtabi\Laranail\LaravelErrorPages\Http;
+namespace Simtabi\Laranail\ErrorPages\Http;
 
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;

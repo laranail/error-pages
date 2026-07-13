@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Simtabi\Laranail\LaravelErrorPages\Http;
+namespace Simtabi\Laranail\ErrorPages\Http;
 
 use Closure;
 use Illuminate\Http\Request;
