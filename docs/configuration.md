@@ -8,7 +8,7 @@ Every knob in `config/error-pages.php`, published with
 | Key | Type | Default | Purpose |
 |-----|------|---------|---------|
 | `enabled` | bool | `true` | Master switch. When false the package renders nothing (Laravel/Ignition untouched). |
-| `stack` | string | `blade` | Default stack: `blade`, `inertia-vue`, `inertia-react`, `vue`, `react` (`livewire` is a server-HTML alias of `blade` for now). |
+| `stack` | string | `blade` | Default stack: `blade` (Path 1), `livewire`, `inertia-vue`, `inertia-react`, `vue`, `react` (Path 2). |
 | `brand.name` | string | `APP_NAME` | Brand shown on the page. |
 | `brand.url` | string | `APP_URL` | Brand link. |
 | `brand.logo` | ?string | `null` | Logo URL (rendered as `<img>`). |
@@ -29,7 +29,7 @@ Every knob in `config/error-pages.php`, published with
 | `report.throttle` | int | `0` | Seconds to suppress repeat reports of the same renderer failure (`0` = report every time). |
 | `preview.enabled` | ?bool | `null` | Preview route; `null` = on only when `APP_DEBUG`. |
 | `preview.route` | string | `/_error-pages` | Preview route prefix. |
-| `panels.filament` / `panels.nova` | bool | `true` | Enable the panel drivers (selected via a `context()` override for now; auto-detection ships with the panel set). |
+| `panels.filament` / `panels.nova` | bool | `true` | Enable/disable panel auto-detection: Filament (path-scoped HTML) and Nova (Inertia request under `nova.path`). |
 
 ## Env vars
 

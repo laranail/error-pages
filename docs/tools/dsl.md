@@ -16,8 +16,9 @@ package edits.
 | `pipe(callable $stage)` | `fn (ErrorPage $page): ErrorPage` — enrich every page (support links, request id, solutions). |
 | `extend(string $stack, Closure $factory)` | Register/override a `StackRenderer` (see [Stacks](stacks.md)). |
 
-Rendering helpers (used by the views/preview, also callable directly): `htmlFor($e)`,
-`jsonFor($e)`, `payloadFor($e)`, `htmlForCode(int)`, `htmlForKey(string)`.
+Rendering helpers (used by the views/preview/embeds, also callable directly): `htmlFor($e)`,
+`renderForWeb($e)`, `jsonFor($e)`, `payloadFor($e)`, `htmlForCode(int)`, `htmlForKey(string)`,
+`payloadForCode(int)`, `payloadForKey(string)`.
 
 ## Example
 

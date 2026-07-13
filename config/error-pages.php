@@ -23,12 +23,13 @@ return [
     | Default stack
     |--------------------------------------------------------------------------
     |
-    | How the web/inertia page is produced: blade | inertia-vue | inertia-react |
-    | vue | react. The API context always renders RFC 7807 JSON. Overridable per
-    | request via the ErrorPages DSL.
+    | How the web/inertia page is produced: blade | livewire | inertia-vue |
+    | inertia-react | vue | react. The API context always renders RFC 7807 JSON.
+    | Overridable per request via the ErrorPages DSL.
     |
-    | `livewire` is accepted as an alias of `blade` for now (both are server-HTML
-    | Path 1); a dedicated Livewire component ships with the visual template set.
+    | `blade` is server-HTML (Path 1). `livewire` renders a full-page Livewire 4
+    | component (Path 2, needs livewire/livewire ^4; degrades to core HTML without
+    | it). The rest are client/SPA (Path 2).
     |
     */
 

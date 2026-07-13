@@ -8,17 +8,17 @@ framework-agnostic core.
 The package never registers one blanket exception renderer (that would run before
 Ignition and has no priority guarantee). It splits by context:
 
-- **Path 1 — server-HTML (`blade`, `livewire`).** The provider pushes the package's
+- **Path 1 — server-HTML (`blade`).** The provider pushes the package's
   `resources/views` onto `config('view.paths')`, so Laravel's own
   `renderHttpException()` → `errors::{code}` resolution finds our thin views as a
   **fallback**. Precedence, for free: your app's `resources/views/errors/{code}` wins →
   ours → the framework default. No renderable runs, so it cannot double-report or preempt
   the debug page.
-- **Path 2 — client/SPA (`inertia`, `vue`, `react`) and API JSON.** One gated
-  `renderable` callback (registered idempotently on the handler) that **defers** (returns
-  `null`) for validation/auth exceptions, the server-HTML web context, non-intercepted
-  codes, consumer `skipWhen` vetoes, and — for genuine dev 500s in HTML-ish contexts — to
-  Ignition.
+- **Path 2 — everything else (`livewire`, `inertia`, `vue`, `react`, the `filament`/`nova`
+  panels) and API JSON.** One gated `renderable` callback (registered idempotently on the
+  handler) that **defers** (returns `null`) for validation/auth exceptions, the server-HTML
+  (blade) web context, non-intercepted codes, consumer `skipWhen` vetoes, and — for genuine
+  dev 500s in HTML-ish contexts — to Ignition.
 
 The result, with **no environment branching in our code**: `abort(4xx/503)` is branded in
 dev and prod; an unhandled 500 is branded in prod but shows Ignition in dev (Laravel's own

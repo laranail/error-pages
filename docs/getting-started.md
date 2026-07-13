@@ -11,9 +11,8 @@ it **complements** Ignition (which keeps the dev debug page) and your reporting 
 
 Rendering is organised on two independent axes:
 
-- **Stack** — *how* a page is produced for your front end: `blade` (default), `inertia-vue`,
-  `inertia-react`, `vue`, `react` (`livewire` is a server-HTML alias of `blade` for now).
-  The API context always emits RFC 7807 JSON.
+- **Stack** — *how* a page is produced for your front end: `blade` (default), `livewire`,
+  `inertia-vue`, `inertia-react`, `vue`, `react`. The API context always emits RFC 7807 JSON.
 - **Theme** — *how* it looks: `default | slate | midnight | emerald | crimson`, plus
   per-token colour overrides.
 

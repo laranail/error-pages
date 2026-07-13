@@ -15,13 +15,13 @@
     "*.css"
   ],
   "files": [
-    "dist",
     "shared",
     "vue",
     "react",
     "!**/*.test.ts",
     "!**/*.test.tsx",
-    "!**/fixtures.ts"
+    "!**/fixtures.ts",
+    "!**/vue-shim.d.ts"
   ],
   "exports": {
     "./style.css": "./shared/css/critical.css",

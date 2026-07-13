@@ -46,3 +46,12 @@ it('ships no enhancement script when assets are off', function (): void {
 
     expect($response->getContent())->not->toContain('error-pages.js');
 });
+
+it('references a published URL in link mode', function (): void {
+    config()->set('error-pages.assets.mode', 'link');
+
+    $response = $this->get('/asset-link-missing');
+
+    $response->assertStatus(404);
+    expect($response->getContent())->toContain('vendor/error-pages/error-pages.js');
+});

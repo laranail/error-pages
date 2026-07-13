@@ -24,17 +24,17 @@ use Throwable;
  * Wires the package into Laravel's error handling by two complementary paths, so
  * it COMPLEMENTS Ignition/Sentry/Flare rather than competing:
  *
- *   Path 1 (server-HTML web: blade, and the planned livewire) — push our thin
- *   errors dir into config('view.paths') so Laravel's native `errors::{code}`
- *   resolution finds it as a fallback (the app's own views still win, Ignition
- *   still renders dev 500s). No renderable, so it can't double-report or preempt
- *   the debug page. Because this path is pure view precedence, `codes.intercept`
- *   and `skipWhen()` govern Path 2 only (see the docs' coexistence page).
+ *   Path 1 (server-HTML web: blade) — push our thin errors dir into
+ *   config('view.paths') so Laravel's native `errors::{code}` resolution finds it
+ *   as a fallback (the app's own views still win, Ignition still renders dev
+ *   500s). No renderable, so it can't double-report or preempt the debug page.
+ *   Because this path is pure view precedence, `codes.intercept` and `skipWhen()`
+ *   govern Path 2 only (see the docs' coexistence page).
  *
- *   Path 2 (api/inertia/spa/panel) — ONE gated renderable that defers (returns
- *   null) for validation/auth, the server-HTML web context, non-intercepted
- *   codes, and consumer vetoes; its render is failure-safe (reports only OUR
- *   failure, then degrades down the fallback ladder).
+ *   Path 2 (livewire/inertia/spa/api/panel) — ONE gated renderable that defers
+ *   (returns null) for validation/auth, the server-HTML (blade) web context,
+ *   non-intercepted codes, and consumer vetoes; its render is failure-safe
+ *   (reports only OUR failure, then degrades down the fallback ladder).
  *
  * Registration is idempotent (Octane-safe) and dependencies resolve fresh per call.
  */
