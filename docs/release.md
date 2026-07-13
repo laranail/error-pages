@@ -15,6 +15,22 @@ Semantic versioning. The package tracks the laranail family's pre-1.0 line
   The Vue 3 / React 19 components (`@laranail/error-pages-ui`) are unit-tested (Vitest); their
   final visual CSS lands with the canonical Blade templates.
 
+## Roadmap
+
+Everything non-visual (the coexistence hook, all stacks and their renderers, the DSL, events,
+asset route, CSP nonce, report throttle, preview gallery, test helpers, panel auto-detection,
+and the Vue/React/Livewire components) ships and is tested today. The remaining work is the
+canonical design and the standalone panel packages:
+
+- [ ] **Canonical CSS-first Blade templates** (expected ~2026-07-19) — drop the maintainer's
+  templates into `presets/blade`; they are the design source of truth for every stack.
+- [ ] **Finalize the component visual CSS** — derive the shared stylesheet and each stack's
+  styling (Blade, plain-PHP, Vue, React, Livewire) from those templates so all stacks stay
+  pixel-consistent. Until then `presets/shared/critical.css` styles them and `presets/plain-php`
+  is the guaranteed server render.
+- [ ] **Standalone Filament Plugin + Nova Tool packages** — first-class panel integrations
+  (auto-registration, panel-matched theming) beyond the current path-based auto-detection.
+
 ## Cutting a release
 
 1. Update `CHANGELOG.md` (Keep a Changelog) with the version's changes.
