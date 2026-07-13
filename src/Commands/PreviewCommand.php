@@ -20,13 +20,13 @@ final class PreviewCommand extends Command
     use SupportsNamespacedNames;
 
     /** @var string */
-    protected $name = 'laranail::laravel-error-pages.preview';
+    protected $name = 'laranail::error-pages.preview';
 
     /** @var string */
     protected $description = 'Render a branded error page to an HTML file (design QA).';
 
     /** @var list<string> */
-    protected array $commandAliases = ['laravel-error-pages:preview'];
+    protected array $commandAliases = ['error-pages:preview'];
 
     public function handle(ErrorPages $pages): int
     {

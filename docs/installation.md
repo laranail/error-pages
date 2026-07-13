@@ -39,7 +39,7 @@ php artisan vendor:publish --tag=laranail::error-pages-config
 php artisan laranail::package-tools.doctor
 
 # preview any page in dev (APP_DEBUG=true)
-php artisan laranail::laravel-error-pages.preview 503 --output=storage/preview-503.html
+php artisan laranail::error-pages.preview 503 --output=storage/preview-503.html
 ```
 
 Or hit the preview route while `APP_DEBUG=true`: `GET /_error-pages/503`.

@@ -8,9 +8,10 @@ use Closure;
 use Illuminate\Http\Request;
 
 /**
- * Maps a request to a render context — `web` | `api` | `inertia` — with a
- * consumer override taking precedence. Detection order: override → Inertia
- * header → explicit JSON/`api/*` → web.
+ * Maps a request to a render context. The built-in detection returns `web`,
+ * `api`, or `inertia`; a consumer override (taking precedence) may return any
+ * custom context string (e.g. `filament`, `nova`) that a registered stack driver
+ * handles. Detection order: override → Inertia header → explicit JSON/`api/*` → web.
  */
 final class ContextResolver
 {

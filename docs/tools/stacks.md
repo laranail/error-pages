@@ -1,21 +1,28 @@
 # Stacks
 
-The six front-end stacks the package renders into, and how to add your own. A stack decides
-how the web/inertia page is produced; the API context always emits RFC 7807 JSON.
+The front-end stacks the package renders into, and how to add your own. A stack decides how
+the web/inertia page is produced; the API context always emits RFC 7807 JSON.
 
 ## Built-in stacks
 
 | Stack | Context | Renders via |
 |-------|---------|-------------|
 | `blade` (default) | web | Laravel `errors::{code}` view (Path 1) |
-| `livewire` | web | `errors::{code}` view embedding a Livewire component (Path 1) |
-| `inertia-vue` / `inertia-react` | inertia | `Inertia::render('ErrorPage', payload)` (Path 2) |
+| `inertia-vue` / `inertia-react` | web / inertia | `Inertia::render('ErrorPage', payload)` (Path 2) |
 | `vue` / `react` | web (SPA) | self-contained page + embedded `#error-page-data` payload (Path 2) |
 | _(fixed)_ api | api | RFC 7807 `application/problem+json` (Path 2) |
 | `filament` / `nova` | panel | panel-tagged page (Path 2) |
 
 Select the default with `config('error-pages.stack')` or `ERROR_PAGES_STACK`; override per
 request with `ErrorPages::stack(...)`.
+
+Renderer selection is by **context first**, then stack: an `X-Inertia` request always uses
+the Inertia renderer; a plain (non-Inertia) web page load under an `inertia-*` stack also
+renders an Inertia response (so the client app takes over), while a `vue`/`react` stack
+renders the self-contained SPA shell.
+
+> `livewire` is accepted as a server-HTML alias of `blade` today (both are Path 1). A
+> dedicated full-page Livewire component ships with the visual template set.
 
 ## The payload
 
@@ -24,7 +31,7 @@ The Inertia and SPA components receive one payload (`ErrorPages::payloadFor()`):
 ```json
 {
   "status": 503, "code": "503", "title": "Be right back",
-  "message": "…", "retryable": true, "retryAfter": 15, "requestId": null,
+  "message": "…", "retryable": true, "retryAfter": 15, "requestId": "9f2c1a7b3d4e5f60",
   "homeUrl": "/", "brand": { "name": "Acme", "url": "/", "logo": null },
   "theme": { "preset": "midnight", "autoDark": true }
 }

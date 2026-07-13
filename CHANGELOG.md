@@ -24,11 +24,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   theme presets + per-token overrides, 4xx-message/5xx-security policy, `Retry-After`/
   `no-store`/`noindex` headers, correlation id, translation-backed content, preview
   route + command.
+- Lifecycle events `RenderingErrorPage` / `ErrorPageRendered` (both paths).
+- Stack-unavailable fallback ladder (a renderer returning `null` degrades to the guaranteed
+  core HTML page, except API which stays JSON).
+- Progressive-enhancement asset route (`assets.mode` = `route`/`link`/`inline`/`off`) serving
+  an immutably-cached, ETag-validated `error-pages.js` + shared CSS from `presets/shared`.
+- RFC 7807 `instance` (request URI) and an optional per-status `type` via `problem_type_base`.
+- Configurable correlation id: `request_id.header` (default `X-Request-Id`) with an optional
+  generated fallback (`request_id.generate`).
+- `content.default_locale` is now threaded into content resolution.
+- `RenderContext` value object centralises context/stack/status and renderer selection.
+
+### Changed
+
+- Renderer selection now honours the configured stack for a plain web page load: an
+  `inertia-*` stack renders an Inertia response (not the generic SPA shell).
+- `render_debug_pages` documented as inertia/spa-only (the API context is always branded).
+- Retryable pages reload the current URL rather than redirecting to the brand home
+  (removes a maintenance/rate-limit refresh-loop risk).
+
+### Fixed
+
+- Scoped `codes.intercept` / `skipWhen()` to Path 2 in the docs and config (Path 1 web is
+  view precedence); corrected the `419`, `codes.fallbacks`, `render_debug_pages`, panel, and
+  Livewire descriptions to match behaviour.
+- Preview command name `laranail::error-pages.preview` (was the stale `laravel-error-pages`
+  slug); translation publish tag/path references.
 
 ### Removed
 
 - The static-HTML generator + Apache/Nginx config emitter, the `build`/`export`/
   `server-config`/`clear` commands, and the `output.*`/`server.*`/`security.headers` config.
+- The unused `codes.fallbacks` flag (generic 4xx/5xx branding is automatic via Laravel's
+  native `errors::{n}xx` resolution).
 
 ## [0.1.0] - 2026-07-11
 

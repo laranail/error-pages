@@ -16,6 +16,7 @@ use Simtabi\Laranail\ErrorPages\Core\ErrorPageFactory;
 use Simtabi\Laranail\ErrorPages\Core\Support\Pipeline;
 use Simtabi\Laranail\ErrorPages\Doctor\Checks;
 use Simtabi\Laranail\ErrorPages\ErrorPages;
+use Simtabi\Laranail\ErrorPages\Http\AssetController;
 use Simtabi\Laranail\ErrorPages\Http\ErrorPageHandler;
 use Simtabi\Laranail\ErrorPages\Rendering\StackManager;
 use Simtabi\Laranail\Package\Tools\Package;
@@ -72,7 +73,24 @@ final class ErrorPagesServiceProvider extends PackageServiceProvider
     {
         $this->app->make(ErrorPageHandler::class)->register();
 
+        $this->registerAssetRoute();
         $this->registerPreviewRoute();
+    }
+
+    private function registerAssetRoute(): void
+    {
+        /** @var Config $config */
+        $config = $this->app->make(Config::class);
+
+        if ($config->get('error-pages.assets.mode') !== 'route') {
+            return;
+        }
+
+        $base = rtrim((string) $config->get('error-pages.assets.route', '/_error-pages/assets'), '/');
+
+        Route::get($base . '/{file}', AssetController::class)
+            ->where('file', 'error-pages\.(css|js)')
+            ->name('error-pages.assets');
     }
 
     private function registerPreviewRoute(): void

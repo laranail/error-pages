@@ -8,8 +8,10 @@ error handling — it complements, it does not compete.
 Sentry, Flare, Bugsnag, and Ignition's reporting all run on Laravel's **report** pass. This
 package only ever touches **rendering** — it never reports the original exception. So there
 is no double-reporting, and your monitoring keeps working exactly as before. The only thing
-it reports is a failure inside *its own* renderer (a distinct, throttleable
-`ErrorPageRenderException`), so a broken pretty-page never escalates into a crash.
+it reports is a failure inside *its own* renderer (a distinct `ErrorPageRenderException`
+carrying the cause), so a broken pretty-page degrades to Laravel's default instead of
+escalating into a crash. Throttle or drop it like any exception via your handler's
+`report`/`dontReport` configuration.
 
 ## Ignition keeps the dev debug page
 
@@ -28,8 +30,8 @@ dev, use the [preview route/command](tools/preview.md) — not by replacing Igni
 
 - **Blade/web:** drop `resources/views/errors/{code}.blade.php` in your app — it takes
   precedence over ours. See [Overriding a view](recipes/overriding-error-views.md).
-- **Any context:** register your own `render()`/`respond()` callback in `bootstrap/app.php`,
-  or veto ours with `ErrorPages::skipWhen(...)` / `codes.intercept`.
+- **api/inertia/spa:** register your own `render()`/`respond()` callback in `bootstrap/app.php`,
+  or veto ours with `ErrorPages::skipWhen(...)` / `codes.intercept` (these govern Path 2).
 
 ## Framework UX is preserved
 

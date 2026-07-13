@@ -30,7 +30,7 @@ $bodyClass = 'ep-body ep-theme-' . $e($theme->preset->value) . ($theme->autoDark
 <meta name="robots" content="noindex, nofollow">
 <meta name="color-scheme" content="<?= $theme->autoDark ? 'light dark' : 'light' ?>">
 <?php if ($page->retryable && $page->retryAfter !== null) { ?>
-<meta http-equiv="refresh" content="<?= (int) $page->retryAfter ?>; url=<?= $e($theme->brandUrl) ?>">
+<meta http-equiv="refresh" content="<?= (int) $page->retryAfter ?>">
 <?php } ?>
 <title><?= $e($page->key) ?> &middot; <?= $e($page->title) ?></title>
 <style><?= $criticalCss ?><?= $themeOverrideCss ?></style>

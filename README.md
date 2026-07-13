@@ -7,7 +7,7 @@
 
 > Beautiful, branded **production** error and exception pages for Laravel that **complement** Ignition — it renders the end-user page, Ignition keeps the dev debug page, your reporting tools keep the report pipeline.
 
-Adapts to the caller's context and front-end stack — Blade (web), RFC 7807 JSON (API), Inertia/Vue/React (SPA), and Filament/Nova panels — all Alpine-enhanced and fully configurable. Runs on Laravel `^13.0`, PHP `^8.4.1 || ^8.5`. The framework-agnostic rendering engine lives in an illuminate-free `Core\` namespace within the package.
+Adapts to the caller's context and front-end stack — Blade (web), RFC 7807 JSON (API), Inertia/Vue/React (SPA), and Filament/Nova panels — progressively enhanced and fully configurable. Runs on Laravel `^13.0`, PHP `^8.4.1 || ^8.5`. The framework-agnostic rendering engine lives in an illuminate-free `Core\` namespace within the package.
 
 ## Install
 
@@ -46,6 +46,7 @@ Hosted at **<https://opensource.simtabi.com/documentation/laranail/error-pages/>
 - [Overriding an error view](docs/recipes/overriding-error-views.md)
 - [API error responses](docs/recipes/api-json.md)
 - [Inertia and SPA error pages](docs/recipes/inertia-spa.md)
+- [Assets and progressive enhancement](docs/recipes/assets.md)
 - [Skipping and passthrough](docs/recipes/skip-and-veto.md)
 
 ### Project

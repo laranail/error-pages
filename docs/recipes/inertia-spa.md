@@ -14,10 +14,11 @@ composer require inertiajs/inertia-laravel
 ERROR_PAGES_STACK=inertia-vue   # or inertia-react
 ```
 
-An Inertia request (`X-Inertia` header) is rendered as
-`Inertia::render('ErrorPage', $payload)` with the correct status. Create the `ErrorPage`
-component in your app (props are the [payload](../tools/stacks.md#the-payload)); publish the
-package's Vue/React component from `@laranail/error-pages-ui` as a starting point.
+An Inertia request (`X-Inertia` header) — and a plain web page load under an `inertia-*`
+stack — is rendered as `Inertia::render('ErrorPage', $payload)` with the correct status.
+Create the `ErrorPage` component in your app (props are the
+[payload](../tools/stacks.md#the-payload)). The shipped Vue/React components
+(`@laranail/error-pages-ui`) land with the visual template set as a starting point.
 
 > Inertia treats some non-2xx visits specially on the client; verify your setup handles a
 > 404/500 error page as expected.

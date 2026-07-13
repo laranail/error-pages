@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Simtabi\Laranail\ErrorPages;
 
 use Closure;
+use Illuminate\Contracts\Config\Repository as Config;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Http\Request;
 use Simtabi\Laranail\ErrorPages\Contracts\StackRenderer;
@@ -22,7 +23,7 @@ use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Throwable;
 
 /**
- * The bridge's fluent entry point (facade root). Builds a resolved
+ * The package's fluent entry point (facade root). Builds a resolved
  * {@see ErrorPage} from a caught throwable — status derivation, the 4xx/5xx
  * message-security policy, correlation id, and the enrichment pipeline — and
  * renders it via the core renderers. Consumers reshape it from their own
@@ -44,7 +45,17 @@ final class ErrorPages
         private readonly Pipeline $pipeline,
         private readonly ThemeResolver $themes,
         private readonly StackManager $stacks,
+        private readonly Config $config,
     ) {}
+
+    /**
+     * The HTTP status for a throwable: an HttpException's own code, else 500.
+     * Centralised so the handler, page builder and web renderer agree.
+     */
+    public function statusFor(Throwable $e): int
+    {
+        return $e instanceof HttpExceptionInterface ? $e->getStatusCode() : 500;
+    }
 
     /**
      * Register or override a stack renderer (the coexistence driver seam).
@@ -132,8 +143,8 @@ final class ErrorPages
 
     public function errorPageFor(Throwable $e, ?Request $request = null): ErrorPage
     {
-        $status = $e instanceof HttpExceptionInterface ? $e->getStatusCode() : 500;
-        $page = $this->factory->make($status);
+        $status = $this->statusFor($e);
+        $page = $this->factory->make($status, $this->defaultLocale());
 
         // A developer-intended 4xx abort message is safe to show; a 5xx never
         // uses getMessage() (it may carry internals) — always the generic copy.
@@ -144,17 +155,119 @@ final class ErrorPages
             }
         }
 
-        $requestId = $request?->headers->get('X-Request-Id');
-        if (is_string($requestId) && $requestId !== '') {
+        $requestId = $this->requestIdFor($request);
+        if ($requestId !== null) {
             $page = $page->withRequestId($requestId);
         }
 
         return $this->pipeline->process($page);
     }
 
+    /**
+     * The locale for content resolution: the configured `content.default_locale`,
+     * or null to follow the ambient app locale.
+     */
+    private function defaultLocale(): ?string
+    {
+        $locale = $this->config->get('error-pages.content.default_locale');
+
+        return is_string($locale) && $locale !== '' ? $locale : null;
+    }
+
+    /**
+     * The correlation id surfaced to the user: the configured request-id header
+     * (default `X-Request-Id`) if present, else a generated one when
+     * `request_id.generate` is on (default), else null.
+     */
+    private function requestIdFor(?Request $request): ?string
+    {
+        $header = (string) $this->config->get('error-pages.request_id.header', 'X-Request-Id');
+
+        $id = $request?->headers->get($header);
+        if (is_string($id) && trim($id) !== '') {
+            return trim($id);
+        }
+
+        if ((bool) $this->config->get('error-pages.request_id.generate', true)) {
+            return bin2hex(random_bytes(8));
+        }
+
+        return null;
+    }
+
     public function htmlFor(Throwable $e, ?Request $request = null): string
     {
-        return (new HtmlRenderer)->render($this->errorPageFor($e, $request), $this->themeSettings());
+        return $this->renderPage($this->errorPageFor($e, $request));
+    }
+
+    /**
+     * Render a resolved page to HTML and layer the optional progressive
+     * enhancement (per `assets.mode`) on top.
+     */
+    private function renderPage(ErrorPage $page): string
+    {
+        return $this->withEnhancement((new HtmlRenderer)->render($page, $this->themeSettings()));
+    }
+
+    /**
+     * Inject the enhancement `<script>` before `</body>` according to
+     * `assets.mode` (route | link | inline | off). The page is fully functional
+     * without it, so a missing `</body>` or an `off`/unknown mode is a no-op.
+     */
+    private function withEnhancement(string $html): string
+    {
+        $tag = $this->enhancementTag();
+
+        if ($tag === null || ! str_contains($html, '</body>')) {
+            return $html;
+        }
+
+        return str_replace('</body>', $tag . '</body>', $html);
+    }
+
+    private function enhancementTag(): ?string
+    {
+        $mode = (string) $this->config->get('error-pages.assets.mode', 'route');
+
+        return match ($mode) {
+            'route' => '<script src="' . htmlspecialchars($this->assetUrl('error-pages.js'), ENT_QUOTES) . '" defer></script>',
+            'link' => '<script src="' . htmlspecialchars(asset('vendor/error-pages/error-pages.js'), ENT_QUOTES) . '" defer></script>',
+            'inline' => $this->inlineEnhancement(),
+            default => null,
+        };
+    }
+
+    /**
+     * Absolute URL to a package asset served by the route (with a cache-busting
+     * version derived from the file when not configured).
+     */
+    public function assetUrl(string $file): string
+    {
+        $base = rtrim((string) $this->config->get('error-pages.assets.route', '/_error-pages/assets'), '/');
+        $version = $this->config->get('error-pages.assets.version');
+        $version = is_string($version) && $version !== '' ? $version : $this->assetVersion();
+
+        return url($base . '/' . $file) . '?v=' . $version;
+    }
+
+    private function assetVersion(): string
+    {
+        static $version = null;
+
+        if ($version === null) {
+            $path = dirname(__DIR__) . '/presets/shared/enhance.js';
+            $version = is_file($path) ? substr((string) md5_file($path), 0, 8) : '0';
+        }
+
+        return $version;
+    }
+
+    private function inlineEnhancement(): ?string
+    {
+        $path = dirname(__DIR__) . '/presets/shared/enhance.js';
+        $js = is_file($path) ? file_get_contents($path) : false;
+
+        return $js === false ? null : '<script>' . $js . '</script>';
     }
 
     /**
@@ -165,7 +278,7 @@ final class ErrorPages
      */
     public function renderForWeb(Throwable $e, ?Request $request = null): string
     {
-        $status = $e instanceof HttpExceptionInterface ? $e->getStatusCode() : 500;
+        $status = $this->statusFor($e);
 
         event(new RenderingErrorPage($e, 'web', $status));
         $html = $this->htmlFor($e, $request);
@@ -207,11 +320,26 @@ final class ErrorPages
     }
 
     /**
+     * The RFC 7807 `application/problem+json` payload. The core renderer supplies
+     * the standard members; the bridge adds the recommended `instance` (request
+     * URI) and, when `problem_type_base` is configured, a per-status `type` URI.
+     *
      * @return array<string, mixed>
      */
     public function jsonFor(Throwable $e, ?Request $request = null): array
     {
-        return (new JsonRenderer)->render($this->errorPageFor($e, $request), $this->themeSettings());
+        $payload = (new JsonRenderer)->render($this->errorPageFor($e, $request), $this->themeSettings());
+
+        $base = (string) $this->config->get('error-pages.problem_type_base', '');
+        if ($base !== '') {
+            $payload['type'] = rtrim($base, '/') . '/' . $payload['status'];
+        }
+
+        if ($request instanceof Request) {
+            $payload['instance'] = $request->getRequestUri();
+        }
+
+        return $payload;
     }
 
     /**
@@ -219,9 +347,7 @@ final class ErrorPages
      */
     public function htmlForCode(int $code): string
     {
-        $page = $this->pipeline->process($this->factory->make($code));
-
-        return (new HtmlRenderer)->render($page, $this->themeSettings());
+        return $this->renderPage($this->pipeline->process($this->factory->make($code, $this->defaultLocale())));
     }
 
     /**
@@ -229,8 +355,6 @@ final class ErrorPages
      */
     public function htmlForKey(string $key): string
     {
-        $page = $this->pipeline->process($this->factory->makeByKey($key));
-
-        return (new HtmlRenderer)->render($page, $this->themeSettings());
+        return $this->renderPage($this->pipeline->process($this->factory->makeByKey($key, $this->defaultLocale())));
     }
 }

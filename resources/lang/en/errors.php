@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 /*
  * Default error-page content. Publish with
- * `php artisan vendor:publish --tag=laranail::server-error-pages-translations`
- * and edit resources/lang/vendor/server-error-pages/en/errors.php to override,
- * or add other locales. A missing key falls back to the HttpStatus enum default.
+ * `php artisan vendor:publish --tag=laranail::error-pages-translations`
+ * and edit lang/vendor/error-pages/en/errors.php to override, or add other
+ * locales. A missing key falls back to the HttpStatus enum default.
  */
 
 return [

@@ -13,9 +13,9 @@ use Throwable;
 
 /**
  * The Vue/React SPA context renderer: serves the self-contained branded page and
- * embeds the error payload as JSON (`#error-page-data`) so the shipped
- * `@laranail/error-pages-ui` component can hydrate/take over on the client. Works
- * with no external request; the visual component is layered on top later.
+ * embeds the error payload as JSON (`#error-page-data`) so a client component can
+ * hydrate/take over. Works with no front-end at all (the server page stands on
+ * its own); the shipped Vue/React components are layered on with the visual set.
  */
 final readonly class SpaStackRenderer implements StackRenderer
 {

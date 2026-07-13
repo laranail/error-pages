@@ -17,21 +17,23 @@ use Simtabi\Laranail\ErrorPages\Events\RenderingErrorPage;
 use Simtabi\Laranail\ErrorPages\Exceptions\ErrorPageRenderException;
 use Simtabi\Laranail\ErrorPages\Rendering\StackManager;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
-use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Throwable;
 
 /**
  * Wires the package into Laravel's error handling by two complementary paths, so
  * it COMPLEMENTS Ignition/Sentry/Flare rather than competing:
  *
- *   Path 1 (web/livewire) — push our thin errors dir into config('view.paths') so
- *   Laravel's native `errors::{code}` resolution finds it as a fallback (the app's
- *   own views still win, Ignition still renders dev 500s). No renderable, so it
- *   can't double-report or preempt the debug page.
+ *   Path 1 (server-HTML web: blade, and the planned livewire) — push our thin
+ *   errors dir into config('view.paths') so Laravel's native `errors::{code}`
+ *   resolution finds it as a fallback (the app's own views still win, Ignition
+ *   still renders dev 500s). No renderable, so it can't double-report or preempt
+ *   the debug page. Because this path is pure view precedence, `codes.intercept`
+ *   and `skipWhen()` govern Path 2 only (see the docs' coexistence page).
  *
- *   Path 2 (api/inertia/spa) — ONE gated renderable that defers (returns null) for
- *   validation/auth, the web context, non-intercepted codes, and consumer vetoes;
- *   its render is failure-safe (reports only OUR failure, then degrades).
+ *   Path 2 (api/inertia/spa/panel) — ONE gated renderable that defers (returns
+ *   null) for validation/auth, the server-HTML web context, non-intercepted
+ *   codes, and consumer vetoes; its render is failure-safe (reports only OUR
+ *   failure, then degrades down the fallback ladder).
  *
  * Registration is idempotent (Octane-safe) and dependencies resolve fresh per call.
  */
@@ -102,46 +104,44 @@ final class ErrorPageHandler
 
         $contexts = $this->app->make(ContextResolver::class);
         $contexts->using($errorPages->contextResolverOverride());
-        $context = $contexts->resolve($request);
+        $render = RenderContext::make($e, $request, $contexts->resolve($request), $stack);
 
         // Path 1 (native errors:: views) owns the web context for server-HTML
-        // stacks (blade/livewire). A web request under a Vue/React SPA stack is
-        // Path 2 (renders the shell + payload).
-        if ($context === 'web' && $stack->isServerHtml()) {
+        // stacks (blade/livewire). A web request under an Inertia/Vue/React stack
+        // is Path 2 (renders the Inertia page or SPA shell + payload).
+        if ($render->context === 'web' && $stack->isServerHtml()) {
             return null;
         }
 
-        $status = $e instanceof HttpExceptionInterface ? $e->getStatusCode() : 500;
-
-        if (! $this->handles($status) || $errorPages->shouldSkip($e, $request)) {
+        if (! $this->handles($render->status) || $errorPages->shouldSkip($e, $request)) {
             return null;
         }
 
         // Complement Ignition: for a genuine (non-HttpException) 500 in dev, defer
         // the HTML-ish contexts to the debug page; JSON is safe (Ignition is
         // HTML-only). render_debug_pages forces branded output in dev.
-        if ($this->shouldDeferToDebug($e, $context)) {
+        if ($this->shouldDeferToDebug($render)) {
             return null;
         }
 
-        event(new RenderingErrorPage($e, $context, $status));
+        event(new RenderingErrorPage($e, $render->context, $render->status));
 
         try {
             $response = $this->app->make(StackManager::class)
-                ->renderer($this->rendererKeyFor($context))
-                ->render($e, $request, $status);
+                ->renderer($render->rendererKey())
+                ->render($e, $request, $render->status);
 
             // Fallback ladder: a stack that cannot render (e.g. its packages are
             // not installed, or a custom driver opts out) degrades to the
             // guaranteed core HTML rather than Laravel's default — except API,
             // which stays JSON (an HTML body would be wrong for a JSON client).
-            if ($response === null && $context !== 'api') {
+            if ($response === null && $render->context !== 'api') {
                 $response = $this->app->make(ErrorResponseFactory::class)
-                    ->html($errorPages->htmlFor($e, $request), $status, $e);
+                    ->html($errorPages->htmlFor($e, $request), $render->status, $e);
             }
 
             if ($response !== null) {
-                event(new ErrorPageRendered($e, $context, $status));
+                event(new ErrorPageRendered($e, $render->context, $render->status));
             }
 
             return $response;
@@ -152,28 +152,15 @@ final class ErrorPageHandler
         }
     }
 
-    /**
-     * Map a resolved (context, stack) to a stack-renderer key. API is always
-     * JSON; Inertia is the Inertia renderer; a web SPA stack renders the shell;
-     * any custom context maps to a same-named consumer-registered driver.
-     */
-    private function rendererKeyFor(string $context): string
+    private function shouldDeferToDebug(RenderContext $render): bool
     {
-        return match ($context) {
-            'api' => 'json',
-            'inertia' => 'inertia',
-            'web' => 'spa',
-            default => $context,
-        };
-    }
-
-    private function shouldDeferToDebug(Throwable $e, string $context): bool
-    {
-        if ($context === 'api') {
+        // API is always branded — Ignition is HTML-only, so there is no debug
+        // page to defer to for a JSON client.
+        if ($render->context === 'api') {
             return false;
         }
 
-        return ! ($e instanceof HttpExceptionInterface)
+        return ! $render->isHttpException
             && (bool) $this->config->get('app.debug', false)
             && ! (bool) $this->config->get('error-pages.render_debug_pages', false);
     }

@@ -23,9 +23,12 @@ return [
     | Default stack
     |--------------------------------------------------------------------------
     |
-    | How the web/inertia page is produced: blade | livewire | inertia-vue |
-    | inertia-react | vue | react. The API context always renders RFC 7807 JSON.
-    | Overridable per request via the ErrorPages DSL.
+    | How the web/inertia page is produced: blade | inertia-vue | inertia-react |
+    | vue | react. The API context always renders RFC 7807 JSON. Overridable per
+    | request via the ErrorPages DSL.
+    |
+    | `livewire` is accepted as an alias of `blade` for now (both are server-HTML
+    | Path 1); a dedicated Livewire component ships with the visual template set.
     |
     */
 
@@ -64,6 +67,35 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Correlation id
+    |--------------------------------------------------------------------------
+    |
+    | The reference shown to the user ("Reference: …") and returned as
+    | `request_id` in the JSON payload. Read from the `header` when the proxy/app
+    | sets one; otherwise a short id is generated per render when `generate` is on.
+    |
+    */
+
+    'request_id' => [
+        'header' => env('ERROR_PAGES_REQUEST_ID_HEADER', 'X-Request-Id'),
+        'generate' => env('ERROR_PAGES_REQUEST_ID_GENERATE', true),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Problem type (RFC 7807)
+    |--------------------------------------------------------------------------
+    |
+    | Optional base URI for the JSON `type` member. When set, the payload's
+    | `type` becomes `{base}/{status}` (e.g. https://example.com/problems/404)
+    | instead of the default `about:blank`. Leave empty to keep `about:blank`.
+    |
+    */
+
+    'problem_type_base' => env('ERROR_PAGES_PROBLEM_TYPE_BASE', ''),
+
+    /*
+    |--------------------------------------------------------------------------
     | Theme
     |--------------------------------------------------------------------------
     |
@@ -90,19 +122,26 @@ return [
     | Codes
     |--------------------------------------------------------------------------
     |
-    | `intercept` lists the HTTP status codes this package takes over; every
-    | other code passes through to Laravel untouched. `fallbacks` also brands the
-    | generic 4xx/5xx pages for intercepted codes without a dedicated view.
+    | `intercept` lists the HTTP status codes the Path-2 renderable (api/inertia/
+    | spa/panel) takes over; every other code passes through to Laravel. Generic
+    | 4xx/5xx branding is automatic for the web context via Laravel's own
+    | `errors::{status}` → `errors::{n}xx` resolution (the package ships both
+    | `errors/4xx` and `errors/5xx` views).
     |
-    | Note: 419 renders only for API/Inertia (web passes through so the app's
-    | redirect-back flow wins); 422 (validation) and auth redirects always pass
-    | through — this is enforced by exception type, independent of this list.
+    | Scope note: `intercept` and `skipWhen()` govern Path 2 only. Path 1 (the
+    | server-HTML web context) is pure view precedence — the app's own
+    | `resources/views/errors/{code}.blade.php` overrides the package view; to
+    | pass a web code through entirely, publish an app view or disable the package.
+    |
+    | 422 (validation) and auth redirects always pass through — enforced by
+    | exception type, independent of this list. A web 419 (TokenMismatch/
+    | PageExpired) is branded like any other code; apps that want a redirect-back
+    | flow should handle that exception themselves.
     |
     */
 
     'codes' => [
         'intercept' => [401, 403, 404, 419, 429, 500, 502, 503, 504],
-        'fallbacks' => true,
     ],
 
     /*
@@ -110,15 +149,21 @@ return [
     | Assets
     |--------------------------------------------------------------------------
     |
-    | `route` (default) serves the committed bundle from a package route — no
-    | publish step, no Vite manifest dependency. `link` uses a published URL;
-    | `inline` embeds everything (max resilience). Critical CSS is always inlined
-    | so a page is never unstyled.
+    | Critical CSS is ALWAYS inlined so a page is never unstyled. This setting
+    | governs the optional progressive-enhancement JS bundle only:
+    |
+    |   route  (default) serves it from a package route — no publish, no Vite
+    |          manifest. `version` busts the cache on upgrade.
+    |   link   references a published URL (`asset('vendor/error-pages/…')`).
+    |   inline embeds the script in the page (max resilience, no extra request).
+    |   off    ships no enhancement JS (the page is fully functional without it).
     |
     */
 
     'assets' => [
         'mode' => env('ERROR_PAGES_ASSETS', 'route'),
+        'route' => '/_error-pages/assets',
+        'version' => env('ERROR_PAGES_ASSETS_VERSION'),
     ],
 
     /*
@@ -128,8 +173,10 @@ return [
     |
     | Branded pages take over production-style responses only; genuine unhandled
     | 500s in dev show Ignition's debug page (mechanism-driven, no env branch).
-    | `render_debug_pages` (api/inertia only) forces branded output in dev too.
-    | Use the preview route to design branded pages in dev without real errors.
+    | `render_debug_pages` (inertia/spa only) forces branded output in dev too;
+    | the API context is always branded (Ignition is HTML-only, so a JSON client
+    | has no debug page to defer to). Use the preview route to design branded
+    | pages in dev without real errors.
     |
     */
 
@@ -145,6 +192,13 @@ return [
     |--------------------------------------------------------------------------
     | Panel adapters
     |--------------------------------------------------------------------------
+    |
+    | Opt-in flags for the Filament/Nova panel renderers. Panel context is
+    | currently selected manually via the DSL (`ErrorPages::context(fn () =>
+    | Filament::getCurrentPanel() ? 'filament' : null)`); automatic detection and
+    | the Filament Plugin / Nova Tool ship with the panel visual set. A flag set
+    | to false makes the matching `filament`/`nova` driver decline to render.
+    |
     */
 
     'panels' => [
