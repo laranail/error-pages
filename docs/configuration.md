@@ -25,6 +25,7 @@ Every knob in `config/error-pages.php`, published with
 | `assets.route` | string | `/_error-pages/assets` | Prefix the enhancement bundle is served from in `route` mode. |
 | `assets.version` | ?string | `null` | Cache-bust token; derived from the bundle file when null. |
 | `render_debug_pages` | bool | `false` | Force branded output in dev for inertia/spa (API is always branded; web 500s stay with Ignition). |
+| `report.throttle` | int | `0` | Seconds to suppress repeat reports of the same renderer failure (`0` = report every time). |
 | `preview.enabled` | ?bool | `null` | Preview route; `null` = on only when `APP_DEBUG`. |
 | `preview.route` | string | `/_error-pages` | Preview route prefix. |
 | `panels.filament` / `panels.nova` | bool | `true` | Enable the panel drivers (selected via a `context()` override for now; auto-detection ships with the panel set). |
@@ -36,7 +37,10 @@ Every scalar has an `ERROR_PAGES_*` env override: `ERROR_PAGES_ENABLED`,
 `ERROR_PAGES_HOME_URL`, `ERROR_PAGES_LOCALE`, `ERROR_PAGES_REQUEST_ID_HEADER`,
 `ERROR_PAGES_REQUEST_ID_GENERATE`, `ERROR_PAGES_PROBLEM_TYPE_BASE`, `ERROR_PAGES_THEME`,
 `ERROR_PAGES_AUTO_DARK`, `ERROR_PAGES_ASSETS`, `ERROR_PAGES_ASSETS_VERSION`,
-`ERROR_PAGES_RENDER_DEBUG`, `ERROR_PAGES_PREVIEW`, `ERROR_PAGES_FILAMENT`, `ERROR_PAGES_NOVA`.
+`ERROR_PAGES_RENDER_DEBUG`, `ERROR_PAGES_REPORT_THROTTLE`, `ERROR_PAGES_PREVIEW`,
+`ERROR_PAGES_FILAMENT`, `ERROR_PAGES_NOVA`.
+
+A CSP nonce is DSL-only (`ErrorPages::nonce(...)`) since it is per-request — never a config key.
 
 ## Callbacks live in code, not config
 

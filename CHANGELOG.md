@@ -37,6 +37,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The bridge `Stack` enum adopts the org-standard `laranail/enumerator` (attribute-driven
   `label()`/`description()`, surfaced in the `about` section). The `Core\` enums stay plain
   to keep the engine framework-agnostic (arch-boundary test).
+- CSP nonce via `ErrorPages::nonce(Closure|string)` — threaded into the inline `<style>`,
+  the enhancement `<script>`, and the SPA payload script.
+- `report.throttle` (seconds) caps repeat reports of the same renderer failure (fails open).
+- Preview gallery at the preview route (`GET /_error-pages`) over every code × theme, and a
+  `?theme=` override on the per-code preview.
+- Consumer test helpers: `ErrorPages::fake()` + `assertRendered($code, stack:, theme:)` /
+  `assertNothingRendered()`.
+- Filament panel **auto-detection** (path-scoped, `panels.filament`-gated) — a request under a
+  Filament panel renders the panel context without a manual `context()`.
+- Vue (`presets/vue`) + React (`presets/react`) `ErrorPage` components and a shared payload
+  type/mount helper (`presets/shared/payload.ts`); a Livewire view (`presets/livewire`) — all
+  rendering the one shared DOM contract. Wired into `@laranail/error-pages-ui`.
 
 ### Changed
 

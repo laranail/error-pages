@@ -22,11 +22,13 @@
   ],
   "exports": {
     "./style.css": "./shared/critical.css",
-    "./vue": "./dist/vue.js",
-    "./react": "./dist/react.js"
+    "./payload": "./shared/payload.ts",
+    "./enhance": "./shared/enhance.js",
+    "./vue": "./vue/index.ts",
+    "./react": "./react/index.tsx"
   },
   "scripts": {
-    "build": "echo \"build wired up in Phase B (Vue/React components land with the canonical templates)\" && exit 0"
+    "build": "echo \"consumers bundle the .ts/.vue/.tsx sources via their own Vite/webpack; a prebuilt dist is added when the canonical templates land\" && exit 0"
   },
   "peerDependencies": {
     "react": ">=18",

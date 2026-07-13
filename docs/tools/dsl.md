@@ -10,7 +10,8 @@ package edits.
 |--------|--------|
 | `stack(string $stack)` | Override the default stack for this request lifecycle. |
 | `theme(string $preset)` | Override the theme preset. |
-| `context(Closure $resolver)` | Custom context detection — return a context string, or `null` to fall back to the default (Inertia → JSON `Accept` → `api/*` → web). |
+| `context(Closure $resolver)` | Custom context detection — return a context string, or `null` to fall back to the default (Filament panel → Inertia → JSON `Accept` → `api/*` → web). |
+| `nonce(Closure\|string $nonce)` | A CSP nonce (value or per-request resolver) put on the inline `<style>` and the enhancement `<script>` — for strict-CSP apps. |
 | `skipWhen(callable $predicate)` | `fn ($e, $request): bool` — pass matching cases through to Laravel untouched. |
 | `pipe(callable $stage)` | `fn (ErrorPage $page): ErrorPage` — enrich every page (support links, request id, solutions). |
 | `extend(string $stack, Closure $factory)` | Register/override a `StackRenderer` (see [Stacks](stacks.md)). |
@@ -52,10 +53,26 @@ Event::listen(ErrorPageRendered::class, function (ErrorPageRendered $e) {
 });
 ```
 
+## Testing helpers
+
+For consumer tests, `ErrorPages::fake()` records every rendered page; assert on them after:
+
+```php
+use Simtabi\Laranail\ErrorPages\Facades\ErrorPages;
+
+ErrorPages::fake();
+
+$this->get('/missing')->assertNotFound();
+
+ErrorPages::assertRendered(404);
+ErrorPages::assertRendered(404, stack: 'blade', theme: 'midnight'); // narrow by stack/theme
+ErrorPages::assertNothingRendered();                                // when no error occurred
+```
+
 ## Notes
 
 - The DSL is where **closures** live — never the published config file, so `config:cache`
-  keeps working.
+  keeps working (`nonce`, `context`, `skipWhen`, `pipe` are all DSL-only for this reason).
 - The `ErrorPages` instance is a singleton; configure it once at boot.
 
 ---

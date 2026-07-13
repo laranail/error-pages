@@ -23,7 +23,10 @@ Consumed, no duplication:
   its `errors::{code}` view path at `blade/`;
 - the **npm `@laranail/error-pages-ui`** package will build `shared/ + vue/ + react/`.
 
-> Status: `plain-php/template.php`, `shared/critical.css`, and `shared/enhance.js` ship today. The
-> `blade/`, `livewire/`, `inertia/`, `vue/`, and `react/` directories are placeholders — they are
-> populated from the canonical CSS-first Blade design, from which the other stacks are ported. Until
-> then, `plain-php/` + `shared/critical.css` are the working, guaranteed render for every stack.
+> Status: `plain-php/template.php`, `shared/{critical.css,enhance.js,payload.ts}`, the
+> `vue/` + `react/` components, and the `livewire/` view all ship today, all rendering the same
+> DOM contract from the one payload. Their **final CSS/visual design** is derived from the
+> canonical CSS-first Blade set (arriving next) — until then `shared/critical.css` styles them and
+> `plain-php/` is the guaranteed server render. Only `blade/` remains a placeholder (it *is* the
+> canonical design). The Livewire component *class* + auto-embed land once Livewire declares
+> Laravel 13 support.

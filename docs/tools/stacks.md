@@ -57,8 +57,11 @@ the Inertia renderer returns null when Inertia is not installed).
 
 ## Panel stacks
 
-`filament` and `nova` render a panel-tagged page. Full panel theming, the Filament plugin,
-the Nova tool, and automatic panel detection layer on when those packages are installed.
+`filament` and `nova` render a panel-tagged page. **Filament is auto-detected** — a request
+under a Filament panel's own path resolves to the `filament` context (path-scoped, so it
+never hijacks a normal route; toggle with `panels.filament`). Nova is Inertia-based, so route
+it through the `inertia` stack or select it explicitly with `ErrorPages::context(...)`. Full
+panel theming and the Filament plugin land with the panel visual set.
 
 ---
 [← Docs index](../../README.md#documentation)

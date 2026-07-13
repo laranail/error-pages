@@ -209,11 +209,13 @@ return [
     | Panel adapters
     |--------------------------------------------------------------------------
     |
-    | Opt-in flags for the Filament/Nova panel renderers. Panel context is
-    | currently selected manually via the DSL (`ErrorPages::context(fn () =>
-    | Filament::getCurrentPanel() ? 'filament' : null)`); automatic detection and
-    | the Filament Plugin / Nova Tool ship with the panel visual set. A flag set
-    | to false makes the matching `filament`/`nova` driver decline to render.
+    | Opt-in flags for the Filament/Nova panel renderers.
+    |
+    | `filament` is auto-detected: a request under a Filament panel's own path
+    | renders the panel-branded page (path-scoped, so it never hijacks a normal
+    | route; set false to disable). Nova is Inertia-based, so route it via the
+    | `inertia` stack or select it explicitly with `ErrorPages::context(fn () =>
+    | \Laravel\Nova\Nova::whatever() ? 'nova' : null)`.
     |
     */
 

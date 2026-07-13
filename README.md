@@ -48,6 +48,7 @@ Hosted at **<https://opensource.simtabi.com/documentation/laranail/error-pages/>
 - [Inertia and SPA error pages](docs/recipes/inertia-spa.md)
 - [Assets and progressive enhancement](docs/recipes/assets.md)
 - [Skipping and passthrough](docs/recipes/skip-and-veto.md)
+- [Testing against error pages](docs/recipes/testing.md)
 
 ### Project
 

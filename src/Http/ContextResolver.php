@@ -9,13 +9,18 @@ use Illuminate\Http\Request;
 
 /**
  * Maps a request to a render context. The built-in detection returns `web`,
- * `api`, or `inertia`; a consumer override (taking precedence) may return any
- * custom context string (e.g. `filament`, `nova`) that a registered stack driver
- * handles. Detection order: override → Inertia header → explicit JSON/`api/*` → web.
+ * `api`, `inertia`, or an auto-detected panel (`filament`); a consumer override
+ * (taking precedence) may return any custom context string that a registered
+ * stack driver handles. Detection order: override → Filament panel → Inertia
+ * header → explicit JSON/`api/*` → web.
  */
 final class ContextResolver
 {
     private ?Closure $override = null;
+
+    public function __construct(
+        private readonly PanelDetector $panels,
+    ) {}
 
     public function using(?Closure $override): void
     {
@@ -29,6 +34,11 @@ final class ContextResolver
             if (is_string($context) && $context !== '') {
                 return $context;
             }
+        }
+
+        $panel = $this->panels->detect($request);
+        if ($panel !== null) {
+            return $panel;
         }
 
         if ($request->hasHeader('X-Inertia')) {

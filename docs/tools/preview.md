@@ -3,19 +3,21 @@
 Design and review branded pages in development without triggering real errors — because in
 dev, real errors show Ignition.
 
-## Route
+## Routes
 
 While `APP_DEBUG=true` (or `preview.enabled = true`), the package registers:
 
 ```
-GET /_error-pages/{code}
+GET /_error-pages            → the gallery: every code × theme, linked
+GET /_error-pages/{code}     → one page; add ?theme= to override the theme
 ```
 
 `{code}` is a status code (`404`, `503`) or a generic key (`4xx`, `5xx`). Change the prefix
 with `config('error-pages.preview.route')`.
 
 ```
-http://localhost/_error-pages/503
+http://localhost/_error-pages                  # gallery index
+http://localhost/_error-pages/503?theme=crimson
 http://localhost/_error-pages/4xx
 ```
 
