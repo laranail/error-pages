@@ -16,6 +16,7 @@ use Throwable;
  * @method static \Simtabi\Laranail\ErrorPages\ErrorPages nonce(Closure|string $nonce)
  * @method static \Simtabi\Laranail\ErrorPages\ErrorPages skipWhen(callable $predicate)
  * @method static \Simtabi\Laranail\ErrorPages\ErrorPages pipe(callable $stage)
+ * @method static \Simtabi\Laranail\ErrorPages\ErrorPages extend(string $stack, Closure $factory)
  * @method static \Simtabi\Laranail\ErrorPages\ErrorPages fake()
  * @method static void assertRendered(int $code, ?string $stack = null, ?string $theme = null)
  * @method static void assertNothingRendered()

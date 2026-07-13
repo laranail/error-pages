@@ -18,7 +18,10 @@
     "dist",
     "shared",
     "vue",
-    "react"
+    "react",
+    "!**/*.test.ts",
+    "!**/*.test.tsx",
+    "!**/fixtures.ts"
   ],
   "exports": {
     "./style.css": "./shared/css/critical.css",
