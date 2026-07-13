@@ -36,6 +36,9 @@ jobs:
       - name: Verify the committed CSS is up to date
         run: git diff --exit-code shared/css/critical.css
 
+      - name: Check WCAG AA contrast
+        run: npm run check:contrast
+
       - name: Check formatting
         run: npm run format:check
 

@@ -33,10 +33,11 @@
   "scripts": {
     "build": "npm run build:css",
     "build:css": "sass shared/scss/critical.scss shared/css/critical.css --no-source-map --style=expanded",
+    "check:contrast": "node scripts/check-contrast.mjs",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
-    "format": "prettier --write \"**/*.{ts,tsx,vue,scss,json}\"",
-    "format:check": "prettier --check \"**/*.{ts,tsx,vue,scss,json}\""
+    "format": "prettier --write \"**/*.{js,mjs,ts,tsx,vue,scss,json}\"",
+    "format:check": "prettier --check \"**/*.{js,mjs,ts,tsx,vue,scss,json}\""
   },
   "peerDependencies": {
     "react": ">=18",

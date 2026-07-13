@@ -34,7 +34,9 @@
         navigator.clipboard.writeText((ref.textContent || '').trim()).then(function () {
           var was = btn.textContent;
           btn.textContent = 'Copied';
-          window.setTimeout(function () { btn.textContent = was; }, 2000);
+          window.setTimeout(function () {
+            btn.textContent = was;
+          }, 2000);
         });
       });
       ref.parentNode.appendChild(btn);

@@ -96,6 +96,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- a11y: all five themes (light + dark) now meet **WCAG 2.1 AA** contrast. Fixed low-contrast
+  `muted` text on midnight/emerald, and added an `--ep-on-accent` token so primary-button text
+  is legible on every accent. A `check:contrast` gate (in the `assets` CI) prevents regressions.
 - i18n/a11y: the rendered page's `<html lang>` and `dir` now reflect the resolved locale
   instead of a hard-coded `en`/`ltr` — right-to-left locales (`ar`, `he`, `fa`, …) render
   `dir="rtl"`. Threaded via `ThemeSettings` (Core stays framework-agnostic; the bridge

@@ -5,6 +5,9 @@
 
 // Keys are quoted strings so interpolation never treats a preset name that is
 // also a CSS colour keyword (e.g. `crimson`) as a colour value.
+// `muted` and `on-accent` (the text colour on a primary button) are tuned so
+// every text/background pair meets WCAG 2.1 AA (>=4.5:1 normal, >=3:1 for the
+// large status). Guarded by `npm run check:contrast`.
 $themes: (
   'default': (
     'light': (
@@ -14,6 +17,7 @@ $themes: (
       muted: #64748b,
       accent: #4f46e5,
       accent-2: #7c3aed,
+      on-accent: #ffffff,
       border: #e2e8f0,
     ),
     'dark': (
@@ -23,6 +27,7 @@ $themes: (
       muted: #94a3b8,
       accent: #818cf8,
       accent-2: #a78bfa,
+      on-accent: #0b1120,
       border: #1f2937,
     ),
   ),
@@ -34,6 +39,7 @@ $themes: (
       muted: #64748b,
       accent: #475569,
       accent-2: #334155,
+      on-accent: #ffffff,
       border: #e2e8f0,
     ),
     'dark': (
@@ -43,6 +49,7 @@ $themes: (
       muted: #94a3b8,
       accent: #cbd5e1,
       accent-2: #94a3b8,
+      on-accent: #0b1120,
       border: #334155,
     ),
   ),
@@ -51,18 +58,20 @@ $themes: (
       bg: #e8ecfb,
       surface: #fff,
       text: #1e1b4b,
-      muted: #6366f1,
+      muted: #5b5fd6,
       accent: #4f46e5,
       accent-2: #4338ca,
+      on-accent: #ffffff,
       border: #dfe3fb,
     ),
     'dark': (
       bg: #020617,
       surface: #0f172a,
       text: #e2e8f0,
-      muted: #64748b,
+      muted: #94a3b8,
       accent: #6366f1,
       accent-2: #818cf8,
+      on-accent: #000000,
       border: #1e293b,
     ),
   ),
@@ -74,15 +83,17 @@ $themes: (
       muted: #4b5563,
       accent: #059669,
       accent-2: #047857,
+      on-accent: #0b1120,
       border: #d1fae5,
     ),
     'dark': (
       bg: #071a12,
       surface: #0f2a1e,
       text: #ecfdf5,
-      muted: #6b7280,
+      muted: #94a3b8,
       accent: #34d399,
       accent-2: #10b981,
+      on-accent: #0b1120,
       border: #14532d,
     ),
   ),
@@ -94,6 +105,7 @@ $themes: (
       muted: #6b7280,
       accent: #dc2626,
       accent-2: #b91c1c,
+      on-accent: #ffffff,
       border: #fee2e2,
     ),
     'dark': (
@@ -103,6 +115,7 @@ $themes: (
       muted: #9ca3af,
       accent: #f87171,
       accent-2: #ef4444,
+      on-accent: #0b1120,
       border: #4c1d1d,
     ),
   ),
