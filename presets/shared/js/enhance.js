@@ -43,15 +43,30 @@
     }
 
     // Live countdown for a retryable page (a Retry-After meta refresh is set).
+    // The templates need no special markup: if a `[data-ep-countdown]` slot is
+    // present it is used, otherwise a subtle retry line is created so the
+    // countdown is visible on every stack. The browser still auto-reloads via
+    // the meta refresh with or without this.
     var meta = document.querySelector('meta[http-equiv="refresh" i]');
-    var slot = document.querySelector('[data-ep-countdown]');
-    if (!meta || !slot) {
+    if (!meta) {
       return;
     }
     var seconds = parseInt((meta.getAttribute('content') || '').split(';')[0], 10);
     if (!(seconds > 0)) {
       return;
     }
+
+    var slot = document.querySelector('[data-ep-countdown]');
+    if (!slot) {
+      var host = document.querySelector('.ep-card') || document.body;
+      var line = document.createElement('p');
+      line.className = 'ep-retry';
+      slot = document.createElement('span');
+      slot.setAttribute('data-ep-countdown', '');
+      line.append('Retrying in ', slot, 's…');
+      host.appendChild(line);
+    }
+
     var tick = function () {
       slot.textContent = String(seconds);
       if (seconds-- <= 0) {

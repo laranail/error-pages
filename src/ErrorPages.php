@@ -19,8 +19,10 @@ use Simtabi\Laranail\ErrorPages\Core\ValueObjects\ThemeSettings;
 use Simtabi\Laranail\ErrorPages\Enums\Stack;
 use Simtabi\Laranail\ErrorPages\Events\ErrorPageRendered;
 use Simtabi\Laranail\ErrorPages\Events\RenderingErrorPage;
+use Simtabi\Laranail\ErrorPages\Exceptions\ErrorPageRenderException;
 use Simtabi\Laranail\ErrorPages\Rendering\StackManager;
 use Simtabi\Laranail\ErrorPages\Support\ThemeResolver;
+use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Throwable;
 
@@ -280,7 +282,11 @@ final class ErrorPages
         // AccessDeniedHttpException(...). Those must never reach the end user.
         if ($status < 500 && $e instanceof HttpExceptionInterface && ! $e->getPrevious() instanceof Throwable) {
             $message = trim($e->getMessage());
-            if ($message !== '') {
+            // Skip the framework's default reason phrase (e.g. `abort(404)` sets
+            // "Not Found") — it would replace the nicer localized copy with a bare
+            // status phrase. Only a *custom* developer message wins.
+            $reasonPhrase = SymfonyResponse::$statusTexts[$status] ?? '';
+            if ($message !== '' && $message !== $reasonPhrase) {
                 $page = new ErrorPage($page->key, $page->code, $page->title, $message, $page->retryable, $page->retryAfter, $page->requestId);
             }
         }
@@ -442,11 +448,39 @@ final class ErrorPages
         $status = $this->statusFor($e);
 
         event(new RenderingErrorPage($e, 'web', $status));
-        $html = $this->htmlFor($e, $request);
+
+        try {
+            $html = $this->htmlFor($e, $request);
+        } catch (Throwable $rendererFailure) {
+            // Parity with the Path-2 degrade: never let a failing pipe stage /
+            // translation / theme throw out of the `errors::{code}` view. Report
+            // only OUR failure and return a guaranteed static shell.
+            report(new ErrorPageRenderException($rendererFailure));
+            $html = $this->minimalShell($status);
+        }
+
         event(new ErrorPageRendered($e, 'web', $status));
         $this->recordRender($status, 'web');
 
         return $html;
+    }
+
+    /**
+     * A dependency-free static shell, used only if the branded web render itself
+     * throws — so Path 1 still returns branded-ish HTML and the lifecycle events
+     * and recording still fire.
+     */
+    private function minimalShell(int $status): string
+    {
+        $code = (string) $status;
+
+        return '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">'
+            . '<meta name="viewport" content="width=device-width, initial-scale=1">'
+            . '<meta name="robots" content="noindex, nofollow">'
+            . '<title>' . $code . '</title></head>'
+            . '<body style="font-family:system-ui,sans-serif;text-align:center;padding:4rem 1rem;color:#0f172a">'
+            . '<h1 style="font-size:3rem;margin:0">' . $code . '</h1>'
+            . '<p style="color:#64748b">An error occurred.</p></body></html>';
     }
 
     /**

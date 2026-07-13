@@ -107,9 +107,10 @@ final class ErrorPageHandler
         $contexts->using($errorPages->contextResolverOverride());
         $render = RenderContext::make($e, $request, $contexts->resolve($request), $stack);
 
-        // Path 1 (native errors:: views) owns the web context for server-HTML
-        // stacks (blade/livewire). A web request under an Inertia/Vue/React stack
-        // is Path 2 (renders the Inertia page or SPA shell + payload).
+        // Path 1 (native errors:: views) owns the web context for the server-HTML
+        // `blade` stack only. A web request under a livewire/Inertia/Vue/React
+        // stack is Path 2 (renders the full-page Livewire component, Inertia page,
+        // or SPA shell + payload).
         if ($render->context === 'web' && $stack->isServerHtml()) {
             return null;
         }

@@ -35,7 +35,10 @@ it('inlines the enhancement script in inline mode', function (): void {
 
     $response = $this->get('/asset-inline-missing');
 
-    expect($response->getContent())->toContain('error-pages progressive enhancement')
+    $response->assertStatus(404);
+    expect($response->getContent())
+        ->toContain('class="ep-status"')
+        ->toContain('error-pages progressive enhancement')
         ->not->toContain('/_error-pages/assets/error-pages.js');
 });
 
@@ -44,7 +47,10 @@ it('ships no enhancement script when assets are off', function (): void {
 
     $response = $this->get('/asset-off-missing');
 
-    expect($response->getContent())->not->toContain('error-pages.js');
+    $response->assertStatus(404);
+    expect($response->getContent())
+        ->toContain('class="ep-status"')
+        ->not->toContain('error-pages.js');
 });
 
 it('references a published URL in link mode', function (): void {

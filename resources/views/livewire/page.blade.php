@@ -7,6 +7,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
 <meta name="color-scheme" content="{{ $page['theme']['autoDark'] ? 'light dark' : 'light' }}">
+@if($page['retryable'] && $page['retryAfter'] !== null)
+    <meta http-equiv="refresh" content="{{ (int) $page['retryAfter'] }}">
+@endif
 <title>{{ $page['code'] }} &middot; {{ $page['title'] }}</title>
 <style>{!! $criticalCss !!}{!! $themeCss !!}</style>
 @livewireStyles

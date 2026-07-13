@@ -3,8 +3,10 @@
 declare(strict_types=1);
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Route;
 use Simtabi\Laranail\ErrorPages\ErrorPages;
+use Simtabi\Laranail\ErrorPages\Events\ErrorPageRendered;
 
 it('renders a branded HTML page for a web 404 (Path 1)', function (): void {
     $response = $this->get('/definitely-missing');
@@ -76,6 +78,29 @@ it('honours a consumer skipWhen veto', function (): void {
 
     $response->assertStatus(404);
     expect($response->headers->get('content-type'))->not->toContain('problem+json');
+});
+
+it('keeps localized copy when a 4xx message is only the default reason phrase', function (): void {
+    Route::get('/reason', fn () => abort(404, 'Not Found')); // Symfony's default phrase
+
+    expect($this->get('/reason')->getContent())
+        ->toContain('could not be found') // the localized 404 copy is kept
+        ->not->toContain('<p class="ep-message">Not Found</p>');
+});
+
+it('degrades Path 1 to a static shell when the branded render throws', function (): void {
+    app(ErrorPages::class)
+        ->pipe(function (): never {
+            throw new RuntimeException('boom inside a pipe stage');
+        });
+
+    Event::fake([ErrorPageRendered::class]);
+
+    $response = $this->get('/path1-boom');
+
+    $response->assertStatus(404);
+    expect($response->getContent())->toContain('404')->not->toContain('ep-shell');
+    Event::assertDispatched(ErrorPageRendered::class);
 });
 
 it('renders a page by code and by generic key (preview / design QA)', function (): void {

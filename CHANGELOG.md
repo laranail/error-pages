@@ -99,6 +99,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- The progressive-enhancement **retry countdown now works** — `enhance.js` creates its own
+  countdown element from the meta-refresh (no template previously emitted `[data-ep-countdown]`,
+  so it was a no-op), and the copy-reference button + retry line are now styled (`.ep-copy`/
+  `.ep-retry`).
+- The full-page **Livewire** stack now emits the retryable `<meta http-equiv="refresh">` for
+  transient codes — parity with the blade and SPA stacks.
+- **Path 1 is now failure-safe**: if the branded web render throws (a bad `pipe()` stage,
+  translation, or theme), `renderForWeb()` degrades to a static shell, reports only the
+  wrapped `ErrorPageRenderException`, and still fires `ErrorPageRendered` — matching Path 2.
+- A 4xx message equal to the framework's default reason phrase (e.g. `abort(404, 'Not Found')`)
+  no longer overrides the nicer localized copy.
 - a11y: all five themes (light + dark) now meet **WCAG 2.1 AA** contrast. Fixed low-contrast
   `muted` text on midnight/emerald, and added an `--ep-on-accent` token so primary-button text
   is legible on every accent. A `check:contrast` gate (in the `assets` CI) prevents regressions.

@@ -10,7 +10,7 @@ Every knob in `config/error-pages.php`, published with
 | `enabled` | bool | `true` | Master switch. When false the package renders nothing (Laravel/Ignition untouched). |
 | `stack` | string | `blade` | Default stack: `blade` (Path 1), `livewire`, `inertia-vue`, `inertia-react`, `vue`, `react` (Path 2). |
 | `brand.name` | string | `APP_NAME` | Brand shown on the page. |
-| `brand.url` | string | `APP_URL` | Brand link. |
+| `brand.url` | string | `APP_URL` | Fallback for `home_url` (the resolved value is the "Back to home" link); `home_url` wins when set. |
 | `brand.logo` | ?string | `null` | Logo URL (rendered as `<img>`). |
 | `home_url` | string | `APP_URL` | Where "home"/retry links point. |
 | `content.default_locale` | string | `APP_LOCALE` | Locale for the copy (falls back to the ambient app locale when empty); also sets the page `<html lang>` and `dir` (RTL-aware for `ar`/`he`/`fa`/…). |
