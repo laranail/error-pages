@@ -33,7 +33,7 @@ final class ErrorPagesServiceProvider extends PackageServiceProvider
     public function configurePackage(Package $package): void
     {
         $package
-            ->name('laranail/laravel-error-pages')
+            ->name('laranail/error-pages')
             ->setPublishTagId('error-pages')
             ->withoutConfigNamespacing()
             ->hasConfigFile('error-pages')
