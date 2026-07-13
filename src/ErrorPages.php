@@ -183,31 +183,19 @@ final class ErrorPages
     public function isolateOctaneRequest(): void
     {
         if ($this->baseline === null) {
-            $this->baseline = $this->captureState();
+            $this->baseline = [
+                'skip' => $this->skipPredicates,
+                'context' => $this->contextResolver,
+                'stack' => $this->stackOverride,
+                'theme' => $this->themeOverride,
+                'nonce' => $this->nonce,
+                'pipeline' => $this->pipeline->snapshot(),
+            ];
 
             return;
         }
 
-        $this->applyState($this->baseline);
-    }
-
-    private function captureState(): array
-    {
-        return [
-            'skip' => $this->skipPredicates,
-            'context' => $this->contextResolver,
-            'stack' => $this->stackOverride,
-            'theme' => $this->themeOverride,
-            'nonce' => $this->nonce,
-            'pipeline' => $this->pipeline->snapshot(),
-        ];
-    }
-
-    /**
-     * @param  DslState  $state
-     */
-    private function applyState(array $state): void
-    {
+        $state = $this->baseline;
         $this->skipPredicates = $state['skip'];
         $this->contextResolver = $state['context'];
         $this->stackOverride = $state['stack'];
