@@ -1,19 +1,18 @@
 {
-    "name": "laranail/server-error-pages",
-    "description": "Branded, self-contained error pages for Laravel that survive total app failure: dynamic Blade views, static HTML for when PHP is down (502/503/504), and generated Apache/Nginx config, all from one component source.",
+    "name": "laranail/laravel-error-pages",
+    "description": "Beautiful, branded production error and exception pages for Laravel that complement Ignition — Blade, API/JSON, Inertia, Filament and Nova, all Alpine-enhanced and fully configurable.",
     "keywords": [
         "laravel",
         "error-pages",
+        "exception-handler",
         "http-errors",
-        "maintenance",
-        "static-html",
-        "nginx",
-        "apache",
-        "shared-hosting",
-        "vps",
+        "inertia",
+        "filament",
+        "nova",
+        "ignition",
         "laranail"
     ],
-    "homepage": "https://opensource.simtabi.com/products/laranail/server-error-pages",
+    "homepage": "https://opensource.simtabi.com/products/laranail/laravel-error-pages",
     "license": "MIT",
     "authors": [
         {
@@ -29,20 +28,19 @@
         }
     ],
     "support": {
-        "issues": "https://github.com/laranail/server-error-pages/issues",
-        "source": "https://github.com/laranail/server-error-pages",
-        "docs": "https://opensource.simtabi.com/documentation/laranail/server-error-pages/"
+        "issues": "https://github.com/laranail/laravel-error-pages/issues",
+        "source": "https://github.com/laranail/laravel-error-pages",
+        "docs": "https://opensource.simtabi.com/documentation/laranail/laravel-error-pages/"
     },
     "require": {
         "php": "^8.4.1 || ^8.5",
-        "illuminate/console": "^13.0",
         "illuminate/contracts": "^13.0",
-        "illuminate/filesystem": "^13.0",
+        "illuminate/http": "^13.0",
         "illuminate/support": "^13.0",
         "illuminate/translation": "^13.0",
         "illuminate/view": "^13.0",
         "laranail/console": "^0.1",
-        "laranail/enumerator": "^0.1",
+        "laranail/error-pages": "*",
         "laranail/package-tools": "^0.1"
     },
     "require-dev": {
@@ -59,12 +57,12 @@
     },
     "autoload": {
         "psr-4": {
-            "Simtabi\\Laranail\\ServerErrorPages\\": "src/"
+            "Simtabi\\Laranail\\LaravelErrorPages\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Simtabi\\Laranail\\ServerErrorPages\\Tests\\": "tests/"
+            "Simtabi\\Laranail\\LaravelErrorPages\\Tests\\": "tests/"
         }
     },
     "scripts": {
@@ -79,17 +77,19 @@
             "@pint",
             "@phpstan",
             "@rector"
-        ],
-        "audit": "composer audit"
+        ]
     },
     "extra": {
         "laravel": {
             "providers": [
-                "Simtabi\\Laranail\\ServerErrorPages\\Providers\\ServerErrorPagesServiceProvider"
-            ]
+                "Simtabi\\Laranail\\LaravelErrorPages\\Providers\\ErrorPagesServiceProvider"
+            ],
+            "aliases": {
+                "ErrorPages": "Simtabi\\Laranail\\LaravelErrorPages\\Facades\\ErrorPages"
+            }
         },
         "branch-alias": {
-            "dev-main": "0.1.x-dev"
+            "dev-main": "0.2.x-dev"
         }
     },
     "config": {
@@ -103,12 +103,29 @@
     "prefer-stable": true,
     "repositories": [
         {
-            "type": "vcs",
-            "url": "https://github.com/laranail/console"
+            "type": "path",
+            "url": "../error-pages",
+            "options": {
+                "symlink": true
+            }
+        },
+        {
+            "type": "path",
+            "url": "../tools/console",
+            "options": {
+                "symlink": true
+            }
+        },
+        {
+            "type": "path",
+            "url": "../package/tools",
+            "options": {
+                "symlink": true
+            }
         },
         {
             "type": "vcs",
-            "url": "https://github.com/laranail/enumerator"
+            "url": "https://github.com/laranail/console"
         },
         {
             "type": "vcs",

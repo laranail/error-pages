@@ -2,23 +2,24 @@
 
 declare(strict_types=1);
 
-namespace Simtabi\Laranail\ServerErrorPages\Content;
+namespace Simtabi\Laranail\LaravelErrorPages\Content;
 
 use Illuminate\Contracts\Translation\Translator;
-use Simtabi\Laranail\ServerErrorPages\Contracts\ContentRepository;
+use Simtabi\Laranail\ErrorPages\Contracts\ContentRepository;
 
 /**
- * File-managed content via Laravel translations. Titles/messages come from
- * `server-error-pages::errors.{key}.{field}`; an app-published
- * `lang/vendor/server-error-pages/{locale}/errors.php` overrides the package
- * automatically, and a missing key returns null so the caller falls back to the
- * HttpStatus enum default. No database.
+ * Content overrides backed by Laravel translations
+ * (`error-pages::errors.{key}.{title|message}`). App-published
+ * `lang/vendor/error-pages/{locale}/errors.php` overrides the package copy; a
+ * missing key returns null so the core factory falls back to the enum default.
  */
 final readonly class TranslationContentRepository implements ContentRepository
 {
-    private const string NAMESPACE = 'server-error-pages::errors';
+    private const string NAMESPACE = 'error-pages::errors';
 
-    public function __construct(private Translator $translator) {}
+    public function __construct(
+        private Translator $translator,
+    ) {}
 
     public function overridesFor(string $key, ?string $locale = null): array
     {

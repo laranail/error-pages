@@ -2,6 +2,6 @@
 
 declare(strict_types=1);
 
-use Simtabi\Laranail\ServerErrorPages\Tests\TestCase;
+use Simtabi\Laranail\LaravelErrorPages\Tests\TestCase;
 
-uses(TestCase::class)->in('Feature', 'Unit');
+uses(TestCase::class)->in('Feature');

@@ -2,83 +2,85 @@
 
 declare(strict_types=1);
 
-use Illuminate\Support\Facades\File;
-use Simtabi\Laranail\ServerErrorPages\Facades\ServerErrorPages;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
+use Simtabi\Laranail\LaravelErrorPages\ErrorPages;
 
-it('loads config under the laranail.server-error-pages key', function (): void {
-    expect(config('laranail.server-error-pages.codes.enabled'))->toContain(404, 402);
-});
+it('renders a branded HTML page for a web 404 (Path 1)', function (): void {
+    $response = $this->get('/definitely-missing');
 
-it('renders a dynamic page that LINKS the external assets (no inline)', function (): void {
-    $html = ServerErrorPages::htmlFor(404);
-
-    expect($html)
-        ->toContain('<!DOCTYPE html>')
+    $response->assertStatus(404);
+    expect($response->getContent())
+        ->toContain('class="ep-status"')
         ->toContain('>404<')
-        ->toContain('Page not found')                                  // from translations
-        ->toContain('href="/vendor/server-error-pages/css/error-pages.css"')
-        ->toContain('src="/vendor/server-error-pages/js/error-pages.js"')
-        ->toContain('sep-theme-default')
-        ->toContain('sep-badge')
-        ->not->toContain('<style>')
-        ->not->toContain('window.__sep');
+        ->toContain('ep-theme-default');
 });
 
-it('resolves content through translations; an app override wins, missing falls to default', function (): void {
-    $dir = lang_path('vendor/server-error-pages/en');
-    File::ensureDirectoryExists($dir);
-    File::put($dir . '/errors.php', "<?php\n\nreturn ['404' => ['title' => 'Not here']];\n");
+it('renders branded RFC 7807 JSON for an API 404 (Path 2)', function (): void {
+    $response = $this->getJson('/definitely-missing');
 
-    expect(ServerErrorPages::page(404)->title)->toBe('Not here')            // app override wins
-        ->and(ServerErrorPages::page(500)->title)->toBe('Something went wrong'); // package/enum default
-
-    File::deleteDirectory(lang_path('vendor/server-error-pages'));
+    $response->assertStatus(404)->assertJson(['status' => 404, 'type' => 'about:blank']);
+    expect($response->headers->get('content-type'))->toContain('application/problem+json');
 });
 
-it('keeps the number but uses generic copy for non-enum codes', function (): void {
-    $client = ServerErrorPages::page(418);
-    $server = ServerErrorPages::page(599);
+it('shows a developer 4xx abort message but never leaks a 5xx message', function (): void {
+    Route::get('/forbidden', fn () => abort(403, 'No entry here'));
+    Route::get('/boom', fn () => throw new RuntimeException('SECRET internal detail'));
 
-    expect($client->key)->toBe('418')
-        ->and($client->title)->toBe('This page is unavailable')
-        ->and($server->key)->toBe('599')
-        ->and($server->retryable)->toBeTrue();
+    expect($this->get('/forbidden')->getContent())->toContain('No entry here');
+
+    $boom = $this->get('/boom');
+    $boom->assertStatus(500);
+    expect($boom->getContent())
+        ->toContain('>500<')
+        ->not->toContain('SECRET internal detail');
 });
 
-it('adds 402 as a first-class branded page', function (): void {
-    expect(ServerErrorPages::page(402)->title)->toBe('Payment required')
-        ->and(ServerErrorPages::htmlFor(402))->toContain('Payment required');
+it('propagates Retry-After and no-store on a transient API error', function (): void {
+    Route::get('/down', fn () => abort(503));
+
+    $response = $this->getJson('/down');
+
+    $response->assertStatus(503);
+    expect($response->headers->get('Retry-After'))->not->toBeNull()
+        ->and($response->headers->get('Cache-Control'))->toContain('no-store')
+        ->and($response->headers->get('X-Robots-Tag'))->toBe('noindex');
 });
 
-it('builds linked static pages + copies the bundle + merges server config', function (): void {
-    $dir = sys_get_temp_dir() . '/sep-' . bin2hex(random_bytes(4));
-    $assets = sys_get_temp_dir() . '/sep-a-' . bin2hex(random_bytes(4));
+it('passes validation through untouched (no branded JSON)', function (): void {
+    Route::post('/validate', fn (Request $request) => $request->validate(['name' => 'required']));
 
-    config()->set('laranail.server-error-pages.output.disk');
-    config()->set('laranail.server-error-pages.output.path', $dir);
-    config()->set('laranail.server-error-pages.output.assets_path', $assets);
-    config()->set('laranail.server-error-pages.server.apache.output', $dir . '/.htaccess');
-    config()->set('laranail.server-error-pages.server.nginx.output', $dir . '/errors.conf');
+    $response = $this->postJson('/validate', []);
 
-    $this->artisan('server-error-pages:build')->assertSuccessful();
-
-    expect(file_exists($dir . '/404.html'))->toBeTrue()
-        ->and(file_exists($dir . '/5xx.html'))->toBeTrue()
-        ->and(file_exists($assets . '/css/error-pages.css'))->toBeTrue()
-        ->and(file_exists($assets . '/js/error-pages.js'))->toBeTrue()
-        ->and(file_exists($dir . '/.htaccess'))->toBeTrue();
-
-    expect(file_get_contents($dir . '/404.html'))
-        ->toContain('>404<')
-        ->toContain('href="/vendor/server-error-pages/css/error-pages.css"');
-    expect(file_get_contents($dir . '/.htaccess'))->toContain('ErrorDocument 404 /errors/404.html');
-
-    File::deleteDirectory($dir);
-    File::deleteDirectory($assets);
+    $response->assertStatus(422)->assertJsonStructure(['message', 'errors']);
+    expect($response->headers->get('content-type'))->not->toContain('problem+json');
 });
 
-it('is the same component for dynamic and static output', function (): void {
-    expect(ServerErrorPages::htmlFor(503))
-        ->toContain('Be right back')
-        ->toContain('http-equiv="refresh"');
+it('does not intercept non-configured status codes (e.g. 402 API)', function (): void {
+    Route::get('/pay', fn () => abort(402));
+
+    // 402 is not in codes.intercept → passes through to Laravel's default JSON.
+    $response = $this->getJson('/pay');
+
+    $response->assertStatus(402);
+    expect($response->headers->get('content-type'))->not->toContain('problem+json');
+});
+
+it('honours a consumer skipWhen veto', function (): void {
+    app(ErrorPages::class)
+        ->skipWhen(fn ($e, $request): bool => $request?->is('webhooks/*') === true);
+
+    Route::get('webhooks/x', fn () => abort(404));
+
+    $response = $this->getJson('/webhooks/x');
+
+    $response->assertStatus(404);
+    expect($response->headers->get('content-type'))->not->toContain('problem+json');
+});
+
+it('renders a page by code and by generic key (preview / design QA)', function (): void {
+    $facade = Simtabi\Laranail\LaravelErrorPages\Facades\ErrorPages::class;
+
+    expect($facade::htmlForCode(503))->toContain('>503<')->toContain('Be right back')
+        ->and($facade::htmlForKey('4xx'))->toContain('>4xx<');
 });
