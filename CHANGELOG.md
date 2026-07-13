@@ -111,6 +111,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Path 1 is now failure-safe**: if the branded web render throws (a bad `pipe()` stage,
   translation, or theme), `renderForWeb()` degrades to a static shell, reports only the
   wrapped `ErrorPageRenderException`, and still fires `ErrorPageRendered` — matching Path 2.
+  Both paths now report through one `FailureReporter`, so `report.throttle` and fail-silent
+  reporting (a broken log channel can't break the fallback) apply uniformly.
 - A 4xx message equal to the framework's default reason phrase (e.g. `abort(404, 'Not Found')`)
   no longer overrides the nicer localized copy.
 - a11y: all five themes (light + dark) now meet **WCAG 2.1 AA** contrast. Fixed low-contrast

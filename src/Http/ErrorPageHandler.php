@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Simtabi\Laranail\ErrorPages\Http;
 
 use Illuminate\Auth\AuthenticationException;
-use Illuminate\Contracts\Cache\Repository as CacheRepository;
 use Illuminate\Contracts\Config\Repository as Config;
 use Illuminate\Contracts\Debug\ExceptionHandler;
 use Illuminate\Contracts\Foundation\Application;
@@ -15,8 +14,8 @@ use Simtabi\Laranail\ErrorPages\Enums\Stack;
 use Simtabi\Laranail\ErrorPages\ErrorPages;
 use Simtabi\Laranail\ErrorPages\Events\ErrorPageRendered;
 use Simtabi\Laranail\ErrorPages\Events\RenderingErrorPage;
-use Simtabi\Laranail\ErrorPages\Exceptions\ErrorPageRenderException;
 use Simtabi\Laranail\ErrorPages\Rendering\StackManager;
+use Simtabi\Laranail\ErrorPages\Support\FailureReporter;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 use Throwable;
 
@@ -149,45 +148,10 @@ final class ErrorPageHandler
 
             return $response;
         } catch (Throwable $rendererFailure) {
-            $this->reportFailure($rendererFailure);
+            $this->app->make(FailureReporter::class)->report($rendererFailure);
 
             return null;
         }
-    }
-
-    /**
-     * Report OUR renderer failure (never the original exception — the framework
-     * already reported it). Optionally throttled by `report.throttle` seconds per
-     * failure signature so a persistently-broken renderer can't flood the log; the
-     * throttle fails open (a cache error still reports).
-     */
-    private function reportFailure(Throwable $rendererFailure): void
-    {
-        $throttle = (int) $this->config->get('error-pages.report.throttle', 0);
-
-        if ($throttle > 0 && $this->throttled($rendererFailure, $throttle)) {
-            return;
-        }
-
-        report(new ErrorPageRenderException($rendererFailure));
-    }
-
-    private function throttled(Throwable $failure, int $seconds): bool
-    {
-        try {
-            $cache = $this->app->make(CacheRepository::class);
-            $key = 'error-pages:report:' . sha1($failure::class . '|' . $failure->getMessage());
-
-            if ($cache->get($key) !== null) {
-                return true;
-            }
-
-            $cache->put($key, true, $seconds);
-        } catch (Throwable) {
-            // Fail open: never let the throttle bookkeeping suppress a report.
-        }
-
-        return false;
     }
 
     private function shouldDeferToDebug(RenderContext $render): bool

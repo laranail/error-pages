@@ -45,3 +45,20 @@ it('throttles repeat reports of the same renderer failure', function (): void {
 
     Exceptions::assertReportedCount(1);
 });
+
+it('throttles Path 1 (web) render failures too, via the shared reporter', function (): void {
+    config()->set('error-pages.report.throttle', 300);
+    Exceptions::fake();
+
+    // A throwing pipe makes the web (Path 1) render fail → renderForWeb degrades.
+    app(ErrorPages::class)->pipe(function (): never {
+        throw new RuntimeException('web render exploded');
+    });
+
+    $this->get('/p1-throttle-a')->assertStatus(404); // degraded to the static shell
+    $this->get('/p1-throttle-b');
+    $this->get('/p1-throttle-c');
+
+    Exceptions::assertReported(ErrorPageRenderException::class);
+    Exceptions::assertReportedCount(1);
+});

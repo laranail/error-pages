@@ -19,8 +19,8 @@ use Simtabi\Laranail\ErrorPages\Core\ValueObjects\ThemeSettings;
 use Simtabi\Laranail\ErrorPages\Enums\Stack;
 use Simtabi\Laranail\ErrorPages\Events\ErrorPageRendered;
 use Simtabi\Laranail\ErrorPages\Events\RenderingErrorPage;
-use Simtabi\Laranail\ErrorPages\Exceptions\ErrorPageRenderException;
 use Simtabi\Laranail\ErrorPages\Rendering\StackManager;
+use Simtabi\Laranail\ErrorPages\Support\FailureReporter;
 use Simtabi\Laranail\ErrorPages\Support\ThemeResolver;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
@@ -66,6 +66,7 @@ final class ErrorPages
         private readonly ThemeResolver $themes,
         private readonly StackManager $stacks,
         private readonly Config $config,
+        private readonly FailureReporter $failures,
     ) {}
 
     /**
@@ -454,8 +455,9 @@ final class ErrorPages
         } catch (Throwable $rendererFailure) {
             // Parity with the Path-2 degrade: never let a failing pipe stage /
             // translation / theme throw out of the `errors::{code}` view. Report
-            // only OUR failure and return a guaranteed static shell.
-            report(new ErrorPageRenderException($rendererFailure));
+            // only OUR failure (throttled + fail-silent, same as Path 2) and
+            // return a guaranteed static shell.
+            $this->failures->report($rendererFailure);
             $html = $this->minimalShell($status);
         }
 
