@@ -16,6 +16,7 @@ use Throwable;
  * @method static \Simtabi\Laranail\ErrorPages\ErrorPages skipWhen(callable $predicate)
  * @method static \Simtabi\Laranail\ErrorPages\ErrorPages pipe(callable $stage)
  * @method static string htmlFor(Throwable $e, ?Request $request = null)
+ * @method static string renderForWeb(Throwable $e, ?Request $request = null)
  * @method static array<string, mixed> jsonFor(Throwable $e, ?Request $request = null)
  * @method static string htmlForCode(int $code)
  *

@@ -34,6 +34,24 @@ public function boot(): void
 }
 ```
 
+## Events
+
+Two events fire around every branded render — observation hooks for telemetry:
+
+- `Simtabi\Laranail\ErrorPages\Events\RenderingErrorPage` — before rendering.
+- `Simtabi\Laranail\ErrorPages\Events\ErrorPageRendered` — after a page is rendered.
+
+Both carry `$exception`, `$context` (`web` | `api` | `inertia` | a custom context), and
+`$status`. To *change* a page use `pipe()` (enrich) or `skipWhen()` (veto), not a listener.
+
+```php
+use Simtabi\Laranail\ErrorPages\Events\ErrorPageRendered;
+
+Event::listen(ErrorPageRendered::class, function (ErrorPageRendered $e) {
+    Metrics::increment("error_pages.{$e->context}.{$e->status}");
+});
+```
+
 ## Notes
 
 - The DSL is where **closures** live — never the published config file, so `config:cache`

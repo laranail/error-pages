@@ -12,6 +12,8 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Simtabi\Laranail\ErrorPages\Enums\Stack;
 use Simtabi\Laranail\ErrorPages\ErrorPages;
+use Simtabi\Laranail\ErrorPages\Events\ErrorPageRendered;
+use Simtabi\Laranail\ErrorPages\Events\RenderingErrorPage;
 use Simtabi\Laranail\ErrorPages\Exceptions\ErrorPageRenderException;
 use Simtabi\Laranail\ErrorPages\Rendering\StackManager;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
@@ -122,6 +124,8 @@ final class ErrorPageHandler
             return null;
         }
 
+        event(new RenderingErrorPage($e, $context, $status));
+
         try {
             $response = $this->app->make(StackManager::class)
                 ->renderer($this->rendererKeyFor($context))
@@ -132,8 +136,12 @@ final class ErrorPageHandler
             // guaranteed core HTML rather than Laravel's default — except API,
             // which stays JSON (an HTML body would be wrong for a JSON client).
             if ($response === null && $context !== 'api') {
-                return $this->app->make(ErrorResponseFactory::class)
+                $response = $this->app->make(ErrorResponseFactory::class)
                     ->html($errorPages->htmlFor($e, $request), $status, $e);
+            }
+
+            if ($response !== null) {
+                event(new ErrorPageRendered($e, $context, $status));
             }
 
             return $response;

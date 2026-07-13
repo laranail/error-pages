@@ -14,6 +14,8 @@ use Simtabi\Laranail\ErrorPages\Core\Rendering\JsonRenderer;
 use Simtabi\Laranail\ErrorPages\Core\Support\Pipeline;
 use Simtabi\Laranail\ErrorPages\Core\ValueObjects\ErrorPage;
 use Simtabi\Laranail\ErrorPages\Core\ValueObjects\ThemeSettings;
+use Simtabi\Laranail\ErrorPages\Events\ErrorPageRendered;
+use Simtabi\Laranail\ErrorPages\Events\RenderingErrorPage;
 use Simtabi\Laranail\ErrorPages\Rendering\StackManager;
 use Simtabi\Laranail\ErrorPages\Support\ThemeResolver;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
@@ -153,6 +155,23 @@ final class ErrorPages
     public function htmlFor(Throwable $e, ?Request $request = null): string
     {
         return (new HtmlRenderer)->render($this->errorPageFor($e, $request), $this->themeSettings());
+    }
+
+    /**
+     * Render for the web (blade/livewire) context and fire the lifecycle events.
+     * The Path-1 `errors::{code}` views call this instead of `htmlFor()` so those
+     * server-rendered pages are observable too (Path 2 fires the events in the
+     * exception-handler renderable).
+     */
+    public function renderForWeb(Throwable $e, ?Request $request = null): string
+    {
+        $status = $e instanceof HttpExceptionInterface ? $e->getStatusCode() : 500;
+
+        event(new RenderingErrorPage($e, 'web', $status));
+        $html = $this->htmlFor($e, $request);
+        event(new ErrorPageRendered($e, 'web', $status));
+
+        return $html;
     }
 
     /**
