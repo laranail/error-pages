@@ -37,9 +37,15 @@ ERROR_PAGES_PROBLEM_DOCS=true
 ```
 
 Now `GET /errors/problems/{code}` (prefix configurable via `problem.docs.route`) returns a
-branded, `noindex` page for that status, and the JSON `type` becomes
-`{app.url}/errors/problems/{status}` — so an API consumer can open the `type` link and read
-what the error means.
+branded, `noindex` page for that status — with **what this means**, **common causes**, and
+**how to fix** — and the JSON `type` becomes `{app.url}/errors/problems/{status}`, so an API
+consumer can open the `type` link and read it. The copy comes from the `problems` translations
+(per-code, with `4xx`/`5xx` fallbacks); publish + edit them:
+
+```bash
+php artisan vendor:publish --tag=laranail::error-pages-translations
+# → lang/vendor/error-pages/en/problems.php
+```
 
 ## Field-level validation errors (RFC 9457)
 

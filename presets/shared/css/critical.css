@@ -250,6 +250,45 @@
   color: var(--ep-muted, #64748b);
 }
 
+.ep-shell-doc {
+  max-width: 40rem;
+}
+
+.ep-doc {
+  margin-top: 26px;
+  padding-top: 22px;
+  border-top: 1px solid var(--ep-border, #e2e8f0);
+  text-align: start;
+}
+
+.ep-doc-heading {
+  margin: 18px 0 6px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ep-muted, #64748b);
+}
+.ep-doc-heading:first-child {
+  margin-top: 0;
+}
+
+.ep-doc-text {
+  margin: 0;
+  color: var(--ep-text, #0f172a);
+  font-size: 0.98rem;
+}
+
+.ep-doc-list {
+  margin: 0;
+  padding-inline-start: 1.25rem;
+  color: var(--ep-text, #0f172a);
+  font-size: 0.95rem;
+}
+.ep-doc-list li {
+  margin: 5px 0;
+}
+
 @media (max-width: 480px) {
   .ep-card {
     padding: 32px 22px 26px;
