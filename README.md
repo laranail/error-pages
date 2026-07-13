@@ -46,6 +46,7 @@ Hosted at **<https://opensource.simtabi.com/documentation/laranail/error-pages/>
 - [Overriding an error view](docs/recipes/overriding-error-views.md)
 - [API error responses](docs/recipes/api-json.md)
 - [Inertia and SPA error pages](docs/recipes/inertia-spa.md)
+- [Livewire error pages](docs/recipes/livewire.md)
 - [Assets and progressive enhancement](docs/recipes/assets.md)
 - [Skipping and passthrough](docs/recipes/skip-and-veto.md)
 - [Testing against error pages](docs/recipes/testing.md)

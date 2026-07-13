@@ -27,3 +27,10 @@ it('renders a full-page Livewire error for the livewire stack', function (): voi
         ->toContain('>404<')
         ->toContain('wire:'); // Livewire rendered the component (wire: attributes present)
 });
+
+it('exposes the livewire views under a publishable, overridable namespace', function (): void {
+    // Registered via package-tools hasViews('error-pages'); consumers publish +
+    // customise them with `vendor:publish --tag=laranail::error-pages-views`.
+    expect(view()->exists('error-pages::livewire.error-page'))->toBeTrue()
+        ->and(view()->exists('error-pages::livewire.page'))->toBeTrue();
+});

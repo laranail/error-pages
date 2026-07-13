@@ -53,7 +53,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The `livewire` stack now renders a real full-page **Livewire 4** `ErrorPage` component
   (`src/Livewire/ErrorPage.php`, registered only when `livewire/livewire ^4` is installed;
   degrades to the core HTML page otherwise). `Stack::Livewire` moved from a `blade` alias to a
-  Path-2 stack.
+  Path-2 stack. The component + wrapper views are **publishable/overridable**
+  (`vendor:publish --tag=laranail::error-pages-views`); registration uses package-tools'
+  `hasViews()` / `hasLivewireComponent()` (late-binding-safe, guarded).
 - Nova is now auto-detected (Inertia request under `nova.path`, `panels.nova`-gated) and the
   `nova` driver renders an **Inertia** response instead of HTML (Nova is an Inertia SPA).
 
