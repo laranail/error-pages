@@ -6,6 +6,7 @@ namespace Simtabi\Laranail\ErrorPages\Tests;
 
 use Illuminate\Foundation\Application;
 use Inertia\ServiceProvider;
+use Livewire\LivewireServiceProvider;
 use Orchestra\Testbench\TestCase as Orchestra;
 use Simtabi\Laranail\ErrorPages\Providers\ErrorPagesServiceProvider;
 
@@ -26,6 +27,11 @@ abstract class TestCase extends Orchestra
             $providers[] = ServiceProvider::class;
         }
 
+        // Livewire is a dev-dep (to exercise the livewire stack).
+        if (class_exists(LivewireServiceProvider::class)) {
+            $providers[] = LivewireServiceProvider::class;
+        }
+
         return $providers;
     }
 
@@ -36,6 +42,9 @@ abstract class TestCase extends Orchestra
     {
         // Production-style by default: branded pages take over, no Ignition.
         $app['config']->set('app.debug', false);
+
+        // Livewire encrypts its component snapshots, so it needs an app key.
+        $app['config']->set('app.key', 'base64:' . base64_encode(str_repeat('x', 32)));
 
         // Register the dev preview routes so their tests can exercise them
         // (production keeps them behind app.debug / preview.enabled).

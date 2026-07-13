@@ -1,0 +1,37 @@
+name: assets
+
+on:
+  push:
+    branches: [main]
+    paths: ['presets/**']
+  pull_request:
+    branches: [main]
+    paths: ['presets/**']
+
+jobs:
+  ui:
+    runs-on: ubuntu-latest
+    name: error-pages-ui (Vue/React)
+    defaults:
+      run:
+        working-directory: presets
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: presets/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Run component tests
+        run: npm test

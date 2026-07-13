@@ -7,6 +7,7 @@ namespace Simtabi\Laranail\ErrorPages\Providers;
 use Illuminate\Contracts\Config\Repository as Config;
 use Illuminate\Contracts\Translation\Translator;
 use Illuminate\Support\Facades\Route;
+use Livewire\Livewire;
 use Override;
 use Simtabi\Laranail\ErrorPages\Commands\PreviewCommand;
 use Simtabi\Laranail\ErrorPages\Content\TranslationContentRepository;
@@ -19,6 +20,7 @@ use Simtabi\Laranail\ErrorPages\ErrorPages;
 use Simtabi\Laranail\ErrorPages\Http\AssetController;
 use Simtabi\Laranail\ErrorPages\Http\ErrorPageHandler;
 use Simtabi\Laranail\ErrorPages\Http\PreviewController;
+use Simtabi\Laranail\ErrorPages\Livewire\ErrorPage as LivewireErrorPage;
 use Simtabi\Laranail\ErrorPages\Rendering\StackManager;
 use Simtabi\Laranail\Package\Tools\Package;
 use Simtabi\Laranail\Package\Tools\Providers\PackageServiceProvider;
@@ -74,8 +76,19 @@ final class ErrorPagesServiceProvider extends PackageServiceProvider
     {
         $this->app->make(ErrorPageHandler::class)->register();
 
+        $this->loadViewsFrom(dirname(__DIR__, 2) . '/resources/views', 'error-pages');
+        $this->registerLivewireComponent();
         $this->registerAssetRoute();
         $this->registerPreviewRoute();
+    }
+
+    private function registerLivewireComponent(): void
+    {
+        // The `livewire` stack renders this component; only register it when
+        // Livewire (4+) is installed, otherwise the stack degrades to core HTML.
+        if (class_exists(Livewire::class)) {
+            Livewire::component('laranail-error-page', LivewireErrorPage::class);
+        }
     }
 
     private function registerAssetRoute(): void

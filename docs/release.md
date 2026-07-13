@@ -10,10 +10,10 @@ Semantic versioning. The package tracks the laranail family's pre-1.0 line
 ## Compatibility
 
 - Laravel `^13.0`, PHP `^8.4.1 || ^8.5`.
-- Optional integrations: Inertia v2 (Vue/React) — active today when installed. Livewire v3,
-  Filament v4/v5, and Nova v5 support ships with the visual template set (the `livewire`
-  stack is a server-HTML alias of `blade` and the `filament`/`nova` panel drivers are
-  selected via a `context()` override until then).
+- Optional integrations, active when installed: Inertia v2 (Vue/React), **Livewire `^4`**
+  (the `livewire` stack), Filament (auto-detected panel context), Nova v5 (Inertia-routed).
+  The Vue 3 / React 19 components (`@laranail/error-pages-ui`) are unit-tested (Vitest); their
+  final visual CSS lands with the canonical Blade templates.
 
 ## Cutting a release
 

@@ -11,8 +11,10 @@ use Simtabi\Laranail\Enumerator\Contracts\Enumerator;
 
 /**
  * How the web/inertia error page is produced. The API context is not a stack —
- * it always renders RFC 7807 JSON. `blade`/`livewire` are server-HTML (Path 1,
- * the `errors::{code}` view); the rest are client/SPA (Path 2, a renderable).
+ * it always renders RFC 7807 JSON. `blade` is server-HTML (Path 1, the
+ * `errors::{code}` view); `livewire` renders a full-page Livewire component and
+ * the rest are client/SPA — all Path 2 (a renderable), degrading to the core
+ * HTML page when their front-end packages are absent.
  *
  * Uses the org-standard `laranail/enumerator` for attribute-driven metadata
  * (`label()`, `description()`); the bridge-specific routing predicates below
@@ -25,7 +27,7 @@ enum Stack: string implements Enumerator
     #[Label('Blade'), Description('Server-rendered Blade views (Path 1).')]
     case Blade = 'blade';
 
-    #[Label('Livewire'), Description('Server-HTML alias of Blade until the Livewire component ships.')]
+    #[Label('Livewire'), Description('Full-page Livewire 4 ErrorPage component (Path 2).')]
     case Livewire = 'livewire';
 
     #[Label('Inertia + Vue'), Description('Inertia page rendered by a Vue ErrorPage component (Path 2).')]
@@ -51,7 +53,12 @@ enum Stack: string implements Enumerator
 
     public function isServerHtml(): bool
     {
-        return $this === self::Blade || $this === self::Livewire;
+        return $this === self::Blade;
+    }
+
+    public function isLivewire(): bool
+    {
+        return $this === self::Livewire;
     }
 
     public function isInertia(): bool

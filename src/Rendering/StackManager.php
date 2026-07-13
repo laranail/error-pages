@@ -11,6 +11,7 @@ use Simtabi\Laranail\ErrorPages\ErrorPages;
 use Simtabi\Laranail\ErrorPages\Http\ErrorResponseFactory;
 use Simtabi\Laranail\ErrorPages\Stacks\InertiaStackRenderer;
 use Simtabi\Laranail\ErrorPages\Stacks\JsonStackRenderer;
+use Simtabi\Laranail\ErrorPages\Stacks\LivewireStackRenderer;
 use Simtabi\Laranail\ErrorPages\Stacks\PanelStackRenderer;
 use Simtabi\Laranail\ErrorPages\Stacks\SpaStackRenderer;
 
@@ -56,14 +57,23 @@ final class StackManager extends Manager
         return $this->container->make(SpaStackRenderer::class);
     }
 
+    protected function createLivewireDriver(): StackRenderer
+    {
+        return $this->container->make(LivewireStackRenderer::class);
+    }
+
     protected function createFilamentDriver(): StackRenderer
     {
+        // Filament is server-HTML (Livewire) — render the branded HTML panel page.
         return $this->panelRenderer('filament');
     }
 
     protected function createNovaDriver(): StackRenderer
     {
-        return $this->panelRenderer('nova');
+        // Nova is Inertia-based: returning HTML to its X-Inertia requests breaks
+        // the client ("must receive a valid Inertia response"). Render via Inertia
+        // — the same path Nova's own exception handler uses.
+        return $this->container->make(InertiaStackRenderer::class);
     }
 
     private function panelRenderer(string $panel): PanelStackRenderer

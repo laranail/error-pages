@@ -11,3 +11,7 @@ build/
 .idea/
 .php-cs-fixer.cache
 .vscode/
+
+# npm (presets/@laranail/error-pages-ui)
+presets/node_modules/
+!presets/package-lock.json

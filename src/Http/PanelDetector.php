@@ -14,9 +14,10 @@ use Throwable;
  * matches requests under the panel's own path, so it can never hijack a normal
  * app route.
  *
- * Filament (server-HTML/Livewire) is auto-detected here. Nova is Inertia-based,
- * so it is left to the `inertia` stack / an explicit `ErrorPages::context()`
- * override rather than being force-routed to the HTML panel renderer.
+ * Filament (server-HTML/Livewire) is auto-detected and rendered as an HTML panel
+ * page. Nova is Inertia-based, so its context is claimed only for an actual
+ * Inertia request within Nova's path — and its driver renders via Inertia, never
+ * HTML (returning HTML to an `X-Inertia` request breaks the Nova client).
  */
 final readonly class PanelDetector
 {
@@ -30,7 +31,25 @@ final readonly class PanelDetector
             return 'filament';
         }
 
+        if ((bool) $this->config->get('error-pages.panels.nova', true) && $this->onNovaPanel($request)) {
+            return 'nova';
+        }
+
         return null;
+    }
+
+    private function onNovaPanel(Request $request): bool
+    {
+        // `nova.path` exists only when Nova is installed, so this is self-guarding.
+        // Claim the context only for an Inertia request (Nova is an Inertia SPA);
+        // a plain full-page load stays `web` and renders the branded HTML page.
+        if (! $request->hasHeader('X-Inertia')) {
+            return false;
+        }
+
+        $path = $this->config->get('nova.path');
+
+        return is_string($path) && $this->requestWithin($request, $path);
     }
 
     private function onFilamentPanel(Request $request): bool

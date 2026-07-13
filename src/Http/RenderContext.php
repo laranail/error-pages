@@ -52,7 +52,11 @@ final readonly class RenderContext
         return match ($this->context) {
             'api' => 'json',
             'inertia' => 'inertia',
-            'web' => $this->stack->isInertia() ? 'inertia' : 'spa',
+            'web' => match (true) {
+                $this->stack->isInertia() => 'inertia',
+                $this->stack->isLivewire() => 'livewire',
+                default => 'spa',
+            },
             default => $this->context,
         };
     }

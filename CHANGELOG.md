@@ -47,8 +47,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Filament panel **auto-detection** (path-scoped, `panels.filament`-gated) — a request under a
   Filament panel renders the panel context without a manual `context()`.
 - Vue (`presets/vue`) + React (`presets/react`) `ErrorPage` components and a shared payload
-  type/mount helper (`presets/shared/payload.ts`); a Livewire view (`presets/livewire`) — all
-  rendering the one shared DOM contract. Wired into `@laranail/error-pages-ui`.
+  type/mount helper (`presets/shared/payload.ts`), all rendering the one shared DOM contract,
+  wired into `@laranail/error-pages-ui` and **unit-tested with Vitest** (DOM-parity) in a new
+  `assets` CI workflow.
+- The `livewire` stack now renders a real full-page **Livewire 4** `ErrorPage` component
+  (`src/Livewire/ErrorPage.php`, registered only when `livewire/livewire ^4` is installed;
+  degrades to the core HTML page otherwise). `Stack::Livewire` moved from a `blade` alias to a
+  Path-2 stack.
+- Nova is now auto-detected (Inertia request under `nova.path`, `panels.nova`-gated) and the
+  `nova` driver renders an **Inertia** response instead of HTML (Nova is an Inertia SPA).
 
 ### Changed
 

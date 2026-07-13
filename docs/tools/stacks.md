@@ -8,21 +8,24 @@ the web/inertia page is produced; the API context always emits RFC 7807 JSON.
 | Stack | Context | Renders via |
 |-------|---------|-------------|
 | `blade` (default) | web | Laravel `errors::{code}` view (Path 1) |
+| `livewire` | web | full-page **Livewire 4** `ErrorPage` component (Path 2) |
 | `inertia-vue` / `inertia-react` | web / inertia | `Inertia::render('ErrorPage', payload)` (Path 2) |
 | `vue` / `react` | web (SPA) | self-contained page + embedded `#error-page-data` payload (Path 2) |
 | _(fixed)_ api | api | RFC 7807 `application/problem+json` (Path 2) |
-| `filament` / `nova` | panel | panel-tagged page (Path 2) |
+| `filament` | panel | branded HTML panel page (Path 2) |
+| `nova` | panel | Inertia response (Nova is an Inertia SPA) (Path 2) |
 
 Select the default with `config('error-pages.stack')` or `ERROR_PAGES_STACK`; override per
 request with `ErrorPages::stack(...)`.
 
 Renderer selection is by **context first**, then stack: an `X-Inertia` request always uses
 the Inertia renderer; a plain (non-Inertia) web page load under an `inertia-*` stack also
-renders an Inertia response (so the client app takes over), while a `vue`/`react` stack
-renders the self-contained SPA shell.
+renders an Inertia response (so the client app takes over); a `livewire` stack renders the
+full-page Livewire component; and a `vue`/`react` stack renders the self-contained SPA shell.
 
-> `livewire` is accepted as a server-HTML alias of `blade` today (both are Path 1). A
-> dedicated full-page Livewire component ships with the visual template set.
+> The `livewire` stack needs **`livewire/livewire ^4`** installed (`composer require
+> livewire/livewire`); without it the stack degrades to the core HTML page. Livewire bundles
+> its own Alpine, so the package's enhancement JS is not loaded on the Livewire page.
 
 ## The payload
 
@@ -57,11 +60,14 @@ the Inertia renderer returns null when Inertia is not installed).
 
 ## Panel stacks
 
-`filament` and `nova` render a panel-tagged page. **Filament is auto-detected** — a request
-under a Filament panel's own path resolves to the `filament` context (path-scoped, so it
-never hijacks a normal route; toggle with `panels.filament`). Nova is Inertia-based, so route
-it through the `inertia` stack or select it explicitly with `ErrorPages::context(...)`. Full
-panel theming and the Filament plugin land with the panel visual set.
+**Filament is auto-detected** — a request under a Filament panel's own path resolves to the
+`filament` context (path-scoped, so it never hijacks a normal route; toggle with
+`panels.filament`) and renders the branded HTML panel page.
+
+**Nova is auto-detected** for Inertia requests under `config('nova.path')` (toggle with
+`panels.nova`) and renders an **Inertia** response — returning HTML to Nova's `X-Inertia`
+requests would break its client. A plain full-page load under Nova stays `web` (branded HTML).
+Full panel theming and the Filament plugin land with the panel visual set.
 
 ---
 [← Docs index](../../README.md#documentation)

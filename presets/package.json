@@ -28,7 +28,9 @@
     "./react": "./react/index.tsx"
   },
   "scripts": {
-    "build": "echo \"consumers bundle the .ts/.vue/.tsx sources via their own Vite/webpack; a prebuilt dist is added when the canonical templates land\" && exit 0"
+    "build": "echo \"consumers bundle the .ts/.vue/.tsx sources via their own Vite/webpack; a prebuilt dist is added when the canonical templates land\" && exit 0",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
   },
   "peerDependencies": {
     "react": ">=18",
@@ -41,5 +43,18 @@
     "vue": {
       "optional": true
     }
+  },
+  "devDependencies": {
+    "@testing-library/react": "^16.1.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-vue": "^5.2.1",
+    "@vue/test-utils": "^2.4.6",
+    "happy-dom": "^16.5.3",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "typescript": "^5.7.2",
+    "vitest": "^3.0.2",
+    "vue": "^3.5.13"
   }
 }
