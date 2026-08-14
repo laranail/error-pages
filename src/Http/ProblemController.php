@@ -33,7 +33,7 @@ final readonly class ProblemController
 
         $cssPath = dirname(__DIR__, 2) . '/presets/shared/css/critical.css';
 
-        $html = $this->views->make('error-pages::problems.show', [
+        $html = $this->views->make('laranail-error-pages::problems.show', [
             'page' => $payload,
             'doc' => $this->docs->for($code),
             'criticalCss' => is_file($cssPath) ? (string) file_get_contents($cssPath) : '',

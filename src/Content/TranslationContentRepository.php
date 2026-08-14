@@ -9,13 +9,13 @@ use Simtabi\Laranail\ErrorPages\Core\Contracts\ContentRepository;
 
 /**
  * Content overrides backed by Laravel translations
- * (`error-pages::errors.{key}.{title|message}`). App-published
+ * (`laranail-error-pages::errors.{key}.{title|message}`). App-published
  * `lang/vendor/error-pages/{locale}/errors.php` overrides the package copy; a
  * missing key returns null so the core factory falls back to the enum default.
  */
 final readonly class TranslationContentRepository implements ContentRepository
 {
-    private const string NAMESPACE = 'error-pages::errors';
+    private const string NAMESPACE = 'laranail-error-pages::errors';
 
     public function __construct(
         private Translator $translator,

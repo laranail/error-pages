@@ -30,6 +30,6 @@ final class ErrorPage extends Component
 
     public function render(): View
     {
-        return app(ViewFactory::class)->make('error-pages::livewire.error-page', ['page' => $this->page]);
+        return app(ViewFactory::class)->make('laranail-error-pages::livewire.error-page', ['page' => $this->page]);
     }
 }

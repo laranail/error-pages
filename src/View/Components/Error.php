@@ -10,7 +10,7 @@ use Illuminate\View\Component;
 use Simtabi\Laranail\ErrorPages\ErrorPages;
 
 /**
- * Embeddable Blade error fragment: `<x-error-pages::error :code="404" />` renders
+ * Embeddable Blade error fragment: `<x-laranail-error-pages::error :code="404" />` renders
  * the shared `ep-*` DOM (no document chrome) inside any view/layout — the Blade
  * parity for the Livewire embed. Resolve the content from a `:code`, a `:key`
  * ("4xx"/"5xx"), or a ready `:page` payload array.
@@ -36,6 +36,6 @@ final class Error extends Component
 
     public function render(): View
     {
-        return app(ViewFactory::class)->make('error-pages::components.error', ['page' => $this->page]);
+        return app(ViewFactory::class)->make('laranail-error-pages::components.error', ['page' => $this->page]);
     }
 }

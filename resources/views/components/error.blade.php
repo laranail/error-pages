@@ -1,5 +1,5 @@
 {{-- Embeddable error fragment (the shared DOM contract, no document chrome) for
-     <x-error-pages::error />. In scope: $page (the payload array). Include the
+     <x-laranail-error-pages::error />. In scope: $page (the payload array). Include the
      shared stylesheet (or your own) for the ep-* classes. --}}
 <div {{ $attributes->class(['ep-body', 'ep-theme-' . $page['theme']['preset'], 'ep-auto-dark' => $page['theme']['autoDark']]) }}>
     <main class="ep-shell" role="main">

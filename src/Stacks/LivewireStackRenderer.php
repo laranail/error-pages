@@ -57,7 +57,7 @@ final readonly class LivewireStackRenderer implements StackRenderer
      */
     private function renderInLayout(string $layout, array $payload): string
     {
-        $slot = $this->views->make('error-pages::livewire.slot', ['page' => $payload])->render();
+        $slot = $this->views->make('laranail-error-pages::livewire.slot', ['page' => $payload])->render();
 
         return $this->views->make($layout, ['slot' => new HtmlString($slot)])->render();
     }
@@ -71,7 +71,7 @@ final readonly class LivewireStackRenderer implements StackRenderer
     {
         $cssPath = dirname(__DIR__, 2) . '/presets/shared/css/critical.css';
 
-        return $this->views->make('error-pages::livewire.page', [
+        return $this->views->make('laranail-error-pages::livewire.page', [
             'page' => $payload,
             'criticalCss' => is_file($cssPath) ? (string) file_get_contents($cssPath) : '',
             'themeCss' => CssVariableMap::themeCss($this->pages->themeSettings()),

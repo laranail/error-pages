@@ -56,7 +56,7 @@ return [
     |--------------------------------------------------------------------------
     |
     | Per-code titles/messages come from translations
-    | (`error-pages::errors.{code}.{title|message}`); a missing key falls back
+    | (`laranail-error-pages::errors.{code}.{title|message}`); a missing key falls back
     | to the built-in HttpStatus enum default. Publish the lang files to override
     | or add locales.
     |

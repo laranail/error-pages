@@ -9,7 +9,7 @@ use Illuminate\Contracts\Translation\Translator;
 
 /**
  * Resolves the human-readable documentation (meaning / common causes / how to
- * fix) shown on a problem-type page, from the `error-pages::problems.{key}`
+ * fix) shown on a problem-type page, from the `laranail-error-pages::problems.{key}`
  * translations. A specific code falls back to its class (`4xx`/`5xx`) entry.
  */
 final readonly class ProblemDocs
@@ -36,7 +36,7 @@ final readonly class ProblemDocs
      */
     private function line(string $key): ?array
     {
-        $id = 'error-pages::problems.' . $key;
+        $id = 'laranail-error-pages::problems.' . $key;
         $locale = $this->defaultLocale();
 
         if (! $this->translator->has($id, $locale)) {

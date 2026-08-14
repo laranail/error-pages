@@ -31,15 +31,15 @@ renders the shared `ep-*` markup (a fragment, no `<html>`/`<head>`):
 ```blade
 {{-- resources/views/errors/500.blade.php --}}
 <x-app-layout>
-    <x-error-pages::error :page="\Simtabi\Laranail\ErrorPages\Facades\ErrorPages::payloadFor($exception, request())" />
+    <x-laranail-error-pages::error :page="\Simtabi\Laranail\ErrorPages\Facades\ErrorPages::payloadFor($exception, request())" />
 </x-app-layout>
 ```
 
 Outside an error view, resolve the content from a code or key:
 
 ```blade
-<x-error-pages::error :code="404" />
-<x-error-pages::error key="5xx" class="my-8" />
+<x-laranail-error-pages::error :code="404" />
+<x-laranail-error-pages::error key="5xx" class="my-8" />
 ```
 
 Include `@laranail/error-pages-ui/style.css` (or your own CSS) for the `ep-*` classes. This is

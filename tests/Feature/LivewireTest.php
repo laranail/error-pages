@@ -55,6 +55,6 @@ it('auto-refreshes a retryable livewire page (parity with blade/spa)', function 
 it('exposes the livewire views under a publishable, overridable namespace', function (): void {
     // Registered via package-tools hasViews('error-pages'); consumers publish +
     // customise them with `vendor:publish --tag=laranail::error-pages-views`.
-    expect(view()->exists('error-pages::livewire.error-page'))->toBeTrue()
-        ->and(view()->exists('error-pages::livewire.page'))->toBeTrue();
+    expect(view()->exists('laranail-error-pages::livewire.error-page'))->toBeTrue()
+        ->and(view()->exists('laranail-error-pages::livewire.page'))->toBeTrue();
 });
