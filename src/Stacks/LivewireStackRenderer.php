@@ -4,17 +4,17 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\ErrorPages\Stacks;
 
-use Illuminate\Contracts\Config\Repository as Config;
-use Illuminate\Contracts\View\Factory as ViewFactory;
+use Throwable;
+use Livewire\Livewire;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\HtmlString;
-use Livewire\Livewire;
+use Simtabi\Laranail\ErrorPages\ErrorPages;
+use Illuminate\Contracts\Config\Repository as Config;
+use Illuminate\Contracts\View\Factory as ViewFactory;
 use Simtabi\Laranail\ErrorPages\Contracts\StackRenderer;
 use Simtabi\Laranail\ErrorPages\Core\Theme\CssVariableMap;
-use Simtabi\Laranail\ErrorPages\ErrorPages;
 use Simtabi\Laranail\ErrorPages\Http\ErrorResponseFactory;
-use Throwable;
 
 /**
  * The `livewire` stack: render the Livewire ErrorPage component (Livewire 4+). By
@@ -53,7 +53,7 @@ final readonly class LivewireStackRenderer implements StackRenderer
      * Embed the component in the consumer's component layout (which supplies the
      * chrome + @livewireStyles/@livewireScripts).
      *
-     * @param  array<string, mixed>  $payload
+     * @param array<string, mixed> $payload
      */
     private function renderInLayout(string $layout, array $payload): string
     {
@@ -65,16 +65,16 @@ final readonly class LivewireStackRenderer implements StackRenderer
     /**
      * The package's self-contained full page (critical CSS inlined).
      *
-     * @param  array<string, mixed>  $payload
+     * @param array<string, mixed> $payload
      */
     private function renderStandalone(array $payload): string
     {
         $cssPath = dirname(__DIR__, 2) . '/presets/shared/css/critical.css';
 
         return $this->views->make('laranail-error-pages::livewire.page', [
-            'page' => $payload,
+            'page'        => $payload,
             'criticalCss' => is_file($cssPath) ? (string) file_get_contents($cssPath) : '',
-            'themeCss' => CssVariableMap::themeCss($this->pages->themeSettings()),
+            'themeCss'    => CssVariableMap::themeCss($this->pages->themeSettings()),
         ])->render();
     }
 }

@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace Simtabi\Laranail\ErrorPages\Commands;
 
 use Override;
+use Simtabi\Laranail\ErrorPages\ErrorPages;
+use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Input\InputArgument;
 use Simtabi\Laranail\Console\Tools\Commands\Command;
 use Simtabi\Laranail\Console\Tools\Commands\Concerns\SupportsNamespacedNames;
-use Simtabi\Laranail\ErrorPages\ErrorPages;
-use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Input\InputOption;
 
 /**
  * Render a branded error page to an HTML file so it can be designed/reviewed in

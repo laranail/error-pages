@@ -38,7 +38,7 @@ final class CssVariableMap
     }
 
     /**
-     * @param  array<string, string>  $colors
+     * @param array<string, string> $colors
      */
     private static function block(array $colors): string
     {

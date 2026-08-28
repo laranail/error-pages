@@ -35,11 +35,11 @@ final readonly class HtmlRenderer implements Renderer
         $criticalCss = is_file($this->cssPath) ? (string) file_get_contents($this->cssPath) : '';
 
         return $this->capture($this->templatePath, [
-            'page' => $page,
-            'theme' => $theme,
-            'criticalCss' => $criticalCss,
+            'page'             => $page,
+            'theme'            => $theme,
+            'criticalCss'      => $criticalCss,
             'themeOverrideCss' => CssVariableMap::themeCss($theme),
-            'nonce' => $nonce,
+            'nonce'            => $nonce,
         ]);
     }
 
@@ -48,7 +48,7 @@ final readonly class HtmlRenderer implements Renderer
      * values through `extract()` keeps every one visibly "used" so dead-code
      * tooling can't strip the data the required template depends on.
      *
-     * @param  array<string, mixed>  $context  provides $page, $theme, $criticalCss, $themeOverrideCss, $nonce
+     * @param array<string, mixed> $context provides $page, $theme, $criticalCss, $themeOverrideCss, $nonce
      */
     private function capture(string $template, array $context): string
     {

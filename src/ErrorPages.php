@@ -5,27 +5,27 @@ declare(strict_types=1);
 namespace Simtabi\Laranail\ErrorPages;
 
 use Closure;
-use Illuminate\Contracts\Config\Repository as Config;
-use Illuminate\Contracts\Foundation\Application;
+use Throwable;
 use Illuminate\Http\Request;
-use Illuminate\Validation\ValidationException;
 use PHPUnit\Framework\Assert;
-use Simtabi\Laranail\ErrorPages\Contracts\StackRenderer;
-use Simtabi\Laranail\ErrorPages\Core\ErrorPageFactory;
-use Simtabi\Laranail\ErrorPages\Core\Rendering\HtmlRenderer;
-use Simtabi\Laranail\ErrorPages\Core\Rendering\JsonRenderer;
-use Simtabi\Laranail\ErrorPages\Core\Support\Pipeline;
-use Simtabi\Laranail\ErrorPages\Core\ValueObjects\ErrorPage;
-use Simtabi\Laranail\ErrorPages\Core\ValueObjects\ThemeSettings;
 use Simtabi\Laranail\ErrorPages\Enums\Stack;
+use Illuminate\Validation\ValidationException;
+use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Contracts\Config\Repository as Config;
+use Simtabi\Laranail\ErrorPages\Core\ErrorPageFactory;
+use Simtabi\Laranail\ErrorPages\Core\Support\Pipeline;
+use Simtabi\Laranail\ErrorPages\Support\ThemeResolver;
+use Simtabi\Laranail\ErrorPages\Rendering\StackManager;
+use Simtabi\Laranail\ErrorPages\Contracts\StackRenderer;
+use Simtabi\Laranail\ErrorPages\Support\FailureReporter;
 use Simtabi\Laranail\ErrorPages\Events\ErrorPageRendered;
 use Simtabi\Laranail\ErrorPages\Events\RenderingErrorPage;
-use Simtabi\Laranail\ErrorPages\Rendering\StackManager;
-use Simtabi\Laranail\ErrorPages\Support\FailureReporter;
-use Simtabi\Laranail\ErrorPages\Support\ThemeResolver;
+use Simtabi\Laranail\ErrorPages\Core\Rendering\HtmlRenderer;
+use Simtabi\Laranail\ErrorPages\Core\Rendering\JsonRenderer;
+use Simtabi\Laranail\ErrorPages\Core\ValueObjects\ErrorPage;
+use Simtabi\Laranail\ErrorPages\Core\ValueObjects\ThemeSettings;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
-use Throwable;
 
 /**
  * The package's fluent entry point (facade root). Builds a resolved
@@ -82,7 +82,7 @@ final class ErrorPages
     /**
      * Register or override a stack renderer (the coexistence driver seam).
      *
-     * @param  Closure(Application): StackRenderer  $factory
+     * @param Closure(Application): StackRenderer $factory
      */
     public function extend(string $stack, Closure $factory): static
     {
@@ -123,7 +123,7 @@ final class ErrorPages
      * A Content-Security-Policy nonce (a value, or a per-request resolver) applied
      * to the inline `<style>` and the enhancement `<script>` — for strict-CSP apps.
      *
-     * @param  (Closure(): ?string)|string  $nonce
+     * @param (Closure(): ?string)|string $nonce
      */
     public function nonce(Closure|string $nonce): static
     {
@@ -135,7 +135,7 @@ final class ErrorPages
     /**
      * Veto handling for matching exceptions/requests (they pass through to Laravel).
      *
-     * @param  callable(Throwable, ?Request): bool  $predicate
+     * @param callable(Throwable, ?Request): bool $predicate
      */
     public function skipWhen(callable $predicate): static
     {
@@ -145,7 +145,7 @@ final class ErrorPages
     }
 
     /**
-     * @param  callable(ErrorPage): ErrorPage  $stage
+     * @param callable(ErrorPage): ErrorPage $stage
      */
     public function pipe(callable $stage): static
     {
@@ -188,11 +188,11 @@ final class ErrorPages
     {
         if ($this->baseline === null) {
             $this->baseline = [
-                'skip' => $this->skipPredicates,
-                'context' => $this->contextResolver,
-                'stack' => $this->stackOverride,
-                'theme' => $this->themeOverride,
-                'nonce' => $this->nonce,
+                'skip'     => $this->skipPredicates,
+                'context'  => $this->contextResolver,
+                'stack'    => $this->stackOverride,
+                'theme'    => $this->themeOverride,
+                'nonce'    => $this->nonce,
                 'pipeline' => $this->pipeline->snapshot(),
             ];
 
@@ -233,10 +233,10 @@ final class ErrorPages
         }
 
         $this->rendered[] = [
-            'status' => $status,
+            'status'  => $status,
             'context' => $context,
-            'stack' => Stack::fromValue($this->stackOverride ?? (string) $this->config->get('error-pages.stack', 'blade'))->value,
-            'theme' => $this->themeSettings()->preset->value,
+            'stack'   => Stack::fromValue($this->stackOverride ?? (string) $this->config->get('error-pages.stack', 'blade'))->value,
+            'theme'   => $this->themeSettings()->preset->value,
         ];
     }
 
@@ -301,6 +301,168 @@ final class ErrorPages
         return $this->pipeline->process($page);
     }
 
+    public function htmlFor(Throwable $e, ?Request $request = null): string
+    {
+        return $this->renderPage($this->errorPageFor($e, $request));
+    }
+
+    /**
+     * The resolved CSP nonce for this render (from the `nonce()` DSL), or null.
+     */
+    public function nonceValue(): ?string
+    {
+        $nonce = $this->nonce instanceof Closure ? ($this->nonce)() : $this->nonce;
+
+        return is_string($nonce) && $nonce !== '' ? $nonce : null;
+    }
+
+    /**
+     * URL to a package asset served by the route (with a cache-busting version
+     * derived from the file when not configured).
+     *
+     * Built from the trusted `app.url`, NOT the request host — an error page must
+     * never reflect a `Host`/`X-Forwarded-Host` header into a `<script src>`
+     * (cache-poisoning / script-source hijack). Falls back to a root-relative URL
+     * when `app.url` is unset.
+     */
+    public function assetUrl(string $file): string
+    {
+        $base = rtrim((string) $this->config->get('error-pages.assets.route', '/_error-pages/assets'), '/');
+        $version = $this->config->get('error-pages.assets.version');
+        $version = is_string($version) && $version !== '' ? $version : $this->assetVersion();
+
+        $root = rtrim((string) $this->config->get('app.url', ''), '/');
+
+        return $root . $base . '/' . $file . '?v=' . $version;
+    }
+
+    /**
+     * Render for the web (blade/livewire) context and fire the lifecycle events.
+     * The Path-1 `errors::{code}` views call this instead of `htmlFor()` so those
+     * server-rendered pages are observable too (Path 2 fires the events in the
+     * exception-handler renderable).
+     */
+    public function renderForWeb(Throwable $e, ?Request $request = null): string
+    {
+        $status = $this->statusFor($e);
+
+        event(new RenderingErrorPage($e, 'web', $status));
+
+        try {
+            $html = $this->htmlFor($e, $request);
+        } catch (Throwable $rendererFailure) {
+            // Parity with the Path-2 degrade: never let a failing pipe stage /
+            // translation / theme throw out of the `errors::{code}` view. Report
+            // only OUR failure (throttled + fail-silent, same as Path 2) and
+            // return a guaranteed static shell.
+            $this->failures->report($rendererFailure);
+            $html = $this->minimalShell($status);
+        }
+
+        event(new ErrorPageRendered($e, 'web', $status));
+        $this->recordRender($status, 'web');
+
+        return $html;
+    }
+
+    /**
+     * The full error payload for the Inertia/SPA components (richer than the
+     * RFC 7807 JSON): copy + brand + theme + retry hints + correlation id.
+     *
+     * @return array<string, mixed>
+     */
+    public function payloadFor(Throwable $e, ?Request $request = null): array
+    {
+        return $this->payloadFromPage($this->errorPageFor($e, $request));
+    }
+
+    /**
+     * The payload for a status code directly — for embedding the Inertia/Vue/React/
+     * Livewire component in your own view without a caught exception.
+     *
+     * @return array<string, mixed>
+     */
+    public function payloadForCode(int $code): array
+    {
+        return $this->payloadFromPage($this->pipeline->process($this->factory->make($code, $this->defaultLocale())));
+    }
+
+    /**
+     * The payload for a status key — a code ("404") or a generic "4xx"/"5xx".
+     *
+     * @return array<string, mixed>
+     */
+    public function payloadForKey(string $key): array
+    {
+        return $this->payloadFromPage($this->pipeline->process($this->factory->makeByKey($key, $this->defaultLocale())));
+    }
+
+    /**
+     * The RFC 7807 `application/problem+json` payload. The core renderer supplies
+     * the standard members; the bridge adds the recommended `instance` (request
+     * URI) and, when `problem_type_base` is configured, a per-status `type` URI.
+     *
+     * @return array<string, mixed>
+     */
+    public function jsonFor(Throwable $e, ?Request $request = null): array
+    {
+        $payload = (new JsonRenderer)->render($this->errorPageFor($e, $request), $this->themeSettings());
+
+        return $this->decorateProblem($payload, $request);
+    }
+
+    /**
+     * The RFC 9457 problem+json for a validation failure: the standard members
+     * plus a field-level `errors[]` array (`pointer`/`field`/`detail`). Used by
+     * the handler when `problem.validation` is on for the API context.
+     *
+     * @return array<string, mixed>
+     */
+    public function validationJsonFor(ValidationException $e, ?Request $request = null): array
+    {
+        $errors = [];
+        foreach ($e->errors() as $field => $messages) {
+            $field = (string) $field;
+            // RFC 6901 JSON Pointer: escape `~`/`/`, and map Laravel's dotted
+            // path (`items.0.name`) to pointer segments (`/items/0/name`).
+            $pointer = '/' . str_replace(['~', '/', '.'], ['~0', '~1', '/'], $field);
+            foreach ($messages as $message) {
+                $errors[] = ['pointer' => $pointer, 'field' => $field, 'detail' => (string) $message];
+            }
+        }
+
+        $payload = [
+            'type'   => 'about:blank',
+            'title'  => 'Validation failed',
+            'status' => $e->status,
+            'detail' => 'The given data failed validation.',
+            'errors' => $errors,
+        ];
+
+        $requestId = $this->requestIdFor($request);
+        if ($requestId !== null) {
+            $payload['request_id'] = $requestId;
+        }
+
+        return $this->decorateProblem($payload, $request);
+    }
+
+    /**
+     * Render a page for a status code directly (preview / design QA).
+     */
+    public function htmlForCode(int $code): string
+    {
+        return $this->renderPage($this->pipeline->process($this->factory->make($code, $this->defaultLocale())));
+    }
+
+    /**
+     * Render a page for a status key — a code ("404") or a generic "4xx"/"5xx".
+     */
+    public function htmlForKey(string $key): string
+    {
+        return $this->renderPage($this->pipeline->process($this->factory->makeByKey($key, $this->defaultLocale())));
+    }
+
     /**
      * The locale for content resolution: the configured `content.default_locale`,
      * or null to follow the ambient app locale.
@@ -339,11 +501,6 @@ final class ErrorPages
         return null;
     }
 
-    public function htmlFor(Throwable $e, ?Request $request = null): string
-    {
-        return $this->renderPage($this->errorPageFor($e, $request));
-    }
-
     /**
      * Render a resolved page to HTML and layer the optional progressive
      * enhancement (per `assets.mode`) on top.
@@ -351,16 +508,6 @@ final class ErrorPages
     private function renderPage(ErrorPage $page): string
     {
         return $this->withEnhancement((new HtmlRenderer)->render($page, $this->themeSettings(), $this->nonceValue()));
-    }
-
-    /**
-     * The resolved CSP nonce for this render (from the `nonce()` DSL), or null.
-     */
-    public function nonceValue(): ?string
-    {
-        $nonce = $this->nonce instanceof Closure ? ($this->nonce)() : $this->nonce;
-
-        return is_string($nonce) && $nonce !== '' ? $nonce : null;
     }
 
     private function nonceAttr(): string
@@ -392,31 +539,11 @@ final class ErrorPages
         $nonce = $this->nonceAttr();
 
         return match ($mode) {
-            'route' => '<script src="' . htmlspecialchars($this->assetUrl('error-pages.js'), ENT_QUOTES) . '"' . $nonce . ' defer></script>',
-            'link' => '<script src="' . htmlspecialchars(asset('vendor/error-pages/error-pages.js'), ENT_QUOTES) . '"' . $nonce . ' defer></script>',
+            'route'  => '<script src="' . htmlspecialchars($this->assetUrl('error-pages.js'), ENT_QUOTES) . '"' . $nonce . ' defer></script>',
+            'link'   => '<script src="' . htmlspecialchars(asset('vendor/error-pages/error-pages.js'), ENT_QUOTES) . '"' . $nonce . ' defer></script>',
             'inline' => $this->inlineEnhancement(),
-            default => null,
+            default  => null,
         };
-    }
-
-    /**
-     * URL to a package asset served by the route (with a cache-busting version
-     * derived from the file when not configured).
-     *
-     * Built from the trusted `app.url`, NOT the request host — an error page must
-     * never reflect a `Host`/`X-Forwarded-Host` header into a `<script src>`
-     * (cache-poisoning / script-source hijack). Falls back to a root-relative URL
-     * when `app.url` is unset.
-     */
-    public function assetUrl(string $file): string
-    {
-        $base = rtrim((string) $this->config->get('error-pages.assets.route', '/_error-pages/assets'), '/');
-        $version = $this->config->get('error-pages.assets.version');
-        $version = is_string($version) && $version !== '' ? $version : $this->assetVersion();
-
-        $root = rtrim((string) $this->config->get('app.url', ''), '/');
-
-        return $root . $base . '/' . $file . '?v=' . $version;
     }
 
     private function assetVersion(): string
@@ -440,35 +567,6 @@ final class ErrorPages
     }
 
     /**
-     * Render for the web (blade/livewire) context and fire the lifecycle events.
-     * The Path-1 `errors::{code}` views call this instead of `htmlFor()` so those
-     * server-rendered pages are observable too (Path 2 fires the events in the
-     * exception-handler renderable).
-     */
-    public function renderForWeb(Throwable $e, ?Request $request = null): string
-    {
-        $status = $this->statusFor($e);
-
-        event(new RenderingErrorPage($e, 'web', $status));
-
-        try {
-            $html = $this->htmlFor($e, $request);
-        } catch (Throwable $rendererFailure) {
-            // Parity with the Path-2 degrade: never let a failing pipe stage /
-            // translation / theme throw out of the `errors::{code}` view. Report
-            // only OUR failure (throttled + fail-silent, same as Path 2) and
-            // return a guaranteed static shell.
-            $this->failures->report($rendererFailure);
-            $html = $this->minimalShell($status);
-        }
-
-        event(new ErrorPageRendered($e, 'web', $status));
-        $this->recordRender($status, 'web');
-
-        return $html;
-    }
-
-    /**
      * A dependency-free static shell, used only if the branded web render itself
      * throws — so Path 1 still returns branded-ish HTML and the lifecycle events
      * and recording still fire.
@@ -487,38 +585,6 @@ final class ErrorPages
     }
 
     /**
-     * The full error payload for the Inertia/SPA components (richer than the
-     * RFC 7807 JSON): copy + brand + theme + retry hints + correlation id.
-     *
-     * @return array<string, mixed>
-     */
-    public function payloadFor(Throwable $e, ?Request $request = null): array
-    {
-        return $this->payloadFromPage($this->errorPageFor($e, $request));
-    }
-
-    /**
-     * The payload for a status code directly — for embedding the Inertia/Vue/React/
-     * Livewire component in your own view without a caught exception.
-     *
-     * @return array<string, mixed>
-     */
-    public function payloadForCode(int $code): array
-    {
-        return $this->payloadFromPage($this->pipeline->process($this->factory->make($code, $this->defaultLocale())));
-    }
-
-    /**
-     * The payload for a status key — a code ("404") or a generic "4xx"/"5xx".
-     *
-     * @return array<string, mixed>
-     */
-    public function payloadForKey(string $key): array
-    {
-        return $this->payloadFromPage($this->pipeline->process($this->factory->makeByKey($key, $this->defaultLocale())));
-    }
-
-    /**
      * Shape a resolved page + current theme into the shared component payload.
      *
      * @return array<string, mixed>
@@ -528,83 +594,34 @@ final class ErrorPages
         $theme = $this->themeSettings();
 
         return [
-            'status' => $page->code,
-            'code' => $page->key,
-            'title' => $page->title,
-            'message' => $page->message,
-            'retryable' => $page->retryable,
+            'status'     => $page->code,
+            'code'       => $page->key,
+            'title'      => $page->title,
+            'message'    => $page->message,
+            'retryable'  => $page->retryable,
             'retryAfter' => $page->retryAfter,
-            'requestId' => $page->requestId,
-            'homeUrl' => $theme->brandUrl,
-            'brand' => [
+            'requestId'  => $page->requestId,
+            'homeUrl'    => $theme->brandUrl,
+            'brand'      => [
                 'name' => $theme->brandName,
-                'url' => $theme->brandUrl,
+                'url'  => $theme->brandUrl,
                 'logo' => $theme->logo,
             ],
             'theme' => [
-                'preset' => $theme->preset->value,
+                'preset'   => $theme->preset->value,
                 'autoDark' => $theme->autoDark,
-                'locale' => $theme->locale,
-                'dir' => $theme->dir,
+                'locale'   => $theme->locale,
+                'dir'      => $theme->dir,
             ],
         ];
-    }
-
-    /**
-     * The RFC 7807 `application/problem+json` payload. The core renderer supplies
-     * the standard members; the bridge adds the recommended `instance` (request
-     * URI) and, when `problem_type_base` is configured, a per-status `type` URI.
-     *
-     * @return array<string, mixed>
-     */
-    public function jsonFor(Throwable $e, ?Request $request = null): array
-    {
-        $payload = (new JsonRenderer)->render($this->errorPageFor($e, $request), $this->themeSettings());
-
-        return $this->decorateProblem($payload, $request);
-    }
-
-    /**
-     * The RFC 9457 problem+json for a validation failure: the standard members
-     * plus a field-level `errors[]` array (`pointer`/`field`/`detail`). Used by
-     * the handler when `problem.validation` is on for the API context.
-     *
-     * @return array<string, mixed>
-     */
-    public function validationJsonFor(ValidationException $e, ?Request $request = null): array
-    {
-        $errors = [];
-        foreach ($e->errors() as $field => $messages) {
-            $field = (string) $field;
-            // RFC 6901 JSON Pointer: escape `~`/`/`, and map Laravel's dotted
-            // path (`items.0.name`) to pointer segments (`/items/0/name`).
-            $pointer = '/' . str_replace(['~', '/', '.'], ['~0', '~1', '/'], $field);
-            foreach ($messages as $message) {
-                $errors[] = ['pointer' => $pointer, 'field' => $field, 'detail' => (string) $message];
-            }
-        }
-
-        $payload = [
-            'type' => 'about:blank',
-            'title' => 'Validation failed',
-            'status' => $e->status,
-            'detail' => 'The given data failed validation.',
-            'errors' => $errors,
-        ];
-
-        $requestId = $this->requestIdFor($request);
-        if ($requestId !== null) {
-            $payload['request_id'] = $requestId;
-        }
-
-        return $this->decorateProblem($payload, $request);
     }
 
     /**
      * Add the resolved `type` URI (problem-docs route, else `problem_type_base`)
      * and the recommended `instance` (request URI) to a problem payload.
      *
-     * @param  array<string, mixed>  $payload
+     * @param array<string, mixed> $payload
+     *
      * @return array<string, mixed>
      */
     private function decorateProblem(array $payload, ?Request $request): array
@@ -637,21 +654,5 @@ final class ErrorPages
         $base = (string) $this->config->get('error-pages.problem_type_base', '');
 
         return $base !== '' ? rtrim($base, '/') . '/' . $status : null;
-    }
-
-    /**
-     * Render a page for a status code directly (preview / design QA).
-     */
-    public function htmlForCode(int $code): string
-    {
-        return $this->renderPage($this->pipeline->process($this->factory->make($code, $this->defaultLocale())));
-    }
-
-    /**
-     * Render a page for a status key — a code ("404") or a generic "4xx"/"5xx".
-     */
-    public function htmlForKey(string $key): string
-    {
-        return $this->renderPage($this->pipeline->process($this->factory->makeByKey($key, $this->defaultLocale())));
     }
 }

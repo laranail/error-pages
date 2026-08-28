@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\ErrorPages\Support;
 
-use Illuminate\Contracts\Config\Repository as Config;
 use Illuminate\Contracts\Translation\Translator;
+use Illuminate\Contracts\Config\Repository as Config;
 
 /**
  * Resolves the human-readable documentation (meaning / common causes / how to
@@ -50,8 +50,8 @@ final readonly class ProblemDocs
         }
 
         return [
-            'meaning' => is_string($value['meaning'] ?? null) ? $value['meaning'] : '',
-            'causes' => $this->strings($value['causes'] ?? []),
+            'meaning'    => is_string($value['meaning'] ?? null) ? $value['meaning'] : '',
+            'causes'     => $this->strings($value['causes'] ?? []),
             'resolution' => $this->strings($value['resolution'] ?? []),
         ];
     }

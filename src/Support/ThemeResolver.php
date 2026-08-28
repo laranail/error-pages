@@ -17,12 +17,12 @@ final readonly class ThemeResolver
 {
     private const string CONFIG = 'error-pages';
 
+    /** Base languages that read right-to-left (matched on the primary subtag). */
+    private const array RTL = ['ar', 'he', 'fa', 'ur', 'ps', 'sd', 'dv', 'ug', 'yi', 'ckb', 'arc', 'nqo', 'rhg'];
+
     public function __construct(
         private Config $config,
     ) {}
-
-    /** Base languages that read right-to-left (matched on the primary subtag). */
-    private const array RTL = ['ar', 'he', 'fa', 'ur', 'ps', 'sd', 'dv', 'ug', 'yi', 'ckb', 'arc', 'nqo', 'rhg'];
 
     public function resolve(?string $presetOverride = null): ThemeSettings
     {
@@ -71,8 +71,9 @@ final readonly class ThemeResolver
      *
      * @template T of string|null
      *
-     * @param  T  $fallback
-     * @param  list<string>  $allowedSchemes
+     * @param T $fallback
+     * @param list<string> $allowedSchemes
+     *
      * @return string|T
      */
     private function safeUrl(?string $url, ?string $fallback, array $allowedSchemes = []): ?string

@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\ErrorPages\Support;
 
-use Illuminate\Contracts\Cache\Repository as CacheRepository;
-use Illuminate\Contracts\Config\Repository as Config;
-use Illuminate\Contracts\Container\Container;
-use Simtabi\Laranail\ErrorPages\Exceptions\ErrorPageRenderException;
 use Throwable;
+use Illuminate\Contracts\Container\Container;
+use Illuminate\Contracts\Config\Repository as Config;
+use Illuminate\Contracts\Cache\Repository as CacheRepository;
+use Simtabi\Laranail\ErrorPages\Exceptions\ErrorPageRenderException;
 
 /**
  * Reports OUR renderer failure — never the original exception (the framework

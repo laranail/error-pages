@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\ErrorPages\View\Components;
 
-use Illuminate\Contracts\View\Factory as ViewFactory;
-use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
+use Illuminate\Contracts\View\View;
 use Simtabi\Laranail\ErrorPages\ErrorPages;
+use Illuminate\Contracts\View\Factory as ViewFactory;
 
 /**
  * Embeddable Blade error fragment: `<x-laranail-error-pages::error :code="404" />` renders
@@ -21,7 +21,7 @@ final class Error extends Component
     public array $page;
 
     /**
-     * @param  array<string, mixed>|null  $page
+     * @param array<string, mixed>|null $page
      */
     public function __construct(?int $code = null, ?string $key = null, ?array $page = null)
     {
@@ -29,8 +29,8 @@ final class Error extends Component
 
         $this->page = $page ?? match (true) {
             $code !== null => $pages->payloadForCode($code),
-            $key !== null => $pages->payloadForKey($key),
-            default => $pages->payloadForCode(500),
+            $key !== null  => $pages->payloadForKey($key),
+            default        => $pages->payloadForCode(500),
         };
     }
 

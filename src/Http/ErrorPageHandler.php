@@ -4,20 +4,20 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\ErrorPages\Http;
 
+use Throwable;
+use Illuminate\Http\Request;
+use Simtabi\Laranail\ErrorPages\ErrorPages;
 use Illuminate\Auth\AuthenticationException;
-use Illuminate\Contracts\Config\Repository as Config;
+use Simtabi\Laranail\ErrorPages\Enums\Stack;
+use Illuminate\Validation\ValidationException;
 use Illuminate\Contracts\Debug\ExceptionHandler;
 use Illuminate\Contracts\Foundation\Application;
-use Illuminate\Http\Request;
-use Illuminate\Validation\ValidationException;
-use Simtabi\Laranail\ErrorPages\Enums\Stack;
-use Simtabi\Laranail\ErrorPages\ErrorPages;
-use Simtabi\Laranail\ErrorPages\Events\ErrorPageRendered;
-use Simtabi\Laranail\ErrorPages\Events\RenderingErrorPage;
+use Illuminate\Contracts\Config\Repository as Config;
 use Simtabi\Laranail\ErrorPages\Rendering\StackManager;
 use Simtabi\Laranail\ErrorPages\Support\FailureReporter;
+use Simtabi\Laranail\ErrorPages\Events\ErrorPageRendered;
+use Simtabi\Laranail\ErrorPages\Events\RenderingErrorPage;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
-use Throwable;
 
 /**
  * Wires the package into Laravel's error handling by two complementary paths, so

@@ -19,7 +19,7 @@ final class AssetController
     /** file segment => [relative preset path, content type] */
     private const array MAP = [
         'error-pages.css' => ['shared/css/critical.css', 'text/css; charset=UTF-8'],
-        'error-pages.js' => ['shared/js/enhance.js', 'application/javascript; charset=UTF-8'],
+        'error-pages.js'  => ['shared/js/enhance.js', 'application/javascript; charset=UTF-8'],
     ];
 
     public function __invoke(Request $request, string $file): BinaryFileResponse

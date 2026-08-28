@@ -24,7 +24,7 @@ final readonly class TranslationContentRepository implements ContentRepository
     public function overridesFor(string $key, ?string $locale = null): array
     {
         return [
-            'title' => $this->line($key, 'title', $locale),
+            'title'   => $this->line($key, 'title', $locale),
             'message' => $this->line($key, 'message', $locale),
         ];
     }

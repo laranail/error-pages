@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\ErrorPages\Enums;
 
-use Simtabi\Laranail\Enumerator\Attributes\Description;
 use Simtabi\Laranail\Enumerator\Attributes\Label;
-use Simtabi\Laranail\Enumerator\Concerns\HasEnumeratorBehavior;
 use Simtabi\Laranail\Enumerator\Contracts\Enumerator;
+use Simtabi\Laranail\Enumerator\Attributes\Description;
+use Simtabi\Laranail\Enumerator\Concerns\HasEnumeratorBehavior;
 
 /**
  * How the web/inertia error page is produced. The API context is not a stack —

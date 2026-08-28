@@ -4,16 +4,17 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\ErrorPages\Tests;
 
-use Illuminate\Foundation\Application;
 use Inertia\ServiceProvider;
 use Livewire\LivewireServiceProvider;
+use Illuminate\Foundation\Application;
 use Orchestra\Testbench\TestCase as Orchestra;
 use Simtabi\Laranail\ErrorPages\Providers\ErrorPagesServiceProvider;
 
 abstract class TestCase extends Orchestra
 {
     /**
-     * @param  Application  $app
+     * @param Application $app
+     *
      * @return list<class-string>
      */
     protected function getPackageProviders($app): array
@@ -36,7 +37,7 @@ abstract class TestCase extends Orchestra
     }
 
     /**
-     * @param  Application  $app
+     * @param Application $app
      */
     protected function defineEnvironment($app): void
     {

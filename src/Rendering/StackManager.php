@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\ErrorPages\Rendering;
 
-use Illuminate\Support\Manager;
 use RuntimeException;
-use Simtabi\Laranail\ErrorPages\Contracts\StackRenderer;
+use Illuminate\Support\Manager;
 use Simtabi\Laranail\ErrorPages\ErrorPages;
-use Simtabi\Laranail\ErrorPages\Http\ErrorResponseFactory;
-use Simtabi\Laranail\ErrorPages\Stacks\InertiaStackRenderer;
-use Simtabi\Laranail\ErrorPages\Stacks\JsonStackRenderer;
-use Simtabi\Laranail\ErrorPages\Stacks\LivewireStackRenderer;
-use Simtabi\Laranail\ErrorPages\Stacks\PanelStackRenderer;
+use Simtabi\Laranail\ErrorPages\Contracts\StackRenderer;
 use Simtabi\Laranail\ErrorPages\Stacks\SpaStackRenderer;
+use Simtabi\Laranail\ErrorPages\Stacks\JsonStackRenderer;
+use Simtabi\Laranail\ErrorPages\Http\ErrorResponseFactory;
+use Simtabi\Laranail\ErrorPages\Stacks\PanelStackRenderer;
+use Simtabi\Laranail\ErrorPages\Stacks\InertiaStackRenderer;
+use Simtabi\Laranail\ErrorPages\Stacks\LivewireStackRenderer;
 
 /**
  * The driver seam for Path-2 rendering: resolve a {@see StackRenderer} by key

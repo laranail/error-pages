@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Simtabi\Laranail\ErrorPages\Contracts\StackRenderer;
 use Simtabi\Laranail\ErrorPages\ErrorPages;
+use Simtabi\Laranail\ErrorPages\Contracts\StackRenderer;
 
 it('renders the SPA shell with embedded payload for a web SPA stack', function (): void {
     config()->set('error-pages.stack', 'vue');

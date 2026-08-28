@@ -70,8 +70,8 @@
     "scripts": {
         "test": "vendor/bin/pest --no-coverage",
         "test-coverage": "vendor/bin/pest --coverage",
-        "pint": "vendor/bin/pint --test",
-        "pint-fix": "vendor/bin/pint",
+        "pint": "vendor/bin/pint --test --config vendor/laranail/package-tools/pint.json",
+        "pint-fix": "vendor/bin/pint --parallel --config vendor/laranail/package-tools/pint.json",
         "phpstan": "vendor/bin/phpstan analyse --no-progress",
         "rector": "vendor/bin/rector process --dry-run",
         "rector-fix": "vendor/bin/rector process",
@@ -79,7 +79,8 @@
             "@pint",
             "@phpstan",
             "@rector"
-        ]
+        ],
+        "format": "@pint-fix"
     },
     "extra": {
         "laravel": {

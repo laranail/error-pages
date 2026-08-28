@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\ErrorPages\Http;
 
-use Illuminate\Contracts\Config\Repository as Config;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Simtabi\Laranail\ErrorPages\Core\Enums\ThemePreset;
 use Simtabi\Laranail\ErrorPages\ErrorPages;
+use Illuminate\Contracts\Config\Repository as Config;
+use Simtabi\Laranail\ErrorPages\Core\Enums\ThemePreset;
 
 /**
  * Design-QA preview surface (dev/preview only): a gallery index over every

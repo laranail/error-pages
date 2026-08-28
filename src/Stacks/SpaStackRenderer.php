@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\ErrorPages\Stacks;
 
+use Throwable;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Simtabi\Laranail\ErrorPages\Contracts\StackRenderer;
 use Simtabi\Laranail\ErrorPages\ErrorPages;
+use Simtabi\Laranail\ErrorPages\Contracts\StackRenderer;
 use Simtabi\Laranail\ErrorPages\Http\ErrorResponseFactory;
-use Throwable;
 
 /**
  * The Vue/React SPA context renderer: serves the self-contained branded page and

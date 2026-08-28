@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\ErrorPages\Http;
 
-use Illuminate\Contracts\Config\Repository as Config;
-use Illuminate\Http\Request;
 use Throwable;
+use Illuminate\Http\Request;
+use Illuminate\Contracts\Config\Repository as Config;
 
 /**
  * Best-effort automatic panel-context detection, gated by the `panels.*` flags
