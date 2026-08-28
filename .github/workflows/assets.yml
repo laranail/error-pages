@@ -1,16 +1,18 @@
 name: assets
 
 on:
-  push:
-    branches: [main]
-    paths: ['presets/**']
   pull_request:
     branches: [main]
     paths: ['presets/**']
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   ui:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     name: error-pages-ui (Vue/React)
     defaults:
       run:

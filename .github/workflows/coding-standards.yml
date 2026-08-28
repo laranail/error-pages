@@ -1,14 +1,17 @@
 name: coding-standards
 
 on:
-  push:
-    branches: [main]
   pull_request:
     branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   pint:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     name: Pint
 
     steps:
