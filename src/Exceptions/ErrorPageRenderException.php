@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\ErrorPages\Exceptions;
 
-use Throwable;
 use RuntimeException;
+use Throwable;
 
 /**
  * Wraps a failure inside our OWN renderer (never the original app exception, which
@@ -18,7 +18,7 @@ final class ErrorPageRenderException extends RuntimeException
     public function __construct(Throwable $previous)
     {
         parent::__construct(
-            'Failed to render a branded error page: ' . $previous->getMessage(),
+            'Failed to render a branded error page: '.$previous->getMessage(),
             previous: $previous,
         );
     }
@@ -29,9 +29,9 @@ final class ErrorPageRenderException extends RuntimeException
     public function context(): array
     {
         return [
-            'cause'      => $this->getPrevious()?->getMessage(),
+            'cause' => $this->getPrevious()?->getMessage(),
             'cause_type' => $this->getPrevious() instanceof Throwable ? $this->getPrevious()::class : null,
-            'decision'   => 'degraded-to-laravel-default',
+            'decision' => 'degraded-to-laravel-default',
         ];
     }
 }

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 use Illuminate\Http\Request;
 use Simtabi\Laranail\ErrorPages\Enums\Stack;
-use Simtabi\Laranail\ErrorPages\Http\RenderContext;
 use Simtabi\Laranail\ErrorPages\Http\ErrorPageHandler;
+use Simtabi\Laranail\ErrorPages\Http\RenderContext;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 it('routes a web request under an Inertia stack to the inertia renderer', function (): void {

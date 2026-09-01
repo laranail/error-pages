@@ -21,24 +21,24 @@ final class CssVariableMap
             return '';
         }
 
-        $class = '.ep-theme-' . $theme->preset->value;
+        $class = '.ep-theme-'.$theme->preset->value;
         $css = '';
 
         $light = self::block($theme->overridesLight);
         if ($light !== '') {
-            $css .= $class . '{' . $light . '}';
+            $css .= $class.'{'.$light.'}';
         }
 
         $dark = self::block($theme->overridesDark);
         if ($dark !== '') {
-            $css .= '@media (prefers-color-scheme:dark){.ep-auto-dark' . $class . '{' . $dark . '}}';
+            $css .= '@media (prefers-color-scheme:dark){.ep-auto-dark'.$class.'{'.$dark.'}}';
         }
 
         return $css;
     }
 
     /**
-     * @param array<string, string> $colors
+     * @param  array<string, string>  $colors
      */
     private static function block(array $colors): string
     {
@@ -53,7 +53,7 @@ final class CssVariableMap
                 continue;
             }
 
-            $out .= '--ep-' . strtolower($token) . ':' . self::safeColor((string) $value) . ';';
+            $out .= '--ep-'.strtolower($token).':'.self::safeColor((string) $value).';';
         }
 
         return $out;

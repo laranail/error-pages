@@ -17,8 +17,8 @@ use Simtabi\Laranail\ErrorPages\Core\Theme\CssVariableMap;
 final readonly class ThemeSettings
 {
     /**
-     * @param array<string, string> $overridesLight
-     * @param array<string, string> $overridesDark
+     * @param  array<string, string>  $overridesLight
+     * @param  array<string, string>  $overridesDark
      */
     public function __construct(
         public string $brandName,

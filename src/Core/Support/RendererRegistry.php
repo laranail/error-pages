@@ -21,7 +21,7 @@ final class RendererRegistry
     private array $resolved = [];
 
     /**
-     * @param callable(): Renderer $factory
+     * @param  callable(): Renderer  $factory
      */
     public function register(string $key, callable $factory): static
     {

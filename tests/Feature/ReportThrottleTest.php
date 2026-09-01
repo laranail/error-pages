@@ -5,8 +5,8 @@ declare(strict_types=1);
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Exceptions;
-use Simtabi\Laranail\ErrorPages\ErrorPages;
 use Simtabi\Laranail\ErrorPages\Contracts\StackRenderer;
+use Simtabi\Laranail\ErrorPages\ErrorPages;
 use Simtabi\Laranail\ErrorPages\Exceptions\ErrorPageRenderException;
 
 /**
