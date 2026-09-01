@@ -22,8 +22,8 @@ use Simtabi\Laranail\ErrorPages\Core\ValueObjects\ThemeSettings;
  * @var ?string $nonce
  * @var Closure $e
  */
-$bodyClass = 'ep-body ep-theme-' . $e($theme->preset->value) . ($theme->autoDark ? ' ep-auto-dark' : '');
-$nonceAttr = ($nonce ?? '') !== '' ? ' nonce="' . $e($nonce) . '"' : '';
+$bodyClass = 'ep-body ep-theme-'.$e($theme->preset->value).($theme->autoDark ? ' ep-auto-dark' : '');
+$nonceAttr = ($nonce ?? '') !== '' ? ' nonce="'.$e($nonce).'"' : '';
 ?><!DOCTYPE html>
 <html lang="<?= $e($theme->locale) ?>" dir="<?= $e($theme->dir) ?>">
 <head>

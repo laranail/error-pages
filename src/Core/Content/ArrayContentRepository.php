@@ -14,8 +14,8 @@ use Simtabi\Laranail\ErrorPages\Core\Contracts\ContentRepository;
 final readonly class ArrayContentRepository implements ContentRepository
 {
     /**
-     * @param array<string, array{title?: string, message?: string}> $content key => copy
-     * @param array<string, array<string, array{title?: string, message?: string}>> $localized locale => (key => copy)
+     * @param  array<string, array{title?: string, message?: string}>  $content  key => copy
+     * @param  array<string, array<string, array{title?: string, message?: string}>>  $localized  locale => (key => copy)
      */
     public function __construct(
         private array $content = [],
@@ -29,7 +29,7 @@ final readonly class ArrayContentRepository implements ContentRepository
             ?? [];
 
         return [
-            'title'   => $this->clean($entry['title'] ?? null),
+            'title' => $this->clean($entry['title'] ?? null),
             'message' => $this->clean($entry['message'] ?? null),
         ];
     }

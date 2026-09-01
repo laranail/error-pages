@@ -19,7 +19,7 @@ final class AssetController
     /** file segment => [relative preset path, content type] */
     private const array MAP = [
         'error-pages.css' => ['shared/css/critical.css', 'text/css; charset=UTF-8'],
-        'error-pages.js'  => ['shared/js/enhance.js', 'application/javascript; charset=UTF-8'],
+        'error-pages.js' => ['shared/js/enhance.js', 'application/javascript; charset=UTF-8'],
     ];
 
     public function __invoke(Request $request, string $file): BinaryFileResponse
@@ -29,7 +29,7 @@ final class AssetController
         }
 
         [$relative, $contentType] = self::MAP[$file];
-        $path = dirname(__DIR__, 2) . '/presets/' . $relative;
+        $path = dirname(__DIR__, 2).'/presets/'.$relative;
 
         if (! is_file($path)) {
             throw new NotFoundHttpException;

@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\ErrorPages\Http;
 
+use Illuminate\Contracts\View\Factory as ViewFactory;
 use Illuminate\Http\Response;
+use Simtabi\Laranail\ErrorPages\Core\Theme\CssVariableMap;
 use Simtabi\Laranail\ErrorPages\ErrorPages;
 use Simtabi\Laranail\ErrorPages\Support\ProblemDocs;
-use Illuminate\Contracts\View\Factory as ViewFactory;
-use Simtabi\Laranail\ErrorPages\Core\Theme\CssVariableMap;
 
 /**
  * Serves the human-readable problem-type page that an RFC 7807/9457 `type` URI
@@ -31,18 +31,18 @@ final readonly class ProblemController
             ? $this->pages->payloadForCode((int) $code)
             : $this->pages->payloadForKey($code);
 
-        $cssPath = dirname(__DIR__, 2) . '/presets/shared/css/critical.css';
+        $cssPath = dirname(__DIR__, 2).'/presets/shared/css/critical.css';
 
         $html = $this->views->make('laranail-error-pages::problems.show', [
-            'page'        => $payload,
-            'doc'         => $this->docs->for($code),
+            'page' => $payload,
+            'doc' => $this->docs->for($code),
             'criticalCss' => is_file($cssPath) ? (string) file_get_contents($cssPath) : '',
-            'themeCss'    => CssVariableMap::themeCss($this->pages->themeSettings()),
+            'themeCss' => CssVariableMap::themeCss($this->pages->themeSettings()),
         ])->render();
 
         return new Response($html, 200, [
-            'Content-Type'           => 'text/html; charset=UTF-8',
-            'X-Robots-Tag'           => 'noindex',
+            'Content-Type' => 'text/html; charset=UTF-8',
+            'X-Robots-Tag' => 'noindex',
             'X-Content-Type-Options' => 'nosniff',
         ]);
     }
