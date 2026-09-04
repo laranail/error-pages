@@ -5,27 +5,27 @@ declare(strict_types=1);
 namespace Simtabi\Laranail\ErrorPages;
 
 use Closure;
-use Illuminate\Contracts\Config\Repository as Config;
-use Illuminate\Contracts\Foundation\Application;
+use Throwable;
 use Illuminate\Http\Request;
-use Illuminate\Validation\ValidationException;
 use PHPUnit\Framework\Assert;
-use Simtabi\Laranail\ErrorPages\Contracts\StackRenderer;
-use Simtabi\Laranail\ErrorPages\Core\ErrorPageFactory;
-use Simtabi\Laranail\ErrorPages\Core\Rendering\HtmlRenderer;
-use Simtabi\Laranail\ErrorPages\Core\Rendering\JsonRenderer;
-use Simtabi\Laranail\ErrorPages\Core\Support\Pipeline;
-use Simtabi\Laranail\ErrorPages\Core\ValueObjects\ErrorPage;
-use Simtabi\Laranail\ErrorPages\Core\ValueObjects\ThemeSettings;
 use Simtabi\Laranail\ErrorPages\Enums\Stack;
+use Illuminate\Validation\ValidationException;
+use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Contracts\Config\Repository as Config;
+use Simtabi\Laranail\ErrorPages\Core\ErrorPageFactory;
+use Simtabi\Laranail\ErrorPages\Core\Support\Pipeline;
+use Simtabi\Laranail\ErrorPages\Support\ThemeResolver;
+use Simtabi\Laranail\ErrorPages\Rendering\StackManager;
+use Simtabi\Laranail\ErrorPages\Contracts\StackRenderer;
+use Simtabi\Laranail\ErrorPages\Support\FailureReporter;
 use Simtabi\Laranail\ErrorPages\Events\ErrorPageRendered;
 use Simtabi\Laranail\ErrorPages\Events\RenderingErrorPage;
-use Simtabi\Laranail\ErrorPages\Rendering\StackManager;
-use Simtabi\Laranail\ErrorPages\Support\FailureReporter;
-use Simtabi\Laranail\ErrorPages\Support\ThemeResolver;
+use Simtabi\Laranail\ErrorPages\Core\Rendering\HtmlRenderer;
+use Simtabi\Laranail\ErrorPages\Core\Rendering\JsonRenderer;
+use Simtabi\Laranail\ErrorPages\Core\ValueObjects\ErrorPage;
+use Simtabi\Laranail\ErrorPages\Core\ValueObjects\ThemeSettings;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
-use Throwable;
 
 /**
  * The package's fluent entry point (facade root). Builds a resolved
@@ -82,7 +82,7 @@ final class ErrorPages
     /**
      * Register or override a stack renderer (the coexistence driver seam).
      *
-     * @param  Closure(Application): StackRenderer  $factory
+     * @param Closure(Application): StackRenderer $factory
      */
     public function extend(string $stack, Closure $factory): static
     {
@@ -123,7 +123,7 @@ final class ErrorPages
      * A Content-Security-Policy nonce (a value, or a per-request resolver) applied
      * to the inline `<style>` and the enhancement `<script>` — for strict-CSP apps.
      *
-     * @param  (Closure(): ?string)|string  $nonce
+     * @param (Closure(): ?string)|string $nonce
      */
     public function nonce(Closure|string $nonce): static
     {
@@ -135,7 +135,7 @@ final class ErrorPages
     /**
      * Veto handling for matching exceptions/requests (they pass through to Laravel).
      *
-     * @param  callable(Throwable, ?Request): bool  $predicate
+     * @param callable(Throwable, ?Request): bool $predicate
      */
     public function skipWhen(callable $predicate): static
     {
@@ -145,7 +145,7 @@ final class ErrorPages
     }
 
     /**
-     * @param  callable(ErrorPage): ErrorPage  $stage
+     * @param callable(ErrorPage): ErrorPage $stage
      */
     public function pipe(callable $stage): static
     {
@@ -188,11 +188,11 @@ final class ErrorPages
     {
         if ($this->baseline === null) {
             $this->baseline = [
-                'skip' => $this->skipPredicates,
-                'context' => $this->contextResolver,
-                'stack' => $this->stackOverride,
-                'theme' => $this->themeOverride,
-                'nonce' => $this->nonce,
+                'skip'     => $this->skipPredicates,
+                'context'  => $this->contextResolver,
+                'stack'    => $this->stackOverride,
+                'theme'    => $this->themeOverride,
+                'nonce'    => $this->nonce,
                 'pipeline' => $this->pipeline->snapshot(),
             ];
 
@@ -233,10 +233,10 @@ final class ErrorPages
         }
 
         $this->rendered[] = [
-            'status' => $status,
+            'status'  => $status,
             'context' => $context,
-            'stack' => Stack::fromValue($this->stackOverride ?? (string) $this->config->get('error-pages.stack', 'blade'))->value,
-            'theme' => $this->themeSettings()->preset->value,
+            'stack'   => Stack::fromValue($this->stackOverride ?? (string) $this->config->get('error-pages.stack', 'blade'))->value,
+            'theme'   => $this->themeSettings()->preset->value,
         ];
     }
 
@@ -333,7 +333,7 @@ final class ErrorPages
 
         $root = rtrim((string) $this->config->get('app.url', ''), '/');
 
-        return $root.$base.'/'.$file.'?v='.$version;
+        return $root . $base . '/' . $file . '?v=' . $version;
     }
 
     /**
@@ -425,15 +425,15 @@ final class ErrorPages
             $field = (string) $field;
             // RFC 6901 JSON Pointer: escape `~`/`/`, and map Laravel's dotted
             // path (`items.0.name`) to pointer segments (`/items/0/name`).
-            $pointer = '/'.str_replace(['~', '/', '.'], ['~0', '~1', '/'], $field);
+            $pointer = '/' . str_replace(['~', '/', '.'], ['~0', '~1', '/'], $field);
             foreach ($messages as $message) {
                 $errors[] = ['pointer' => $pointer, 'field' => $field, 'detail' => (string) $message];
             }
         }
 
         $payload = [
-            'type' => 'about:blank',
-            'title' => 'Validation failed',
+            'type'   => 'about:blank',
+            'title'  => 'Validation failed',
             'status' => $e->status,
             'detail' => 'The given data failed validation.',
             'errors' => $errors,
@@ -514,7 +514,7 @@ final class ErrorPages
     {
         $nonce = $this->nonceValue();
 
-        return $nonce === null ? '' : ' nonce="'.htmlspecialchars($nonce, ENT_QUOTES).'"';
+        return $nonce === null ? '' : ' nonce="' . htmlspecialchars($nonce, ENT_QUOTES) . '"';
     }
 
     /**
@@ -530,7 +530,7 @@ final class ErrorPages
             return $html;
         }
 
-        return str_replace('</body>', $tag.'</body>', $html);
+        return str_replace('</body>', $tag . '</body>', $html);
     }
 
     private function enhancementTag(): ?string
@@ -539,10 +539,10 @@ final class ErrorPages
         $nonce = $this->nonceAttr();
 
         return match ($mode) {
-            'route' => '<script src="'.htmlspecialchars($this->assetUrl('error-pages.js'), ENT_QUOTES).'"'.$nonce.' defer></script>',
-            'link' => '<script src="'.htmlspecialchars(asset('vendor/error-pages/error-pages.js'), ENT_QUOTES).'"'.$nonce.' defer></script>',
+            'route'  => '<script src="' . htmlspecialchars($this->assetUrl('error-pages.js'), ENT_QUOTES) . '"' . $nonce . ' defer></script>',
+            'link'   => '<script src="' . htmlspecialchars(asset('vendor/error-pages/error-pages.js'), ENT_QUOTES) . '"' . $nonce . ' defer></script>',
             'inline' => $this->inlineEnhancement(),
-            default => null,
+            default  => null,
         };
     }
 
@@ -551,7 +551,7 @@ final class ErrorPages
         static $version = null;
 
         if ($version === null) {
-            $path = dirname(__DIR__).'/presets/shared/js/enhance.js';
+            $path = dirname(__DIR__) . '/presets/shared/js/enhance.js';
             $version = is_file($path) ? substr((string) md5_file($path), 0, 8) : '0';
         }
 
@@ -560,10 +560,10 @@ final class ErrorPages
 
     private function inlineEnhancement(): ?string
     {
-        $path = dirname(__DIR__).'/presets/shared/js/enhance.js';
+        $path = dirname(__DIR__) . '/presets/shared/js/enhance.js';
         $js = is_file($path) ? file_get_contents($path) : false;
 
-        return $js === false ? null : '<script'.$this->nonceAttr().'>'.$js.'</script>';
+        return $js === false ? null : '<script' . $this->nonceAttr() . '>' . $js . '</script>';
     }
 
     /**
@@ -576,12 +576,12 @@ final class ErrorPages
         $code = (string) $status;
 
         return '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">'
-            .'<meta name="viewport" content="width=device-width, initial-scale=1">'
-            .'<meta name="robots" content="noindex, nofollow">'
-            .'<title>'.$code.'</title></head>'
-            .'<body style="font-family:system-ui,sans-serif;text-align:center;padding:4rem 1rem;color:#0f172a">'
-            .'<h1 style="font-size:3rem;margin:0">'.$code.'</h1>'
-            .'<p style="color:#64748b">An error occurred.</p></body></html>';
+            . '<meta name="viewport" content="width=device-width, initial-scale=1">'
+            . '<meta name="robots" content="noindex, nofollow">'
+            . '<title>' . $code . '</title></head>'
+            . '<body style="font-family:system-ui,sans-serif;text-align:center;padding:4rem 1rem;color:#0f172a">'
+            . '<h1 style="font-size:3rem;margin:0">' . $code . '</h1>'
+            . '<p style="color:#64748b">An error occurred.</p></body></html>';
     }
 
     /**
@@ -594,24 +594,24 @@ final class ErrorPages
         $theme = $this->themeSettings();
 
         return [
-            'status' => $page->code,
-            'code' => $page->key,
-            'title' => $page->title,
-            'message' => $page->message,
-            'retryable' => $page->retryable,
+            'status'     => $page->code,
+            'code'       => $page->key,
+            'title'      => $page->title,
+            'message'    => $page->message,
+            'retryable'  => $page->retryable,
             'retryAfter' => $page->retryAfter,
-            'requestId' => $page->requestId,
-            'homeUrl' => $theme->brandUrl,
-            'brand' => [
+            'requestId'  => $page->requestId,
+            'homeUrl'    => $theme->brandUrl,
+            'brand'      => [
                 'name' => $theme->brandName,
-                'url' => $theme->brandUrl,
+                'url'  => $theme->brandUrl,
                 'logo' => $theme->logo,
             ],
             'theme' => [
-                'preset' => $theme->preset->value,
+                'preset'   => $theme->preset->value,
                 'autoDark' => $theme->autoDark,
-                'locale' => $theme->locale,
-                'dir' => $theme->dir,
+                'locale'   => $theme->locale,
+                'dir'      => $theme->dir,
             ],
         ];
     }
@@ -620,7 +620,8 @@ final class ErrorPages
      * Add the resolved `type` URI (problem-docs route, else `problem_type_base`)
      * and the recommended `instance` (request URI) to a problem payload.
      *
-     * @param  array<string, mixed>  $payload
+     * @param array<string, mixed> $payload
+     *
      * @return array<string, mixed>
      */
     private function decorateProblem(array $payload, ?Request $request): array
@@ -647,11 +648,11 @@ final class ErrorPages
             $root = rtrim((string) $this->config->get('app.url', ''), '/');
             $route = trim((string) $this->config->get('error-pages.problem.docs.route', '/errors/problems'), '/');
 
-            return $root.'/'.$route.'/'.$status;
+            return $root . '/' . $route . '/' . $status;
         }
 
         $base = (string) $this->config->get('error-pages.problem_type_base', '');
 
-        return $base !== '' ? rtrim($base, '/').'/'.$status : null;
+        return $base !== '' ? rtrim($base, '/') . '/' . $status : null;
     }
 }

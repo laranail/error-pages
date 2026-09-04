@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\ErrorPages\Core;
 
-use Simtabi\Laranail\ErrorPages\Core\Contracts\ContentRepository;
 use Simtabi\Laranail\ErrorPages\Core\Enums\HttpStatus;
 use Simtabi\Laranail\ErrorPages\Core\ValueObjects\ErrorPage;
+use Simtabi\Laranail\ErrorPages\Core\Contracts\ContentRepository;
 
 /**
  * Resolves a status key to an {@see ErrorPage} via one content chain: caller

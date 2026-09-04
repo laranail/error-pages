@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use Illuminate\Support\Facades\Route;
 use Livewire\Livewire;
+use Illuminate\Support\Facades\Route;
 use Simtabi\Laranail\ErrorPages\ErrorPages;
 use Simtabi\Laranail\ErrorPages\Livewire\ErrorPage;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
