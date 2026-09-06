@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\ErrorPages\Http;
 
-use Illuminate\Http\JsonResponse;
+use Throwable;
 use Illuminate\Http\Response;
+use Illuminate\Http\JsonResponse;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
-use Throwable;
 
 /**
  * Wraps rendered output into an HTTP response, propagating the exception's own
@@ -19,7 +19,7 @@ use Throwable;
 final class ErrorResponseFactory
 {
     /**
-     * @param  array<string, mixed>  $payload
+     * @param array<string, mixed> $payload
      */
     public function json(array $payload, int $status, Throwable $e): JsonResponse
     {
@@ -40,7 +40,8 @@ final class ErrorResponseFactory
      *
      * @template T of SymfonyResponse
      *
-     * @param  T  $response
+     * @param T $response
+     *
      * @return T
      */
     public function harden(SymfonyResponse $response, int $status, Throwable $e): SymfonyResponse

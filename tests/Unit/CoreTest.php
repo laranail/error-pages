@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-use Simtabi\Laranail\ErrorPages\Core\Content\ArrayContentRepository;
-use Simtabi\Laranail\ErrorPages\Core\Contracts\Renderer;
+use Simtabi\Laranail\ErrorPages\Core\ErrorPages;
 use Simtabi\Laranail\ErrorPages\Core\Enums\HttpStatus;
 use Simtabi\Laranail\ErrorPages\Core\Enums\ThemePreset;
-use Simtabi\Laranail\ErrorPages\Core\ErrorPages;
+use Simtabi\Laranail\ErrorPages\Core\Contracts\Renderer;
 use Simtabi\Laranail\ErrorPages\Core\ValueObjects\ErrorPage;
 use Simtabi\Laranail\ErrorPages\Core\ValueObjects\ThemeSettings;
+use Simtabi\Laranail\ErrorPages\Core\Content\ArrayContentRepository;
 
 function theme(ThemePreset $preset = ThemePreset::Default): ThemeSettings
 {

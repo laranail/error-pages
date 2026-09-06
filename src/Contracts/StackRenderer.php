@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\ErrorPages\Contracts;
 
+use Throwable;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Throwable;
 
 /**
  * Renders a branded error page for one front-end stack/context (json, inertia,

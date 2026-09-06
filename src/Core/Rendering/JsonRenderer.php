@@ -21,12 +21,12 @@ final class JsonRenderer implements Renderer
     public function render(ErrorPage $page, ThemeSettings $theme): array
     {
         return array_filter([
-            'type' => 'about:blank',
-            'title' => $page->title,
-            'status' => $page->code,
-            'detail' => $page->message,
-            'code' => $page->key,
-            'request_id' => $page->requestId,
+            'type'        => 'about:blank',
+            'title'       => $page->title,
+            'status'      => $page->code,
+            'detail'      => $page->message,
+            'code'        => $page->key,
+            'request_id'  => $page->requestId,
             'retry_after' => $page->retryAfter,
         ], static fn (mixed $value): bool => $value !== null);
     }

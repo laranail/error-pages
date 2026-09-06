@@ -71,8 +71,9 @@ final readonly class ThemeResolver
      *
      * @template T of string|null
      *
-     * @param  T  $fallback
-     * @param  list<string>  $allowedSchemes
+     * @param T $fallback
+     * @param list<string> $allowedSchemes
+     *
      * @return string|T
      */
     private function safeUrl(?string $url, ?string $fallback, array $allowedSchemes = []): ?string
@@ -93,7 +94,7 @@ final readonly class ThemeResolver
 
     private function get(string $key, mixed $default = null): mixed
     {
-        return $this->config->get(self::CONFIG.'.'.$key, $default);
+        return $this->config->get(self::CONFIG . '.' . $key, $default);
     }
 
     /**
@@ -102,7 +103,7 @@ final readonly class ThemeResolver
     private function colors(string $scheme): array
     {
         /** @var array<string, mixed> $colors */
-        $colors = (array) $this->get('theme.colors.'.$scheme, []);
+        $colors = (array) $this->get('theme.colors.' . $scheme, []);
 
         return array_map(strval(...), array_filter($colors, is_scalar(...)));
     }
