@@ -51,14 +51,14 @@ it('offers panels in its config, so this guard is not vacuous', function (): voi
 });
 
 it('can build a driver for every renderer key it can produce', function (): void {
-    $manager   = new ReflectionClass(StackManager::class);
+    $manager = new ReflectionClass(StackManager::class);
     $offenders = [];
 
     // The full cartesian product: the `web` context picks its key from the stack, so a stack case
     // added without a matching renderer is exactly as broken as a missing panel driver.
     foreach (builtInRenderContexts() as $context) {
         foreach (Stack::cases() as $stack) {
-            $key    = RenderContext::make(new RuntimeException('probe'), request(), $context, $stack)->rendererKey();
+            $key = RenderContext::make(new RuntimeException('probe'), request(), $context, $stack)->rendererKey();
             $method = createMethodFor($key);
 
             if (! $manager->hasMethod($method)) {
