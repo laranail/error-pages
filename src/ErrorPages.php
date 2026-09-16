@@ -551,7 +551,7 @@ final class ErrorPages
         static $version = null;
 
         if ($version === null) {
-            $path = dirname(__DIR__) . '/presets/shared/js/enhance.js';
+            $path = __DIR__ . '/../presets/shared/js/enhance.js';
             $version = is_file($path) ? substr((string) md5_file($path), 0, 8) : '0';
         }
 
@@ -560,7 +560,7 @@ final class ErrorPages
 
     private function inlineEnhancement(): ?string
     {
-        $path = dirname(__DIR__) . '/presets/shared/js/enhance.js';
+        $path = __DIR__ . '/../presets/shared/js/enhance.js';
         $js = is_file($path) ? file_get_contents($path) : false;
 
         return $js === false ? null : '<script' . $this->nonceAttr() . '>' . $js . '</script>';
