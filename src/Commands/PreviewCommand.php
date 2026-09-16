@@ -25,9 +25,6 @@ final class PreviewCommand extends Command
     /** @var string */
     protected $description = 'Render a branded error page to an HTML file (design QA).';
 
-    /** @var list<string> */
-    protected array $commandAliases = ['error-pages:preview'];
-
     public function handle(ErrorPages $pages): int
     {
         $codeArgument = $this->argument('code');

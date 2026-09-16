@@ -26,7 +26,7 @@ http://localhost/_error-pages/4xx
 ```bash
 php artisan laranail::error-pages.preview 500 --output=storage/preview-500.html
 # alias:
-php artisan error-pages:preview 500 -o storage/preview-500.html
+php artisan laranail::error-pages.preview 500 -o storage/preview-500.html
 ```
 
 Renders the page to an HTML file (default: `error-preview-{code}.html` in the CWD).
