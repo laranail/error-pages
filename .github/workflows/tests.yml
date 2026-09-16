@@ -17,7 +17,12 @@ jobs:
       matrix:
         php: ['8.4', '8.5']
 
-    name: PHP ${{ matrix.php }}
+        # prefer-lowest is what actually installs the floor composer.json declares.
+        # Without it nothing ever resolves the minimum this package tells consumers
+        # it supports. Paired with --prefer-stable because bare --prefer-lowest
+        # resolves the lowest UNSTABLE release, which fails for the wrong reason.
+        stability: [prefer-lowest, prefer-stable]
+    name: PHP ${{ matrix.php }} · ${{ matrix.stability }}
 
     steps:
       - name: Checkout
@@ -54,7 +59,7 @@ jobs:
         run: rm -rf "$(composer config cache-files-dir)/laranail"
 
       - name: Install dependencies
-        run: composer update --prefer-dist --no-interaction --no-progress
+        run: composer update --${{ matrix.stability }} --prefer-stable --prefer-dist --no-interaction --no-progress
 
       - name: Run tests
         run: composer test
