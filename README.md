@@ -1,9 +1,10 @@
 # laranail/error-pages
 
-[![Packagist Version](https://img.shields.io/packagist/v/laranail/error-pages.svg?style=flat-square)](https://packagist.org/packages/laranail/error-pages)
 [![Tests](https://img.shields.io/github/actions/workflow/status/laranail/error-pages/ci.yml?branch=main&label=tests&style=flat-square)](https://github.com/laranail/error-pages/actions)
 [![Static analysis](https://img.shields.io/github/actions/workflow/status/laranail/error-pages/ci.yml?branch=main&label=static%20analysis&style=flat-square)](https://github.com/laranail/error-pages/actions)
 [![License MIT](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](LICENSE)
+
+`laranail/error-pages` is not published to Packagist, so there is no registry-version badge to show — see [Install](#install).
 
 > Beautiful, branded **production** error and exception pages for Laravel that **complement** Ignition — it renders the end-user page, Ignition keeps the dev debug page, your reporting tools keep the report pipeline.
 
