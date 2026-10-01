@@ -14,4 +14,3 @@ build/
 
 # npm (presets/@laranail/error-pages-ui)
 presets/node_modules/
-!presets/package-lock.json
