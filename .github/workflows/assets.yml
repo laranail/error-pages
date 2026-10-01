@@ -25,7 +25,9 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v7
         with:
-          node-version: '22'
+          # npm 10 (bundled with Node 22) crashes resolving this manifest without a lock
+          # ("Cannot read properties of null (reading 'edgesOut')"); Node 24 ships npm 11.
+          node-version: '24'
           cache: npm
           cache-dependency-path: presets/package.json
 
