@@ -22,7 +22,20 @@ It self-registers and takes over production-style error responses out of the box
 php artisan vendor:publish --tag=laranail::error-pages-config
 ```
 
-## Quick start
+## Quick start guide and usage
+
+### Getting started
+
+Nothing to configure: the service provider registers itself, and with `APP_DEBUG=false` a missing route already renders a branded 404 and an `Accept: application/json` request gets RFC 7807 JSON. To brand it or pick a front-end stack, set these in `.env`:
+
+```dotenv
+ERROR_PAGES_BRAND="Acme Inc"
+ERROR_PAGES_LOGO="/images/logo.svg"
+ERROR_PAGES_THEME=midnight
+ERROR_PAGES_STACK=inertia-react
+```
+
+### Usage
 
 ```bash
 # Render the branded 503 page to a file, even while APP_DEBUG=true keeps Ignition on
@@ -30,6 +43,16 @@ php artisan laranail::error-pages.preview 503 --output=storage/app/error-503.htm
 
 # With APP_DEBUG=false, an API caller hitting a missing route gets RFC 7807 JSON
 curl -i -H "Accept: application/json" https://acme.test/orders/does-not-exist
+```
+
+Reshape it from a service provider:
+
+```php
+use Simtabi\Laranail\ErrorPages\Facades\ErrorPages;
+
+ErrorPages::theme('crimson')
+    ->skipWhen(fn ($e, $request) => $request?->is('webhooks/*'))
+    ->pipe(fn ($page) => $page->withRequestId(request()->header('X-Request-Id')));
 ```
 
 The full walkthrough is in [Getting started](docs/getting-started.md); everything else is in the [documentation index](#documentation).
