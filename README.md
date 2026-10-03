@@ -22,6 +22,18 @@ It self-registers and takes over production-style error responses out of the box
 php artisan vendor:publish --tag=laranail::error-pages-config
 ```
 
+## Quick start
+
+```bash
+# Render the branded 503 page to a file, even while APP_DEBUG=true keeps Ignition on
+php artisan laranail::error-pages.preview 503 --output=storage/app/error-503.html
+
+# With APP_DEBUG=false, an API caller hitting a missing route gets RFC 7807 JSON
+curl -i -H "Accept: application/json" https://acme.test/orders/does-not-exist
+```
+
+The full walkthrough is in [Getting started](docs/getting-started.md); everything else is in the [documentation index](#documentation).
+
 ## <a name="documentation"></a>Documentation
 
 Hosted at **<https://opensource.simtabi.com/documentation/laranail/error-pages/>**.
