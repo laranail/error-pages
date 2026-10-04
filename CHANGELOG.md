@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Route names are vendor-scoped: `error-pages.assets`, `error-pages.problem`,
+  `error-pages.preview.gallery` and `error-pages.preview` are now registered as
+  `laranail-error-pages.assets`, `laranail-error-pages.problem`,
+  `laranail-error-pages.preview.gallery` and `laranail-error-pages.preview`, so they cannot
+  collide with an application or sibling-package route in Laravel's flat name registry.
+
+### Deprecated
+
+- The bare route names above. `route()` still resolves each one to its scoped route (through
+  `URL::resolveMissingNamedRoutesUsing()`, chained to any resolver already installed, so another
+  package's fallback keeps working) and raises an `E_USER_DEPRECATED` naming the replacement. An
+  application route of the same name is never shadowed. `Route::has()` does not see the aliases;
+  ask for the scoped name. Earliest removal: the next minor after 0.1.
+
+### Added
+
+- `NamingConventionTest`, which boots the package with every route enabled and fails on any
+  bare route name, rate limiter, Artisan command or alias, or middleware alias it owns, reading
+  the live router, rate limiter and console registries.
+
 ## [0.2.0] - 2026-08-15
 
 The rebuild and the rename. `extra.branch-alias` has declared `0.2.x-dev` since

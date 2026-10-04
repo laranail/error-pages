@@ -12,6 +12,11 @@ GET /_error-pages            → the gallery: every code × theme, linked
 GET /_error-pages/{code}     → one page; add ?theme= to override the theme
 ```
 
+They are named `laranail-error-pages.preview.gallery` and `laranail-error-pages.preview`
+(`route('laranail-error-pages.preview', ['code' => 404])`). The old bare names
+`error-pages.preview.gallery` / `error-pages.preview` still resolve as deprecated aliases; see
+[Route names](../configuration.md#route-names).
+
 `{code}` is a status code (`404`, `503`) or a generic key (`4xx`, `5xx`). Change the prefix
 with `config('error-pages.preview.route')`.
 
