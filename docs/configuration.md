@@ -35,6 +35,27 @@ Every knob in `config/error-pages.php`, published with
 | `preview.route` | string | `/_error-pages` | Preview route prefix. |
 | `panels.filament` / `panels.nova` | bool | `true` | Enable/disable panel auto-detection: Filament (path-scoped HTML) and Nova (Inertia request under `nova.path`). |
 
+## Route names
+
+Every route the package registers is named under `laranail-error-pages.`, so it cannot
+collide with an application or sibling-package route in Laravel's flat route-name registry.
+
+| Route | Name | Registered when |
+|---|---|---|
+| `GET {assets.route}/{file}` | `laranail-error-pages.assets` | `assets.mode` is `route` (the default) |
+| `GET {problem.docs.route}/{code}` | `laranail-error-pages.problem` | `problem.docs.enabled` |
+| `GET {preview.route}` | `laranail-error-pages.preview.gallery` | `preview.enabled` (or `APP_DEBUG`) |
+| `GET {preview.route}/{code}` | `laranail-error-pages.preview` | `preview.enabled` (or `APP_DEBUG`) |
+
+> The previous bare names (`error-pages.assets`, `error-pages.problem`,
+> `error-pages.preview.gallery`, `error-pages.preview`) are deprecated aliases. `route()` still
+> resolves them, and each use raises an `E_USER_DEPRECATED` naming the replacement. They are
+> resolved through `URL::resolveMissingNamedRoutesUsing()`, which Laravel consults only when a
+> name is not found, so an application route that already uses one of those names keeps
+> winning. `Route::has()` does not consult that hook and answers `false` for a bare name: ask for
+> the scoped name instead. The earliest release that may drop the aliases is the next minor after
+> 0.1.
+
 ## Env vars
 
 Every scalar has an `ERROR_PAGES_*` env override: `ERROR_PAGES_ENABLED`,
