@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\ErrorPages\Support;
 
-use Closure;
 use Illuminate\Routing\Router;
 use Illuminate\Routing\UrlGenerator;
+use Simtabi\Laranail\Package\Tools\Support\Routing\BareRouteNameAliases;
 
 /**
  * The vendor-scoped names of the routes this package registers, and the
@@ -18,7 +18,9 @@ use Illuminate\Routing\UrlGenerator;
  * are what the package registers; the bare ones still resolve through
  * `URL::resolveMissingNamedRoutesUsing()`, which Laravel consults only when a
  * name is NOT found, so an application's own route of that name is never
- * shadowed.
+ * shadowed. The provider declares {@see self::DEPRECATED} through
+ * `hasDeprecatedRouteNames()`, and package-tools' {@see BareRouteNameAliases}
+ * installs that fallback at boot.
  */
 final class RouteNames
 {
@@ -52,45 +54,34 @@ final class RouteNames
      * Make each deprecated bare name resolve to its scoped route, emitting an
      * `E_USER_DEPRECATED` that names the replacement.
      *
-     * The URL generator holds exactly one missing-route resolver, so a second
-     * package installing one would silently replace the first. Any resolver
-     * already installed is captured and consulted for every name this package
-     * does not own, so registering this one never breaks another package's
-     * fallback.
+     * Delegates to package-tools' shared fallback, which chains any resolver
+     * already installed, accepts only a string from it, and announces each
+     * bare name once per process.
+     *
+     * @deprecated since 0.1, removable no earlier than the next minor after 0.1.
+     *             The package declares its deprecated names with
+     *             `hasDeprecatedRouteNames(map: RouteNames::DEPRECATED)` and
+     *             package-tools installs the fallback at boot; call
+     *             {@see BareRouteNameAliases::install()} to install one by hand.
      */
     public static function registerBareNameFallback(UrlGenerator $url, Router $router): void
     {
-        $previous = Closure::bind(
-            static fn (UrlGenerator $generator): mixed => $generator->missingNamedRouteResolver,
-            null,
-            UrlGenerator::class,
-        )($url);
+        trigger_error(
+            sprintf(
+                '%s::registerBareNameFallback() is deprecated and will be removed no earlier than the next minor after 0.1; '
+                . 'declare hasDeprecatedRouteNames(map: %s::DEPRECATED) on the package, or call %s::install().',
+                self::class,
+                self::class,
+                BareRouteNameAliases::class,
+            ),
+            E_USER_DEPRECATED,
+        );
 
-        $url->resolveMissingNamedRoutesUsing(
-            static function (string $name, mixed $parameters, ?bool $absolute) use ($url, $router, $previous): ?string {
-                $scoped = self::DEPRECATED[$name] ?? null;
-
-                if ($scoped !== null && $router->getRoutes()->hasNamedRoute($scoped)) {
-                    trigger_error(
-                        sprintf(
-                            'The route name [%s] is deprecated and will stop resolving in the next minor after 0.1; use [%s].',
-                            $name,
-                            $scoped,
-                        ),
-                        E_USER_DEPRECATED,
-                    );
-
-                    return $url->route($scoped, $parameters ?? [], $absolute ?? true);
-                }
-
-                if (is_callable($previous)) {
-                    $resolved = $previous($name, $parameters, $absolute);
-
-                    return is_string($resolved) ? $resolved : null;
-                }
-
-                return null;
-            },
+        BareRouteNameAliases::install(
+            router: $router,
+            url: $url,
+            package: 'laranail/error-pages',
+            map: self::DEPRECATED,
         );
     }
 }

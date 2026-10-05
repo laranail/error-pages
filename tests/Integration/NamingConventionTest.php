@@ -2,99 +2,54 @@
 
 declare(strict_types=1);
 
-use Illuminate\Routing\Route;
-use Illuminate\Cache\RateLimiter;
+use Psr\Log\LoggerInterface;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Routing\UrlGenerator;
-use Illuminate\Support\Facades\Artisan;
 use Simtabi\Laranail\ErrorPages\Support\RouteNames;
+use Simtabi\Laranail\Package\Tools\Testing\NamingScope;
+use Simtabi\Laranail\Package\Tools\Testing\NameRegistry;
 use Symfony\Component\Routing\Exception\RouteNotFoundException;
+use Simtabi\Laranail\Package\Tools\Testing\AssertsRegisteredNames;
 use Simtabi\Laranail\ErrorPages\Providers\ErrorPagesServiceProvider;
+use Simtabi\Laranail\Package\Tools\Support\Routing\BareRouteNameAliases;
 
 /*
  * Guards the names this package registers by reading the LIVE registries of a
- * booted application (router, rate limiter, console kernel, middleware map),
+ * booted application, through package-tools' shared AssertsRegisteredNames,
  * not the provider source. Runs under ProblemDocsTestCase so every route the
  * package can register is on: problem docs, assets (default `route` mode) and
  * the preview gallery.
  */
 
-/**
- * Routes whose action is a class in this package.
- *
- * @return list<Route>
- */
-function errorPagesOwnedRoutes(): array
-{
-    return array_values(array_filter(
-        app('router')->getRoutes()->getRoutes(),
-        static function (Route $route): bool {
-            $action = $route->getAction('uses');
-            $class = is_string($action) ? explode('@', $action)[0] : '';
+uses(AssertsRegisteredNames::class);
 
-            return str_starts_with($class, 'Simtabi\\Laranail\\ErrorPages\\');
-        },
-    ));
+/**
+ * The scope the shared assertions judge names against.
+ *
+ * The base path is narrowed to one directory because the default (the package
+ * root) contains this checkout's own vendor/ when the package is the root
+ * project, which would claim every framework closure binding as the
+ * package's. Code lives in src/, views and translations in resources/.
+ */
+function errorPagesScope(string $directory = 'src'): NamingScope
+{
+    return NamingScope::for(
+        package: 'laranail/error-pages',
+        ownerNamespace: 'Simtabi\\Laranail\\ErrorPages\\',
+        basePath: dirname(__DIR__, 2) . '/' . $directory,
+        // D2: the full-page Livewire component keeps its singular name, a
+        // sanctioned vendor-scoped variant.
+        prefixes: [NameRegistry::Livewire->value => ['laranail-error-pages', 'laranail-error-page']],
+    );
 }
 
-it('inspects every route the package registers (non-vacuous)', function (): void {
-    expect(errorPagesOwnedRoutes())->toHaveCount(4);
-});
-
-it('registers only vendor-scoped route names', function (): void {
-    $names = array_map(static fn (Route $route): ?string => $route->getName(), errorPagesOwnedRoutes());
-
-    expect($names)->each->toStartWith('laranail-error-pages.');
-
-    expect($names)->toEqualCanonicalizing([
-        RouteNames::PROBLEM,
-        RouteNames::ASSETS,
-        RouteNames::PREVIEW_GALLERY,
-        RouteNames::PREVIEW,
-    ]);
-});
-
-it('registers no bare rate limiter', function (): void {
-    $limiters = (fn (): array => $this->limiters)->call(app(RateLimiter::class));
-
-    foreach (array_keys($limiters) as $name) {
-        expect($name)->toStartWith('laranail-error-pages.');
-    }
-
-    expect(true)->toBeTrue();
-});
-
-it('registers only vendor-scoped commands, with no bare alias', function (): void {
-    $owned = array_filter(
-        Artisan::all(),
-        static fn (object $command): bool => str_starts_with($command::class, 'Simtabi\\Laranail\\ErrorPages\\'),
-    );
-
-    expect($owned)->not->toBeEmpty();
-
-    foreach ($owned as $command) {
-        expect($command->getName())->toStartWith('laranail::error-pages.');
-
-        foreach ($command->getAliases() as $alias) {
-            expect($alias)->toStartWith('laranail::error-pages.');
-        }
-    }
-});
-
-it('registers no bare middleware alias', function (): void {
-    $owned = array_filter(
-        app('router')->getMiddleware(),
-        static fn (string $class): bool => str_starts_with($class, 'Simtabi\\Laranail\\ErrorPages\\'),
-    );
-
-    foreach (array_keys($owned) as $alias) {
-        expect($alias)->toStartWith('laranail-error-pages');
-    }
-
-    expect(true)->toBeTrue();
-});
-
-it('still resolves every deprecated bare route name, with a deprecation naming the replacement', function (): void {
+/**
+ * Capture E_USER_DEPRECATED messages raised while $callback runs.
+ *
+ * @return list<string>
+ */
+function errorPagesDeprecations(Closure $callback): array
+{
     $deprecations = [];
 
     set_error_handler(static function (int $level, string $message) use (&$deprecations): bool {
@@ -104,13 +59,82 @@ it('still resolves every deprecated bare route name, with a deprecation naming t
     }, E_USER_DEPRECATED);
 
     try {
-        expect(route('error-pages.problem', ['code' => 404]))->toBe(route(RouteNames::PROBLEM, ['code' => 404]))
-            ->and(route('error-pages.assets', ['file' => 'error-pages.js']))->toBe(route(RouteNames::ASSETS, ['file' => 'error-pages.js']))
-            ->and(route('error-pages.preview.gallery'))->toBe(route(RouteNames::PREVIEW_GALLERY))
-            ->and(route('error-pages.preview', ['code' => 500]))->toBe(route(RouteNames::PREVIEW, ['code' => 500]));
+        $callback();
     } finally {
         restore_error_handler();
     }
+
+    return $deprecations;
+}
+
+beforeEach(function (): void {
+    BareRouteNameAliases::forgetWarnings();
+});
+
+it('inspects every route the package registers (non-vacuous)', function (): void {
+    expect($this->assertRouteNamesScoped(errorPagesScope(), atLeast: 4))->toHaveCount(4);
+});
+
+it('registers only vendor-scoped route names', function (): void {
+    expect($this->assertRouteNamesScoped(errorPagesScope(), atLeast: 4))->toEqualCanonicalizing([
+        RouteNames::PROBLEM,
+        RouteNames::ASSETS,
+        RouteNames::PREVIEW_GALLERY,
+        RouteNames::PREVIEW,
+    ]);
+});
+
+it('registers no bare rate limiter', function (): void {
+    expect($this->assertRateLimitersScoped(errorPagesScope(), atLeast: 0))->toBe([]);
+});
+
+it('registers only vendor-scoped commands, with no bare alias', function (): void {
+    expect($this->assertCommandNamesScoped(errorPagesScope(), atLeast: 1))
+        ->toContain('laranail::error-pages.preview');
+});
+
+it('registers no bare middleware alias', function (): void {
+    expect($this->assertMiddlewareAliasesScoped(errorPagesScope(), atLeast: 0))->toBe([]);
+});
+
+it('registers views under the canonical slash namespace and the hyphen alias', function (): void {
+    expect($this->assertViewNamespacesScoped(errorPagesScope('resources'), atLeast: 2))
+        ->toContain('laranail/error-pages', 'laranail-error-pages');
+
+    expect(view()->exists('laranail/error-pages::components.error'))->toBeTrue()
+        ->and(view()->exists('laranail-error-pages::components.error'))->toBeTrue();
+});
+
+it('finds a view a host published under the hyphen namespace through the slash namespace', function (): void {
+    expect(trim(view('laranail/error-pages::host-override')->render()))->toBe('host-override');
+});
+
+it('registers translations, Blade components, Livewire components and container aliases scoped', function (): void {
+    $scope = errorPagesScope();
+
+    expect($this->assertTranslationNamespacesScoped(errorPagesScope('resources'), atLeast: 2))
+        ->toContain('laranail/error-pages', 'laranail-error-pages')
+        ->and($this->assertBladeComponentsScoped($scope, atLeast: 1))->not->toBeEmpty()
+        ->and($this->assertLivewireComponentsScoped($scope, atLeast: 1))->toContain('laranail-error-page')
+        ->and($this->assertContainerAliasesScoped($scope, atLeast: 1))->toContain('laranail.error-pages');
+});
+
+it('still resolves every deprecated bare route name, with a deprecation naming the replacement', function (): void {
+    $parameters = [
+        'error-pages.problem' => ['code' => 404],
+        'error-pages.assets'  => ['file' => 'error-pages.js'],
+        'error-pages.preview' => ['code' => 500],
+    ];
+
+    $this->assertDeprecatedRouteNamesResolve(RouteNames::DEPRECATED, $parameters);
+
+    BareRouteNameAliases::forgetWarnings();
+
+    $deprecations = errorPagesDeprecations(static function () use ($parameters): void {
+        foreach (RouteNames::DEPRECATED as $bare => $scoped) {
+            expect(route($bare, $parameters[$bare] ?? []))->toBe(route($scoped, $parameters[$bare] ?? []));
+        }
+    });
 
     expect($deprecations)->toHaveCount(4);
 
@@ -131,19 +155,35 @@ it('chains to a missing-route resolver installed before it', function (): void {
         static fn (string $name): ?string => $name === 'other-package.home' ? 'https://other.example/home' : null,
     );
 
-    $provider = new ErrorPagesServiceProvider(app());
-    new ReflectionMethod($provider, 'registerBareRouteNames')->invoke($provider);
+    // Re-run the installation package-tools performs at boot, now that a
+    // foreign resolver is in place.
+    app()->getProvider(ErrorPagesServiceProvider::class)->package->bootPackageDeprecatedRouteNames(
+        app('router'),
+        app(UrlGenerator::class),
+        static fn (): LoggerInterface => app(LoggerInterface::class),
+    );
 
     expect(route('other-package.home'))->toBe('https://other.example/home');
 
-    set_error_handler(static fn (): bool => true, E_USER_DEPRECATED);
-
-    try {
+    errorPagesDeprecations(static function (): void {
         expect(route('error-pages.preview.gallery'))->toBe(route(RouteNames::PREVIEW_GALLERY));
-    } finally {
-        restore_error_handler();
-    }
+    });
 
     expect(fn (): string => route('nobody.owns.this'))->toThrow(RouteNotFoundException::class);
     expect(app('url'))->toBeInstanceOf(UrlGenerator::class);
+});
+
+it('keeps the deprecated RouteNames::registerBareNameFallback() working, with a deprecation', function (): void {
+    URL::resolveMissingNamedRoutesUsing(static fn (): ?string => null);
+
+    $deprecations = errorPagesDeprecations(static function (): void {
+        RouteNames::registerBareNameFallback(app(UrlGenerator::class), app('router'));
+
+        expect(route('error-pages.preview.gallery'))->toBe(route(RouteNames::PREVIEW_GALLERY));
+    });
+
+    expect(implode("\n", $deprecations))
+        ->toContain('registerBareNameFallback() is deprecated')
+        ->toContain('hasDeprecatedRouteNames')
+        ->toContain('[error-pages.preview.gallery]');
 });

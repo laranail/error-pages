@@ -22,7 +22,7 @@ If Livewire is **not** installed the stack degrades to the guaranteed core HTML 
 ## How it renders
 
 The `livewire` stack is Path 2: the handler resolves the `livewire` driver, which renders the
-`laranail-error-pages::livewire.page` wrapper embedding `<livewire:laranail-error-page :page="$payload" />`.
+`laranail/error-pages::livewire.page` wrapper embedding `<livewire:laranail-error-page :page="$payload" />`.
 The component receives the [payload](../tools/stacks.md#the-payload) and renders the shared DOM
 contract (`.ep-shell` / `.ep-card` / `.ep-status` / `.ep-title` / …).
 
@@ -71,7 +71,7 @@ Publish the views and edit your copy — it overrides the package's:
 php artisan vendor:publish --tag=laranail::error-pages-views
 ```
 
-This writes `resources/views/vendor/error-pages/livewire/{error-page,page}.blade.php`. Keep the
+This writes `resources/views/vendor/laranail-error-pages/livewire/{error-page,page}.blade.php`. Keep the
 single root element and the `ep-*` classes so the theme CSS still applies.
 
 ## Replace the component

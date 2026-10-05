@@ -14,6 +14,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `laranail-error-pages.assets`, `laranail-error-pages.problem`,
   `laranail-error-pages.preview.gallery` and `laranail-error-pages.preview`, so they cannot
   collide with an application or sibling-package route in Laravel's flat name registry.
+- The deprecated bare route names are now resolved by package-tools' shared
+  `BareRouteNameAliases`, declared with `hasDeprecatedRouteNames(map: RouteNames::DEPRECATED)`.
+  It chains a resolver installed before it the same way, and raises the `E_USER_DEPRECATED`
+  once per bare name per process rather than on every `route()` call.
+- The package renders its views through the canonical `laranail/error-pages::` namespace. The
+  `laranail-error-pages::` namespace still resolves the same files, including views a host
+  published under `resources/views/vendor/laranail-error-pages/`, and stays the Blade tag prefix.
+- Requires `laranail/package-tools ^0.1.3`, the first release with `BareRouteNameAliases`, the
+  shared naming assertions, and the slash form registered beside a hyphen view namespace.
 
 ### Deprecated
 
@@ -22,12 +31,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   package's fallback keeps working) and raises an `E_USER_DEPRECATED` naming the replacement. An
   application route of the same name is never shadowed. `Route::has()` does not see the aliases;
   ask for the scoped name. Earliest removal: the next minor after 0.1.
+- `RouteNames::registerBareNameFallback()`. It now raises an `E_USER_DEPRECATED` and delegates to
+  `BareRouteNameAliases::install()` with the same map, so a caller still gets a working fallback.
+  Declare `hasDeprecatedRouteNames()` on a package instead. Earliest removal: the next minor
+  after 0.1.
 
 ### Added
 
 - `NamingConventionTest`, which boots the package with every route enabled and fails on any
   bare route name, rate limiter, Artisan command or alias, or middleware alias it owns, reading
-  the live router, rate limiter and console registries.
+  the live router, rate limiter and console registries. It now runs on package-tools'
+  `AssertsRegisteredNames` and also covers view and translation namespaces, Blade components,
+  the Livewire component (`laranail-error-page`, a sanctioned singular variant) and container
+  aliases.
 
 ## [0.2.0] - 2026-08-15
 
