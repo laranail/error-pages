@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- `illuminate/auth`, `illuminate/routing`, `illuminate/validation` are now declared in `require` at `^13.0`. `src/` imports them, and they were only arriving transitively.
 - Route names are vendor-scoped: `error-pages.assets`, `error-pages.problem`,
   `error-pages.preview.gallery` and `error-pages.preview` are now registered as
   `laranail-error-pages.assets`, `laranail-error-pages.problem`,
