@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace Simtabi\Laranail\ErrorPages\Providers;
 
 use Override;
-use Illuminate\Routing\Router;
-use Illuminate\Routing\UrlGenerator;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Contracts\Events\Dispatcher;
 use Simtabi\Laranail\ErrorPages\ErrorPages;
@@ -47,6 +45,7 @@ final class ErrorPagesServiceProvider extends PackageServiceProvider
             ->hasConfigFile('error-pages')
             ->hasTranslations('laranail-error-pages')
             ->hasViews('laranail-error-pages')
+            ->hasDeprecatedRouteNames(map: RouteNames::DEPRECATED)
             ->hasBladeComponentNamespace('Simtabi\\Laranail\\ErrorPages\\View\\Components', 'laranail-error-pages')
             ->hasLivewireComponent('laranail-error-page', LivewireErrorPage::class)
             ->withoutLivewireNamespacePrefix()
@@ -87,21 +86,7 @@ final class ErrorPagesServiceProvider extends PackageServiceProvider
         $this->registerAssetRoute();
         $this->registerProblemRoute();
         $this->registerPreviewRoute();
-        $this->registerBareRouteNames();
         $this->registerOctaneReset();
-    }
-
-    /**
-     * Keep the pre-scoping bare route names (`error-pages.preview`, ...)
-     * resolving as deprecated aliases of their `laranail-error-pages.*`
-     * replacements. See {@see RouteNames::registerBareNameFallback()}.
-     */
-    private function registerBareRouteNames(): void
-    {
-        RouteNames::registerBareNameFallback(
-            $this->app->make(UrlGenerator::class),
-            $this->app->make(Router::class),
-        );
     }
 
     private function registerProblemRoute(): void

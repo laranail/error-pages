@@ -49,12 +49,29 @@ collide with an application or sibling-package route in Laravel's flat route-nam
 
 > The previous bare names (`error-pages.assets`, `error-pages.problem`,
 > `error-pages.preview.gallery`, `error-pages.preview`) are deprecated aliases. `route()` still
-> resolves them, and each use raises an `E_USER_DEPRECATED` naming the replacement. They are
-> resolved through `URL::resolveMissingNamedRoutesUsing()`, which Laravel consults only when a
-> name is not found, so an application route that already uses one of those names keeps
-> winning. `Route::has()` does not consult that hook and answers `false` for a bare name: ask for
-> the scoped name instead. The earliest release that may drop the aliases is the next minor after
-> 0.1.
+> resolves them, and the first use of each in a process raises an `E_USER_DEPRECATED` naming the
+> replacement. They are resolved by package-tools' `BareRouteNameAliases`, through
+> `URL::resolveMissingNamedRoutesUsing()`, which Laravel consults only when a name is not found,
+> so an application route that already uses one of those names keeps winning, and a resolver
+> another package installed first is still consulted. `Route::has()` does not consult that hook
+> and answers `false` for a bare name: ask for the scoped name instead. The earliest release that
+> may drop the aliases is the next minor after 0.1.
+>
+> `RouteNames::registerBareNameFallback()`, which installed that fallback by hand, is deprecated
+> too. The provider now declares `hasDeprecatedRouteNames(map: RouteNames::DEPRECATED)` and
+> package-tools installs it at boot; the method still works, raises an `E_USER_DEPRECATED`, and
+> may be removed no earlier than the next minor after 0.1.
+
+## View namespace
+
+The package's views answer to `laranail/error-pages::` (the composer name, and the form the
+package itself renders) and to `laranail-error-pages::`, which is the form a Blade tag can spell
+(`<x-laranail-error-pages::error />`). Both resolve to the same files, including copies published
+with `--tag=laranail::error-pages-views` into `resources/views/vendor/laranail-error-pages/`, so a
+host that already published or references the hyphen form keeps working.
+
+Translations stay under `laranail-error-pages::` (`laranail-error-pages::errors.404.title`), where
+published translation overrides are read from.
 
 ## Env vars
 

@@ -36,6 +36,6 @@ final class Error extends Component
 
     public function render(): View
     {
-        return app(ViewFactory::class)->make('laranail-error-pages::components.error', ['page' => $this->page]);
+        return app(ViewFactory::class)->make('laranail/error-pages::components.error', ['page' => $this->page]);
     }
 }
