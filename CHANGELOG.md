@@ -60,6 +60,19 @@ cuts the tag the alias was always describing.
   Complements Ignition/Sentry/Flare — it renders the production page, never touches the
   report pipeline, and leaves the dev debug page to Ignition. See [`UPGRADE.md`](UPGRADE.md).
 
+- **Reorganised `presets/` by asset kind.** `shared/` now splits into `scss/` (source),
+  `css/` (built `critical.css`), `js/` (`enhance.js`), and `ts/` (`payload.ts`/`fixtures.ts`);
+  each stack folder has `views/`/`components/`/`scss/` sub-folders. The stylesheet is authored
+  in **SCSS** (one `$themes` map generating every `.ep-theme-*` class) and built to CSS via
+  `npm run build:css` (committed; the `assets` CI job builds it and checks it is up to date).
+  The `blade/` preset is populated with a starter design. (PHP asset paths updated accordingly.)
+  A **Prettier** format gate (the JS/TS/Vue/SCSS analog of Pint) now runs in the `assets` CI.
+- Renderer selection now honours the configured stack for a plain web page load: an
+  `inertia-*` stack renders an Inertia response (not the generic SPA shell).
+- `render_debug_pages` documented as inertia/spa-only (the API context is always branded).
+- Retryable pages reload the current URL rather than redirecting to the brand home
+  (removes a maintenance/rate-limit refresh-loop risk).
+
 ### Added
 
 - Two-path coexistence hook (native `errors::` view injection + one gated renderable).
@@ -125,21 +138,6 @@ cuts the tag the alias was always describing.
 - Nova is now auto-detected (Inertia request under `nova.path`, `panels.nova`-gated) and the
   `nova` driver renders an **Inertia** response instead of HTML (Nova is an Inertia SPA).
 
-### Changed
-
-- **Reorganised `presets/` by asset kind.** `shared/` now splits into `scss/` (source),
-  `css/` (built `critical.css`), `js/` (`enhance.js`), and `ts/` (`payload.ts`/`fixtures.ts`);
-  each stack folder has `views/`/`components/`/`scss/` sub-folders. The stylesheet is authored
-  in **SCSS** (one `$themes` map generating every `.ep-theme-*` class) and built to CSS via
-  `npm run build:css` (committed; the `assets` CI job builds it and checks it is up to date).
-  The `blade/` preset is populated with a starter design. (PHP asset paths updated accordingly.)
-  A **Prettier** format gate (the JS/TS/Vue/SCSS analog of Pint) now runs in the `assets` CI.
-- Renderer selection now honours the configured stack for a plain web page load: an
-  `inertia-*` stack renders an Inertia response (not the generic SPA shell).
-- `render_debug_pages` documented as inertia/spa-only (the API context is always branded).
-- Retryable pages reload the current URL rather than redirecting to the brand home
-  (removes a maintenance/rate-limit refresh-loop risk).
-
 ### Fixed
 
 - Scoped `codes.intercept` / `skipWhen()` to Path 2 in the docs and config (Path 1 web is
@@ -147,18 +145,6 @@ cuts the tag the alias was always describing.
   Livewire descriptions to match behaviour.
 - Preview command name `laranail::error-pages.preview` (was the stale `laravel-error-pages`
   slug); translation publish tag/path references.
-
-### Removed
-
-- The static-HTML generator + Apache/Nginx config emitter, the `build`/`export`/
-  `server-config`/`clear` commands, and the `output.*`/`server.*`/`security.headers` config.
-- The unused `codes.fallbacks` flag (generic 4xx/5xx branding is automatic via Laravel's
-  native `errors::{n}xx` resolution).
-- Dead code: unused predicates `HttpStatus::{color,isClientError,isServerError,fallbackKey}`
-  (the static `fallbackKeyFor` is kept), `ErrorPage::{isGeneric,isServerError}`, and
-  `Stack::isSpa` (SPA is reached via the renderer-key default branch).
-
-### Fixed
 
 - The progressive-enhancement **retry countdown now works** — `enhance.js` creates its own
   countdown element from the meta-refresh (no template previously emitted `[data-ep-countdown]`,
@@ -182,6 +168,16 @@ cuts the tag the alias was always describing.
   resolves it).
 - `.editorconfig` now covers `ts`/`tsx`/`vue`/`scss` at 2-space (the org "2-space JS" rule);
   they were falling under the 4-space default.
+
+### Removed
+
+- The static-HTML generator + Apache/Nginx config emitter, the `build`/`export`/
+  `server-config`/`clear` commands, and the `output.*`/`server.*`/`security.headers` config.
+- The unused `codes.fallbacks` flag (generic 4xx/5xx branding is automatic via Laravel's
+  native `errors::{n}xx` resolution).
+- Dead code: unused predicates `HttpStatus::{color,isClientError,isServerError,fallbackKey}`
+  (the static `fallbackKeyFor` is kept), `ErrorPage::{isGeneric,isServerError}`, and
+  `Stack::isSpa` (SPA is reached via the renderer-key default branch).
 
 ### Security
 
