@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- A guard now keeps literal credentials out of the tests, and every credential the tests generate is named with a single-word purpose, so secret scanning has nothing to report. `laranail/package-tools` in `require` is now `^0.1.10`, the first release with the purpose check.
 - `illuminate/auth`, `illuminate/routing`, `illuminate/validation` are now declared in `require` at `^13.0`. `src/` imports them, and they were only arriving transitively.
 - Route names are vendor-scoped: `error-pages.assets`, `error-pages.problem`,
   `error-pages.preview.gallery` and `error-pages.preview` are now registered as
