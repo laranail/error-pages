@@ -42,17 +42,17 @@ enum HttpStatus: int
     public function label(): string
     {
         return match ($this) {
-            self::BadRequest          => 'Bad request',
-            self::Unauthorized        => 'Unauthorized',
-            self::PaymentRequired     => 'Payment required',
-            self::Forbidden           => 'Forbidden',
-            self::NotFound            => 'Page not found',
-            self::PageExpired         => 'Page expired',
-            self::TooManyRequests     => 'Too many requests',
+            self::BadRequest => 'Bad request',
+            self::Unauthorized => 'Unauthorized',
+            self::PaymentRequired => 'Payment required',
+            self::Forbidden => 'Forbidden',
+            self::NotFound => 'Page not found',
+            self::PageExpired => 'Page expired',
+            self::TooManyRequests => 'Too many requests',
             self::InternalServerError => 'Something went wrong',
-            self::BadGateway          => 'Bad gateway',
-            self::ServiceUnavailable  => 'Be right back',
-            self::GatewayTimeout      => 'Gateway timeout',
+            self::BadGateway => 'Bad gateway',
+            self::ServiceUnavailable => 'Be right back',
+            self::GatewayTimeout => 'Gateway timeout',
         };
     }
 
@@ -62,17 +62,17 @@ enum HttpStatus: int
     public function description(): string
     {
         return match ($this) {
-            self::BadRequest          => 'The request could not be understood by the server.',
-            self::Unauthorized        => 'You need to sign in to view this page.',
-            self::PaymentRequired     => 'This resource requires a payment to access.',
-            self::Forbidden           => 'You do not have permission to view this page.',
-            self::NotFound            => 'The page you are looking for could not be found.',
-            self::PageExpired         => 'Your session has expired. Please refresh and try again.',
-            self::TooManyRequests     => 'You have made too many requests. Please slow down and try again shortly.',
+            self::BadRequest => 'The request could not be understood by the server.',
+            self::Unauthorized => 'You need to sign in to view this page.',
+            self::PaymentRequired => 'This resource requires a payment to access.',
+            self::Forbidden => 'You do not have permission to view this page.',
+            self::NotFound => 'The page you are looking for could not be found.',
+            self::PageExpired => 'Your session has expired. Please refresh and try again.',
+            self::TooManyRequests => 'You have made too many requests. Please slow down and try again shortly.',
             self::InternalServerError => 'An unexpected error occurred on our side. We have been notified.',
-            self::BadGateway          => 'The server received an invalid response upstream. Please try again shortly.',
-            self::ServiceUnavailable  => 'We are briefly offline for maintenance. Please try again in a few minutes.',
-            self::GatewayTimeout      => 'The server took too long to respond. Please try again shortly.',
+            self::BadGateway => 'The server received an invalid response upstream. Please try again shortly.',
+            self::ServiceUnavailable => 'We are briefly offline for maintenance. Please try again in a few minutes.',
+            self::GatewayTimeout => 'The server took too long to respond. Please try again shortly.',
         };
     }
 

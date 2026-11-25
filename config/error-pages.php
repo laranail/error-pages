@@ -43,7 +43,7 @@ return [
 
     'brand' => [
         'name' => env('ERROR_PAGES_BRAND', env('APP_NAME', 'Our site')),
-        'url'  => env('ERROR_PAGES_BRAND_URL', env('APP_URL', '/')),
+        'url' => env('ERROR_PAGES_BRAND_URL', env('APP_URL', '/')),
         'logo' => env('ERROR_PAGES_LOGO'),
     ],
 
@@ -78,7 +78,7 @@ return [
     */
 
     'request_id' => [
-        'header'   => env('ERROR_PAGES_REQUEST_ID_HEADER', 'X-Request-Id'),
+        'header' => env('ERROR_PAGES_REQUEST_ID_HEADER', 'X-Request-Id'),
         'generate' => env('ERROR_PAGES_REQUEST_ID_GENERATE', true),
     ],
 
@@ -112,7 +112,7 @@ return [
     'problem' => [
         'docs' => [
             'enabled' => env('ERROR_PAGES_PROBLEM_DOCS', false),
-            'route'   => '/errors/problems',
+            'route' => '/errors/problems',
         ],
         'validation' => env('ERROR_PAGES_PROBLEM_VALIDATION', false),
     ],
@@ -142,9 +142,9 @@ return [
     */
 
     'theme' => [
-        'preset'    => env('ERROR_PAGES_THEME', ThemePreset::Default->value),
+        'preset' => env('ERROR_PAGES_THEME', ThemePreset::Default->value),
         'auto_dark' => env('ERROR_PAGES_AUTO_DARK', true),
-        'colors'    => [
+        'colors' => [
             'light' => [
                 // 'accent' => '#4f46e5',
             ],
@@ -198,8 +198,8 @@ return [
     */
 
     'assets' => [
-        'mode'    => env('ERROR_PAGES_ASSETS', 'route'),
-        'route'   => '/_error-pages/assets',
+        'mode' => env('ERROR_PAGES_ASSETS', 'route'),
+        'route' => '/_error-pages/assets',
         'version' => env('ERROR_PAGES_ASSETS_VERSION'),
     ],
 
@@ -255,7 +255,7 @@ return [
     'preview' => [
         // null => enabled only when app.debug is true.
         'enabled' => env('ERROR_PAGES_PREVIEW'),
-        'route'   => '/_error-pages',
+        'route' => '/_error-pages',
     ],
 
     /*
@@ -275,7 +275,7 @@ return [
 
     'panels' => [
         'filament' => env('ERROR_PAGES_FILAMENT', true),
-        'nova'     => env('ERROR_PAGES_NOVA', true),
+        'nova' => env('ERROR_PAGES_NOVA', true),
     ],
 
 ];

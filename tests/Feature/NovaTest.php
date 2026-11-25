@@ -7,7 +7,7 @@ it('routes a Nova (Inertia) request to an Inertia response, not HTML', function 
     config()->set('nova.path', 'nova');
 
     $response = $this->get('/nova/dashboards/main', [
-        'X-Inertia'         => 'true',
+        'X-Inertia' => 'true',
         'X-Inertia-Version' => '',
     ]);
 

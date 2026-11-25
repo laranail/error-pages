@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Simtabi\Laranail\ErrorPages\Facades;
 
 use Closure;
-use Throwable;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Facade;
+use Throwable;
 
 /**
  * @method static \Simtabi\Laranail\ErrorPages\ErrorPages stack(string $stack)

@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\ErrorPages\Support;
 
-use Throwable;
-use Illuminate\Contracts\Container\Container;
-use Illuminate\Contracts\Config\Repository as Config;
 use Illuminate\Contracts\Cache\Repository as CacheRepository;
+use Illuminate\Contracts\Config\Repository as Config;
+use Illuminate\Contracts\Container\Container;
 use Simtabi\Laranail\ErrorPages\Exceptions\ErrorPageRenderException;
+use Throwable;
 
 /**
  * Reports OUR renderer failure — never the original exception (the framework
@@ -47,7 +47,7 @@ final readonly class FailureReporter
     {
         try {
             $cache = $this->app->make(CacheRepository::class);
-            $key = 'error-pages:report:' . sha1($failure::class . '|' . $failure->getMessage());
+            $key = 'error-pages:report:'.sha1($failure::class.'|'.$failure->getMessage());
 
             if ($cache->get($key) !== null) {
                 return true;

@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\ErrorPages\Stacks;
 
-use Throwable;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
-use Simtabi\Laranail\ErrorPages\ErrorPages;
+use Illuminate\Http\Request;
 use Simtabi\Laranail\ErrorPages\Contracts\StackRenderer;
+use Simtabi\Laranail\ErrorPages\ErrorPages;
 use Simtabi\Laranail\ErrorPages\Http\ErrorResponseFactory;
+use Throwable;
 
 /**
  * The API context renderer: RFC 7807 `application/problem+json`.

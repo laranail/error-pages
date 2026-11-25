@@ -4,17 +4,16 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\ErrorPages\Tests;
 
+use Illuminate\Foundation\Application;
 use Inertia\ServiceProvider;
 use Livewire\LivewireServiceProvider;
-use Illuminate\Foundation\Application;
 use Orchestra\Testbench\TestCase as Orchestra;
 use Simtabi\Laranail\ErrorPages\Providers\ErrorPagesServiceProvider;
 
 abstract class TestCase extends Orchestra
 {
     /**
-     * @param Application $app
-     *
+     * @param  Application  $app
      * @return list<class-string>
      */
     protected function getPackageProviders($app): array
@@ -37,7 +36,7 @@ abstract class TestCase extends Orchestra
     }
 
     /**
-     * @param Application $app
+     * @param  Application  $app
      */
     protected function defineEnvironment($app): void
     {
@@ -45,7 +44,7 @@ abstract class TestCase extends Orchestra
         $app['config']->set('app.debug', false);
 
         // Livewire encrypts its component snapshots, so it needs an app key.
-        $app['config']->set('app.key', 'base64:' . base64_encode(str_repeat('x', 32)));
+        $app['config']->set('app.key', 'base64:'.base64_encode(str_repeat('x', 32)));
 
         // Register the dev preview routes so their tests can exercise them
         // (production keeps them behind app.debug / preview.enabled).
@@ -55,6 +54,6 @@ abstract class TestCase extends Orchestra
         // ours at view-path index 0 (that models an app WITH custom error views).
         // Point the "app" view path at a clean dir so we exercise OUR fallback,
         // as a real app (no errors/ views) would.
-        $app['config']->set('view.paths', [__DIR__ . '/fixtures/views']);
+        $app['config']->set('view.paths', [__DIR__.'/fixtures/views']);
     }
 }

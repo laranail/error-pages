@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\ErrorPages\Http;
 
-use Throwable;
 use Illuminate\Http\Request;
 use Simtabi\Laranail\ErrorPages\Enums\Stack;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
+use Throwable;
 
 /**
  * The resolved facts for one error render, built once by {@see ErrorPageHandler}
@@ -50,12 +50,12 @@ final readonly class RenderContext
     public function rendererKey(): string
     {
         return match ($this->context) {
-            'api'     => 'json',
+            'api' => 'json',
             'inertia' => 'inertia',
-            'web'     => match (true) {
-                $this->stack->isInertia()  => 'inertia',
+            'web' => match (true) {
+                $this->stack->isInertia() => 'inertia',
                 $this->stack->isLivewire() => 'livewire',
-                default                    => 'spa',
+                default => 'spa',
             },
             default => $this->context,
         };

@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\ErrorPages\Http;
 
-use Throwable;
-use Illuminate\Http\Request;
 use Illuminate\Contracts\Config\Repository as Config;
+use Illuminate\Http\Request;
+use Throwable;
 
 /**
  * Best-effort automatic panel-context detection, gated by the `panels.*` flags
@@ -79,6 +79,6 @@ final readonly class PanelDetector
     {
         $path = trim($path, '/');
 
-        return $path !== '' && ($request->is($path) || $request->is($path . '/*'));
+        return $path !== '' && ($request->is($path) || $request->is($path.'/*'));
     }
 }
