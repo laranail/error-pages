@@ -25,7 +25,7 @@ jobs:
       - name: Extract release notes from the CHANGELOG
         run: |
           VERSION="${GITHUB_REF_NAME#v}"
-          awk -v ver="$VERSION" '
+          awk -v ver="${VERSION%%-*}" '
             $0 ~ ("^## \\[" ver "\\]") { capture = 1; next }
             capture && /^## \[/ { exit }
             capture { print }
@@ -37,6 +37,8 @@ jobs:
       - name: Create the GitHub release
         uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3
         with:
+          prerelease: ${{ contains(github.ref_name, '-') }}
+          make_latest: ${{ !contains(github.ref_name, '-') }}
           name: ${{ github.ref_name }}
           body_path: release-notes.md
           generate_release_notes: true
