@@ -27,7 +27,7 @@ it('renders branded RFC 7807 JSON for an API 404 (Path 2)', function (): void {
 
 it('shows a developer 4xx abort message but never leaks a 5xx message', function (): void {
     Route::get('/forbidden', fn () => abort(403, 'No entry here'));
-    Route::get('/boom', fn () => throw new RuntimeException('SECRET internal detail'));
+    Route::get('/boom', fn (): never => throw new RuntimeException('SECRET internal detail'));
 
     expect($this->get('/forbidden')->getContent())->toContain('No entry here');
 
