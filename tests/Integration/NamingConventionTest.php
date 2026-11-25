@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-use Illuminate\Routing\UrlGenerator;
-use Illuminate\Support\Facades\URL;
 use Psr\Log\LoggerInterface;
-use Simtabi\Laranail\ErrorPages\Providers\ErrorPagesServiceProvider;
+use Illuminate\Support\Facades\URL;
+use Illuminate\Routing\UrlGenerator;
 use Simtabi\Laranail\ErrorPages\Support\RouteNames;
-use Simtabi\Laranail\Package\Tools\Support\Routing\BareRouteNameAliases;
-use Simtabi\Laranail\Package\Tools\Testing\AssertsRegisteredNames;
-use Simtabi\Laranail\Package\Tools\Testing\NameRegistry;
 use Simtabi\Laranail\Package\Tools\Testing\NamingScope;
+use Simtabi\Laranail\Package\Tools\Testing\NameRegistry;
 use Symfony\Component\Routing\Exception\RouteNotFoundException;
+use Simtabi\Laranail\Package\Tools\Testing\AssertsRegisteredNames;
+use Simtabi\Laranail\ErrorPages\Providers\ErrorPagesServiceProvider;
+use Simtabi\Laranail\Package\Tools\Support\Routing\BareRouteNameAliases;
 
 /*
  * Guards the names this package registers by reading the LIVE registries of a
@@ -36,7 +36,7 @@ function errorPagesScope(string $directory = 'src'): NamingScope
     return NamingScope::for(
         package: 'laranail/error-pages',
         ownerNamespace: 'Simtabi\\Laranail\\ErrorPages\\',
-        basePath: dirname(__DIR__, 2).'/'.$directory,
+        basePath: dirname(__DIR__, 2) . '/' . $directory,
         // D2: the full-page Livewire component keeps its singular name, a
         // sanctioned vendor-scoped variant.
         prefixes: [NameRegistry::Livewire->value => ['laranail-error-pages', 'laranail-error-page']],
@@ -122,7 +122,7 @@ it('registers translations, Blade components, Livewire components and container 
 it('still resolves every deprecated bare route name, with a deprecation naming the replacement', function (): void {
     $parameters = [
         'error-pages.problem' => ['code' => 404],
-        'error-pages.assets' => ['file' => 'error-pages.js'],
+        'error-pages.assets'  => ['file' => 'error-pages.js'],
         'error-pages.preview' => ['code' => 500],
     ];
 

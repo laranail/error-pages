@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\ErrorPages\Tests;
 
-use Illuminate\Foundation\Application;
 use Override;
+use Illuminate\Foundation\Application;
 
 /**
  * The problem-docs route is registered at boot (gated on `problem.docs.enabled`),
@@ -14,7 +14,7 @@ use Override;
 class ProblemDocsTestCase extends TestCase
 {
     /**
-     * @param  Application  $app
+     * @param Application $app
      */
     #[Override]
     protected function defineEnvironment($app): void

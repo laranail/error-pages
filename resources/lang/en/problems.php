@@ -14,7 +14,7 @@ declare(strict_types=1);
 return [
     '4xx' => [
         'meaning' => 'The request could not be completed because of something in the request itself — not a fault on the server.',
-        'causes' => [
+        'causes'  => [
             'The address (URL) is mistyped, outdated, or no longer exists.',
             'Required parameters are missing or invalid.',
             'You are not signed in, or you lack permission for this resource.',
@@ -28,7 +28,7 @@ return [
 
     '5xx' => [
         'meaning' => 'Something went wrong on our side while handling the request. This is not a problem with your request.',
-        'causes' => [
+        'causes'  => [
             'A temporary outage, deployment, or overload.',
             'An unexpected error in the application.',
         ],
@@ -40,7 +40,7 @@ return [
 
     '403' => [
         'meaning' => 'You are authenticated, but you do not have permission to access this resource.',
-        'causes' => [
+        'causes'  => [
             'Your account lacks the required role or permission.',
             'The resource belongs to another account or team.',
         ],
@@ -52,7 +52,7 @@ return [
 
     '404' => [
         'meaning' => 'The page or resource you asked for does not exist at this address.',
-        'causes' => [
+        'causes'  => [
             'The URL is mistyped or out of date.',
             'The resource was moved or deleted.',
         ],
@@ -64,7 +64,7 @@ return [
 
     '422' => [
         'meaning' => 'The request was well-formed, but the data it carried failed validation and could not be processed.',
-        'causes' => [
+        'causes'  => [
             'A required field was missing or left empty.',
             'A value was the wrong type, format, or out of range.',
             'A field did not match a related one (for example, a password confirmation).',
@@ -77,7 +77,7 @@ return [
 
     '429' => [
         'meaning' => 'You have sent too many requests in a short time and have been rate-limited.',
-        'causes' => [
+        'causes'  => [
             'A burst of requests from your client or IP.',
             'A tight loop or missing back-off in an integration.',
         ],
@@ -89,7 +89,7 @@ return [
 
     '503' => [
         'meaning' => 'The service is temporarily unavailable, usually for maintenance or because it is overloaded.',
-        'causes' => [
+        'causes'  => [
             'Scheduled maintenance.',
             'A temporary spike in traffic.',
         ],

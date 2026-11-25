@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\ErrorPages\Stacks;
 
+use Throwable;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Simtabi\Laranail\ErrorPages\Contracts\StackRenderer;
 use Simtabi\Laranail\ErrorPages\ErrorPages;
+use Simtabi\Laranail\ErrorPages\Contracts\StackRenderer;
 use Simtabi\Laranail\ErrorPages\Http\ErrorResponseFactory;
-use Throwable;
 
 /**
  * The Vue/React SPA context renderer: serves the self-contained branded page and
@@ -30,12 +30,12 @@ final readonly class SpaStackRenderer implements StackRenderer
 
         $payload = json_encode($this->pages->payloadFor($e, $request), JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP);
         $nonce = $this->pages->nonceValue();
-        $nonceAttr = $nonce === null ? '' : ' nonce="'.htmlspecialchars($nonce, ENT_QUOTES).'"';
-        $script = '<script id="error-page-data" type="application/json"'.$nonceAttr.'>'.($payload === false ? '{}' : $payload).'</script>';
+        $nonceAttr = $nonce === null ? '' : ' nonce="' . htmlspecialchars($nonce, ENT_QUOTES) . '"';
+        $script = '<script id="error-page-data" type="application/json"' . $nonceAttr . '>' . ($payload === false ? '{}' : $payload) . '</script>';
 
         $html = str_contains($html, '</body>')
-            ? str_replace('</body>', $script.'</body>', $html)
-            : $html.$script;
+            ? str_replace('</body>', $script . '</body>', $html)
+            : $html . $script;
 
         return $this->responses->html($html, $status, $e);
     }

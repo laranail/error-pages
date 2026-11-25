@@ -30,7 +30,7 @@ use Simtabi\Laranail\ErrorPages\Rendering\StackManager;
  */
 function shippedErrorPagesConfig(): array
 {
-    return require __DIR__.'/../../config/error-pages.php';
+    return require __DIR__ . '/../../config/error-pages.php';
 }
 
 /** Every context this package can produce on its own: the panel keys, plus the resolver's three. */
@@ -42,7 +42,7 @@ function builtInRenderContexts(): array
 function createMethodFor(string $key): string
 {
     // Manager studlies the name: 'inertia-vue' would become createInertiaVueDriver.
-    return 'create'.str_replace(' ', '', ucwords(str_replace(['-', '_'], ' ', $key))).'Driver';
+    return 'create' . str_replace(' ', '', ucwords(str_replace(['-', '_'], ' ', $key))) . 'Driver';
 }
 
 it('offers panels in its config, so this guard is not vacuous', function (): void {

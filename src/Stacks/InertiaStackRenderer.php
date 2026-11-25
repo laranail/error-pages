@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\ErrorPages\Stacks;
 
-use Illuminate\Http\Request;
-use Inertia\Inertia;
-use Simtabi\Laranail\ErrorPages\Contracts\StackRenderer;
-use Simtabi\Laranail\ErrorPages\ErrorPages;
-use Simtabi\Laranail\ErrorPages\Http\ErrorResponseFactory;
-use Symfony\Component\HttpFoundation\Response;
 use Throwable;
+use Inertia\Inertia;
+use Illuminate\Http\Request;
+use Simtabi\Laranail\ErrorPages\ErrorPages;
+use Symfony\Component\HttpFoundation\Response;
+use Simtabi\Laranail\ErrorPages\Contracts\StackRenderer;
+use Simtabi\Laranail\ErrorPages\Http\ErrorResponseFactory;
 
 /**
  * The Inertia context renderer: `Inertia::render('ErrorPage', payload)` so the

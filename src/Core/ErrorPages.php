@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\ErrorPages\Core;
 
-use Simtabi\Laranail\ErrorPages\Core\Content\ArrayContentRepository;
-use Simtabi\Laranail\ErrorPages\Core\Contracts\ContentRepository;
+use Simtabi\Laranail\ErrorPages\Core\Support\Pipeline;
 use Simtabi\Laranail\ErrorPages\Core\Contracts\Renderer;
 use Simtabi\Laranail\ErrorPages\Core\Rendering\HtmlRenderer;
 use Simtabi\Laranail\ErrorPages\Core\Rendering\JsonRenderer;
-use Simtabi\Laranail\ErrorPages\Core\Support\Pipeline;
-use Simtabi\Laranail\ErrorPages\Core\Support\RendererRegistry;
 use Simtabi\Laranail\ErrorPages\Core\ValueObjects\ErrorPage;
+use Simtabi\Laranail\ErrorPages\Core\Support\RendererRegistry;
 use Simtabi\Laranail\ErrorPages\Core\ValueObjects\ThemeSettings;
+use Simtabi\Laranail\ErrorPages\Core\Contracts\ContentRepository;
+use Simtabi\Laranail\ErrorPages\Core\Content\ArrayContentRepository;
 
 /**
  * The framework-agnostic entry point: resolves an {@see ErrorPage} through the
@@ -48,7 +48,7 @@ final readonly class ErrorPages
     /**
      * Register or override a renderer by key.
      *
-     * @param  callable(): Renderer  $factory
+     * @param callable(): Renderer $factory
      */
     public function extend(string $key, callable $factory): static
     {
@@ -60,7 +60,7 @@ final readonly class ErrorPages
     /**
      * Add an ErrorPage enrichment stage.
      *
-     * @param  callable(ErrorPage): ErrorPage  $stage
+     * @param callable(ErrorPage): ErrorPage $stage
      */
     public function pipe(callable $stage): static
     {

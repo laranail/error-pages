@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use Simtabi\Laranail\Enumerator\Contracts\Enumerator;
 use Simtabi\Laranail\ErrorPages\Enums\Stack;
+use Simtabi\Laranail\Enumerator\Contracts\Enumerator;
 
 it('is a laranail/enumerator enum with attribute-driven metadata', function (): void {
     expect(Stack::Blade)->toBeInstanceOf(Enumerator::class)

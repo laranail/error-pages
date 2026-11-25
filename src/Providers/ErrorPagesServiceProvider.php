@@ -4,28 +4,28 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\ErrorPages\Providers;
 
-use Illuminate\Contracts\Config\Repository as Config;
-use Illuminate\Contracts\Events\Dispatcher;
-use Illuminate\Contracts\Translation\Translator;
-use Illuminate\Support\Facades\Route;
 use Override;
-use Simtabi\Laranail\ErrorPages\Commands\PreviewCommand;
-use Simtabi\Laranail\ErrorPages\Content\TranslationContentRepository;
-use Simtabi\Laranail\ErrorPages\Core\Contracts\ContentRepository;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Contracts\Events\Dispatcher;
+use Simtabi\Laranail\ErrorPages\ErrorPages;
+use Simtabi\Laranail\Package\Tools\Package;
+use Simtabi\Laranail\ErrorPages\Enums\Stack;
+use Simtabi\Laranail\ErrorPages\Doctor\Checks;
+use Illuminate\Contracts\Translation\Translator;
+use Simtabi\Laranail\ErrorPages\Support\RouteNames;
+use Illuminate\Contracts\Config\Repository as Config;
+use Simtabi\Laranail\ErrorPages\Http\AssetController;
 use Simtabi\Laranail\ErrorPages\Core\ErrorPageFactory;
 use Simtabi\Laranail\ErrorPages\Core\Support\Pipeline;
-use Simtabi\Laranail\ErrorPages\Doctor\Checks;
-use Simtabi\Laranail\ErrorPages\Enums\Stack;
-use Simtabi\Laranail\ErrorPages\ErrorPages;
-use Simtabi\Laranail\ErrorPages\Http\AssetController;
 use Simtabi\Laranail\ErrorPages\Http\ErrorPageHandler;
 use Simtabi\Laranail\ErrorPages\Http\PreviewController;
 use Simtabi\Laranail\ErrorPages\Http\ProblemController;
-use Simtabi\Laranail\ErrorPages\Livewire\ErrorPage as LivewireErrorPage;
 use Simtabi\Laranail\ErrorPages\Rendering\StackManager;
-use Simtabi\Laranail\ErrorPages\Support\RouteNames;
-use Simtabi\Laranail\Package\Tools\Package;
+use Simtabi\Laranail\ErrorPages\Commands\PreviewCommand;
+use Simtabi\Laranail\ErrorPages\Core\Contracts\ContentRepository;
 use Simtabi\Laranail\Package\Tools\Providers\PackageServiceProvider;
+use Simtabi\Laranail\ErrorPages\Content\TranslationContentRepository;
+use Simtabi\Laranail\ErrorPages\Livewire\ErrorPage as LivewireErrorPage;
 use Simtabi\Laranail\Package\Tools\Support\Definitions\AboutSectionDefinition;
 
 /**
@@ -100,7 +100,7 @@ final class ErrorPagesServiceProvider extends PackageServiceProvider
 
         $base = rtrim((string) $config->get('error-pages.problem.docs.route', '/errors/problems'), '/');
 
-        Route::get($base.'/{code}', [ProblemController::class, 'show'])
+        Route::get($base . '/{code}', [ProblemController::class, 'show'])
             ->where('code', '[0-9]+|4xx|5xx')
             ->name(RouteNames::PROBLEM);
     }
@@ -134,7 +134,7 @@ final class ErrorPagesServiceProvider extends PackageServiceProvider
 
         $base = rtrim((string) $config->get('error-pages.assets.route', '/_error-pages/assets'), '/');
 
-        Route::get($base.'/{file}', AssetController::class)
+        Route::get($base . '/{file}', AssetController::class)
             ->where('file', 'error-pages\.(css|js)')
             ->name(RouteNames::ASSETS);
     }
@@ -155,7 +155,7 @@ final class ErrorPagesServiceProvider extends PackageServiceProvider
 
         Route::get($base, [PreviewController::class, 'index'])->name(RouteNames::PREVIEW_GALLERY);
 
-        Route::get($base.'/{code}', [PreviewController::class, 'show'])
+        Route::get($base . '/{code}', [PreviewController::class, 'show'])
             ->where('code', '[0-9]+|4xx|5xx')
             ->name(RouteNames::PREVIEW);
     }
@@ -171,9 +171,9 @@ final class ErrorPagesServiceProvider extends PackageServiceProvider
         $stack = Stack::fromValue((string) $config->get('error-pages.stack', 'blade'));
 
         return [
-            'Enabled' => $config->get('error-pages.enabled') ? 'yes' : 'no',
-            'Default stack' => $stack->label().' ('.$stack->value.')',
-            'Theme preset' => (string) $config->get('error-pages.theme.preset', 'default'),
+            'Enabled'           => $config->get('error-pages.enabled') ? 'yes' : 'no',
+            'Default stack'     => $stack->label() . ' (' . $stack->value . ')',
+            'Theme preset'      => (string) $config->get('error-pages.theme.preset', 'default'),
             'Intercepted codes' => implode(', ', array_map(strval(...), (array) $config->get('error-pages.codes.intercept', []))),
         ];
     }

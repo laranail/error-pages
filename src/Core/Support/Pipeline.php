@@ -18,7 +18,7 @@ final class Pipeline
     private array $stages = [];
 
     /**
-     * @param  callable(ErrorPage): ErrorPage  $stage
+     * @param callable(ErrorPage): ErrorPage $stage
      */
     public function pipe(callable $stage): static
     {
@@ -45,7 +45,7 @@ final class Pipeline
     }
 
     /**
-     * @param  list<callable(ErrorPage): ErrorPage>  $stages
+     * @param list<callable(ErrorPage): ErrorPage> $stages
      */
     public function restore(array $stages): void
     {

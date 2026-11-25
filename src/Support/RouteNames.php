@@ -26,13 +26,13 @@ final class RouteNames
 {
     public const string PREFIX = 'laranail-error-pages.';
 
-    public const string PROBLEM = self::PREFIX.'problem';
+    public const string PROBLEM = self::PREFIX . 'problem';
 
-    public const string ASSETS = self::PREFIX.'assets';
+    public const string ASSETS = self::PREFIX . 'assets';
 
-    public const string PREVIEW_GALLERY = self::PREFIX.'preview.gallery';
+    public const string PREVIEW_GALLERY = self::PREFIX . 'preview.gallery';
 
-    public const string PREVIEW = self::PREFIX.'preview';
+    public const string PREVIEW = self::PREFIX . 'preview';
 
     /**
      * Deprecated bare name => scoped replacement.
@@ -44,10 +44,10 @@ final class RouteNames
      * @var array<string, string>
      */
     public const array DEPRECATED = [
-        'error-pages.problem' => self::PROBLEM,
-        'error-pages.assets' => self::ASSETS,
+        'error-pages.problem'         => self::PROBLEM,
+        'error-pages.assets'          => self::ASSETS,
         'error-pages.preview.gallery' => self::PREVIEW_GALLERY,
-        'error-pages.preview' => self::PREVIEW,
+        'error-pages.preview'         => self::PREVIEW,
     ];
 
     /**
@@ -69,7 +69,7 @@ final class RouteNames
         trigger_error(
             sprintf(
                 '%s::registerBareNameFallback() is deprecated and will be removed no earlier than the next minor after 0.1; '
-                .'declare hasDeprecatedRouteNames(map: %s::DEPRECATED) on the package, or call %s::install().',
+                . 'declare hasDeprecatedRouteNames(map: %s::DEPRECATED) on the package, or call %s::install().',
                 self::class,
                 self::class,
                 BareRouteNameAliases::class,

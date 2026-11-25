@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\ErrorPages\Http;
 
-use Illuminate\Contracts\Config\Repository as Config;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Simtabi\Laranail\ErrorPages\Core\Enums\ThemePreset;
 use Simtabi\Laranail\ErrorPages\ErrorPages;
+use Illuminate\Contracts\Config\Repository as Config;
+use Simtabi\Laranail\ErrorPages\Core\Enums\ThemePreset;
 
 /**
  * Design-QA preview surface (dev/preview only): a gallery index over every
@@ -34,10 +34,10 @@ final readonly class PreviewController
         foreach ($codes as $code) {
             $links = '';
             foreach (ThemePreset::cases() as $theme) {
-                $href = htmlspecialchars($base.'/'.$code.'?theme='.$theme->value, ENT_QUOTES);
-                $links .= '<a href="'.$href.'">'.htmlspecialchars($theme->value, ENT_QUOTES).'</a>';
+                $href = htmlspecialchars($base . '/' . $code . '?theme=' . $theme->value, ENT_QUOTES);
+                $links .= '<a href="' . $href . '">' . htmlspecialchars($theme->value, ENT_QUOTES) . '</a>';
             }
-            $rows .= '<tr><th>'.htmlspecialchars($code, ENT_QUOTES).'</th><td>'.$links.'</td></tr>';
+            $rows .= '<tr><th>' . htmlspecialchars($code, ENT_QUOTES) . '</th><td>' . $links . '</td></tr>';
         }
         $html = <<<HTML
         <!DOCTYPE html><html lang="en"><head><meta charset="utf-8">

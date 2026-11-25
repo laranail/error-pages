@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\ErrorPages\Livewire;
 
-use Illuminate\Contracts\View\Factory as ViewFactory;
-use Illuminate\Contracts\View\View;
 use Livewire\Component;
+use Illuminate\Contracts\View\View;
 use Simtabi\Laranail\ErrorPages\ErrorPages;
+use Illuminate\Contracts\View\Factory as ViewFactory;
 
 /**
  * The full-page Livewire 4 error component (the `livewire` stack). It receives the
@@ -21,7 +21,7 @@ final class ErrorPage extends Component
     public array $page = [];
 
     /**
-     * @param  array<string, mixed>  $page
+     * @param array<string, mixed> $page
      */
     public function mount(array $page): void
     {

@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Simtabi\Laranail\ErrorPages\Http;
 
 use Closure;
-use Illuminate\Contracts\Config\Repository as Config;
 use Illuminate\Http\Request;
+use Illuminate\Contracts\Config\Repository as Config;
 
 /**
  * Maps a request to a render context. The built-in detection returns `web`,

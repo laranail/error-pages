@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\ErrorPages\Stacks;
 
+use Throwable;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Simtabi\Laranail\ErrorPages\Contracts\StackRenderer;
 use Simtabi\Laranail\ErrorPages\ErrorPages;
+use Simtabi\Laranail\ErrorPages\Contracts\StackRenderer;
 use Simtabi\Laranail\ErrorPages\Http\ErrorResponseFactory;
-use Throwable;
 
 /**
  * The `filament` / `nova` panel context renderer. It tags the page with the
@@ -32,7 +32,7 @@ final readonly class PanelStackRenderer implements StackRenderer
     {
         $html = str_replace(
             '<body class="ep-body',
-            '<body data-panel="'.$this->panel.'" class="ep-body',
+            '<body data-panel="' . $this->panel . '" class="ep-body',
             $this->pages->htmlFor($e, $request),
         );
 
